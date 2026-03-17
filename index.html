@@ -256,16 +256,16 @@
     .links-section { padding: 0 0 56px; }
     .links-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 16px;
     }
     .link-btn {
-      display: flex; align-items: center; gap: 10px;
+      display: flex; align-items: center; gap: 14px;
       background: #fff; border: 1px solid var(--border);
-      border-radius: 12px; padding: 14px 16px;
+      border-radius: 14px; padding: 20px 22px;
       text-decoration: none; color: var(--text-dark);
-      font-size: 0.88rem; font-weight: 600;
-      box-shadow: 0 2px 8px rgba(10,22,40,0.06);
+      font-size: 1rem; font-weight: 700;
+      box-shadow: 0 4px 12px rgba(10,22,40,0.08);
       transition: all 0.2s;
     }
     .link-btn:hover {
@@ -744,7 +744,7 @@
       <div class="contact-card email">
         <div class="c-icon">📧</div>
         <h3>Email Address</h3>
-        <p><a href="mailto:pmkisanwork@gmail.com" style="color:var(--saffron);text-decoration:none;font-weight:600;">pmkisanwork@gmail.com</a></p>
+        <p><a href="/cdn-cgi/l/email-protection#bacad7d1d3c9dbd4cdd5c8d1faddd7dbd3d694d9d5d7" style="color:var(--saffron);text-decoration:none;font-weight:600;"><span class="__cf_email__" data-cfemail="c2b2afa9abb1a3acb5adb0a982a5afa3abaeeca1adaf">[email&#160;protected]</span></a></p>
       </div>
       <div class="contact-card time">
         <div class="c-icon">🕐</div>
@@ -778,7 +778,36 @@
   </div>
 </section>
 
-<!-- FOOTER -->
+<!-- TOOL LINKS SECTION -->
+<section style="padding: 48px 0; background: linear-gradient(135deg, #0A1628, #1a3560);">
+  <div class="section-wrap">
+    <div class="section-title">
+      <h2 style="color:#fff;">🔧 Hamare <span style="color:var(--saffron-light);">Tool Links</span></h2>
+      <div class="title-line"></div>
+      <p style="color:#8aafc8;">Useful online tools — ek click mein use karein</p>
+    </div>
+    <div style="display:flex; justify-content:center; margin-top: 28px;">
+      <a href="https://pmkisanwork.github.io/tool_link/" target="_blank"
+        style="display:inline-flex; align-items:center; gap:16px;
+               background: rgba(255,255,255,0.07);
+               border: 2px solid rgba(255,107,0,0.5);
+               color:#fff; text-decoration:none;
+               padding: 20px 40px; border-radius: 16px;
+               font-size: 1rem; font-weight: 700;
+               box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+               transition: all 0.25s;"
+        onmouseover="this.style.background='rgba(255,107,0,0.15)';this.style.borderColor='#FF9A45';this.style.transform='translateY(-4px)'"
+        onmouseout="this.style.background='rgba(255,255,255,0.07)';this.style.borderColor='rgba(255,107,0,0.5)';this.style.transform='translateY(0)'">
+        <span style="font-size:2rem;">🔧</span>
+        <span>
+          <span style="display:block; font-size:1.1rem; font-weight:800; color:#fff;">All Tool Links</span>
+          <span style="display:block; font-size:0.78rem; color:#8aafc8; font-weight:400; margin-top:3px;">pmkisanwork.github.io/tool_link</span>
+        </span>
+        <span style="color:var(--saffron-light); font-size:1.4rem; margin-left:6px;">→</span>
+      </a>
+    </div>
+  </div>
+</section>
 
 <!-- FAQ -->
 <section class="faq-section">
@@ -828,24 +857,6 @@
   </div>
 </section>
 
-<footer>
-  <div class="footer-logo">🇮🇳 All Work Online</div>
-  <p>Digital India Portal — Sabhi services bilkul free</p>
-  <p style="margin-top:8px;">Designed & Developed by <a href="#">S.S.G Web Developer And Technology</a></p>
-  <p style="margin-top:4px;">© 2024 All Work Online. All Rights Reserved.</p>
-  <div class="footer-tricolor">
-    <div class="s"></div>
-    <div class="w"></div>
-    <div class="g"></div>
-  </div>
-</footer>
-
-<script>
-  function toggleMenu() {
-    document.getElementById('mobileMenu').classList.toggle('open');
-  }
-  // Close menu on outside click
-  document.addEventListener('click', function
 <!-- TESTIMONIALS -->
 <section class="testimonials-section">
   <div class="section-wrap">
@@ -888,8 +899,8 @@
         <div class="testi-author">
           <div class="testi-avatar" style="background:#e3f2fd;">👨‍🌾</div>
           <div>
-            <div class="testi-name">Mohan Singh</div>
-            <div class="testi-place">📍 Unnao, UP</div>
+            <div class="testi-name">Mohan Lal Verma</div>
+            <div class="testi-place">📍 Kanpur, UP</div>
             <div class="testi-stars">★★★★★</div>
           </div>
         </div>
@@ -898,4 +909,51 @@
   </div>
 </section>
 
-(
+<script>
+  function toggleMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('open');
+  }
+
+  // Close menu on outside click
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mobileMenu');
+    const hamburger = document.querySelector('.hamburger');
+    if (menu && hamburger && !menu.contains(e.target) && !hamburger.contains(e.target)) {
+      menu.classList.remove('open');
+    }
+  });
+
+  // FAQ toggle
+  function toggleFaq(el) {
+    el.classList.toggle('open');
+    const ans = el.nextElementSibling;
+    ans.classList.toggle('open');
+  }
+
+  // Back to top button
+  const backTop = document.getElementById('backTop');
+  if (backTop) {
+    window.addEventListener('scroll', function() {
+      backTop.classList.toggle('show', window.scrollY > 400);
+    });
+    backTop.addEventListener('click', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+</script>
+
+<footer>
+  <div class="footer-logo">🇮🇳 All Work Online</div>
+  <p>Digital India Portal — Sabhi services bilkul free</p>
+  <p style="margin-top:8px;">Designed & Developed by <a href="#">S.S.G Web Developer And Technology</a></p>
+  <p style="margin-top:4px;">© 2024 All Work Online. All Rights Reserved.</p>
+  <div class="footer-tricolor">
+    <div class="s"></div>
+    <div class="w"></div>
+    <div class="g"></div>
+  </div>
+</footer>
+
+</body>
+</html>

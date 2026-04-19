@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FileTools Pro — All-in-One File Converter</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root{
+  --bg:#0a0a0f;
+  --surface:#111118;
+  --card:#16161f;
+  --border:#2a2a3a;
+  --accent:#6c63ff;
+  --accent2:#ff6584;
+  --accent3:#43e97b;
+  --accent4:#f7971e;
+  --accent5:#21d4fd;
+  --text:#f0f0ff;
+  --muted:#7070a0;
+  --radius:16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── ANIMATED BG ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 20%, rgba(108,99,255,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 35% at 80% 80%, rgba(255,101,132,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 30% at 60% 40%, rgba(67,233,123,0.06) 0%, transparent 50%);
+}
+
+/* ── HEADER ── */
+/* ── NAVBAR ── */
+.navbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(10,10,15,0.92);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(255,255,255,0.07);
+  padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:56px;
+}
+.nav-brand{
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:800;
+  background:linear-gradient(135deg,#6c63ff,#f7971e);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  text-decoration:none;letter-spacing:-.5px;
+}
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-link{
+  color:var(--muted);font-size:13px;font-weight:600;
+  text-decoration:none;padding:7px 14px;border-radius:8px;
+  transition:all .2s;display:flex;align-items:center;gap:6px;
+}
+.nav-link:hover{color:var(--text);background:rgba(255,255,255,0.07)}
+.nav-link.active{color:#fff;background:rgba(108,99,255,0.18);border:1px solid rgba(108,99,255,0.3)}
+
+/* ── FOOTER ── */
+.site-footer{
+  position:relative;z-index:10;
+  background:rgba(10,10,15,0.95);
+  border-top:1px solid rgba(255,255,255,0.07);
+  padding:40px 24px 24px;
+  margin-top:20px;
+}
+.footer-inner{
+  max-width:1100px;margin:0 auto;
+  display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;
+}
+.footer-brand-col{}
+.footer-logo{
+  font-family:'Syne',sans-serif;font-size:22px;font-weight:800;
+  background:linear-gradient(135deg,#6c63ff,#f7971e,#ff6584);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  display:inline-block;margin-bottom:8px;
+}
+.footer-brand-desc{color:var(--muted);font-size:12px;line-height:1.7;max-width:220px}
+.footer-company{
+  margin-top:14px;
+  font-size:12px;color:rgba(255,255,255,0.35);
+  font-weight:500;
+}
+.footer-company b{color:rgba(255,255,255,0.6)}
+.footer-col-title{
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:700;
+  color:var(--text);margin-bottom:14px;letter-spacing:.3px;
+}
+.footer-col a{
+  display:block;color:var(--muted);font-size:13px;
+  text-decoration:none;margin-bottom:9px;
+  transition:color .2s;
+}
+.footer-col a:hover{color:var(--text)}
+.footer-divider{
+  max-width:1100px;margin:28px auto 0;
+  border:none;border-top:1px solid rgba(255,255,255,0.07);
+}
+.footer-bottom{
+  max-width:1100px;margin:16px auto 0;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:8px;
+}
+.footer-copy{font-size:11px;color:rgba(255,255,255,0.25)}
+.footer-copy b{color:rgba(255,255,255,0.45)}
+.footer-badge{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(108,99,255,0.1);border:1px solid rgba(108,99,255,0.2);
+  border-radius:50px;padding:4px 12px;
+  font-size:11px;color:#a09aff;font-weight:600;
+}
+
+@media(max-width:700px){
+  .footer-inner{grid-template-columns:1fr 1fr}
+  .footer-brand-col{grid-column:1/-1}
+  .nav-link span.nav-txt{display:none}
+  .footer-bottom{flex-direction:column;align-items:flex-start}
+}
+@media(max-width:400px){
+  .footer-inner{grid-template-columns:1fr}
+  .navbar{padding:0 12px}
+}
+
+.site-header{
+  position:relative;z-index:10;
+  padding:28px 24px 0;
+  text-align:center;
+}
+.company-name{
+  font-family:'Syne',sans-serif;
+  font-size:13px;font-weight:700;
+  letter-spacing:5px;
+  text-transform:uppercase;
+  color:rgba(255,255,255,0.45);
+  margin-bottom:6px;
+  animation:fadeDown .5s ease both;
+  position:relative;
+  display:inline-flex;align-items:center;gap:10px;
+}
+.company-name::before,.company-name::after{
+  content:'';display:inline-block;
+  width:28px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.35));
+}
+.company-name::after{
+  background:linear-gradient(90deg,rgba(255,255,255,0.35),transparent);
+}
+.company-tagline-top{
+  font-size:11px;color:rgba(255,255,255,0.22);
+  letter-spacing:2px;text-transform:uppercase;
+  margin-bottom:16px;
+  animation:fadeDown .5s .05s ease both;
+}
+.logo{
+  font-family:'Syne',sans-serif;
+  font-size:36px;font-weight:800;
+  background:linear-gradient(135deg,#6c63ff,#f7971e,#ff6584);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  letter-spacing:-1px;
+  display:inline-block;
+  animation:fadeDown .6s ease both;
+}
+.tagline{
+  color:var(--muted);font-size:14px;margin-top:6px;
+  animation:fadeDown .6s .1s ease both;
+}
+.tool-count-badge{
+  display:inline-block;
+  background:rgba(108,99,255,0.15);
+  border:1px solid rgba(108,99,255,0.3);
+  color:#a09aff;
+  font-size:12px;font-weight:600;
+  padding:4px 14px;border-radius:50px;
+  margin-top:10px;
+  animation:fadeDown .6s .2s ease both;
+}
+
+/* ── TOOLS GRID ── */
+.tools-grid{
+  position:relative;z-index:10;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(360px,1fr));
+  gap:24px;
+  padding:36px 28px 60px;
+  max-width:1300px;
+  margin:0 auto;
+}
+
+/* ── TOOL CARD ── */
+.tool-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:28px;
+  transition:transform .25s, box-shadow .25s, border-color .25s;
+  animation:fadeUp .5s ease both;
+  position:relative;
+  overflow:hidden;
+}
+.tool-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:var(--tool-color,#6c63ff);
+  border-radius:20px 20px 0 0;
+}
+.tool-card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 24px 70px rgba(0,0,0,0.45);
+  border-color:var(--tool-color,#6c63ff);
+}
+
+.tool-header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.tool-icon{
+  width:54px;height:54px;border-radius:14px;
+  background:rgba(108,99,255,0.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;flex-shrink:0;
+}
+.tool-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--text)}
+.tool-desc{font-size:13px;color:var(--muted);margin-top:3px}
+
+/* Drop Zone inside card */
+.card-drop{
+  border:2px dashed var(--border);
+  border-radius:14px;
+  padding:26px 16px;
+  text-align:center;
+  cursor:pointer;
+  transition:all .25s;
+  background:rgba(255,255,255,0.02);
+  position:relative;
+}
+.card-drop:hover,.card-drop.drag{
+  border-color:var(--tool-color,#6c63ff);
+  background:rgba(108,99,255,0.06);
+}
+.card-drop input[type=file]{
+  position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
+}
+.drop-label{font-size:13px;color:var(--muted);margin-top:8px}
+
+/* Controls */
+.control-row{display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap}
+.ctrl-label{font-size:11px;color:var(--muted);white-space:nowrap}
+.ctrl-range{
+  flex:1;min-width:80px;
+  -webkit-appearance:none;height:4px;
+  background:var(--border);border-radius:4px;cursor:pointer;
+}
+.ctrl-range::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+  background:var(--tool-color,#6c63ff);cursor:pointer;
+}
+.ctrl-val{font-size:12px;font-weight:700;color:var(--tool-color,#6c63ff);min-width:36px;text-align:right}
+.ctrl-select{
+  background:rgba(255,255,255,0.06);border:1px solid var(--border);
+  color:var(--text);border-radius:8px;padding:5px 10px;font-size:12px;
+  font-family:'DM Sans',sans-serif;cursor:pointer;flex:1;
+}
+.ctrl-input{
+  background:rgba(255,255,255,0.06);border:1px solid var(--border);
+  color:var(--text);border-radius:8px;padding:6px 10px;font-size:12px;
+  font-family:'DM Sans',sans-serif;width:80px;text-align:center;
+}
+
+/* Preview */
+.preview-box{
+  margin-top:12px;background:rgba(0,0,0,0.3);
+  border-radius:10px;overflow:hidden;
+  display:none;position:relative;
+}
+.preview-box img,.preview-box canvas{
+  max-width:100%;max-height:180px;width:100%;
+  object-fit:contain;display:block;
+}
+.preview-info{
+  font-size:11px;color:var(--muted);
+  padding:8px 10px;
+  display:flex;justify-content:space-between;align-items:center;
+  border-top:1px solid var(--border);
+}
+.preview-info b{color:var(--accent3)}
+
+/* Action button */
+.action-btn{
+  width:100%;margin-top:14px;
+  background:linear-gradient(135deg,var(--tool-color,#6c63ff),color-mix(in srgb,var(--tool-color,#6c63ff) 60%,#fff 40%));
+  border:none;border-radius:12px;padding:14px;
+  color:#fff;font-weight:700;font-size:14px;cursor:pointer;
+  font-family:'Syne',sans-serif;letter-spacing:.3px;
+  transition:opacity .2s,transform .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.action-btn:hover{opacity:.88;transform:translateY(-1px)}
+.action-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* Status */
+.status-msg{
+  font-size:11px;text-align:center;margin-top:8px;
+  min-height:18px;transition:color .3s;
+}
+.status-ok{color:var(--accent3)}
+.status-err{color:var(--accent2)}
+.status-load{color:var(--accent5)}
+
+/* Multi image list */
+.img-list{margin-top:10px;display:flex;flex-direction:column;gap:6px;max-height:120px;overflow-y:auto}
+.img-item{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,0.04);border-radius:8px;padding:6px 10px;
+  font-size:11px;color:var(--muted);
+}
+.img-item .im-thumb{width:28px;height:28px;object-fit:cover;border-radius:4px;flex-shrink:0}
+.img-item .im-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.img-item .im-remove{cursor:pointer;color:var(--accent2);font-size:14px;flex-shrink:0}
+
+/* Crop canvas */
+#cropCanvas{cursor:crosshair;display:block;max-width:100%}
+.crop-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:6px}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+.tool-card:nth-child(1){animation-delay:.05s;--tool-color:#6c63ff}
+.tool-card:nth-child(2){animation-delay:.10s;--tool-color:#f7971e}
+.tool-card:nth-child(3){animation-delay:.15s;--tool-color:#43e97b}
+.tool-card:nth-child(4){animation-delay:.20s;--tool-color:#21d4fd}
+.tool-card:nth-child(5){animation-delay:.25s;--tool-color:#ff6584}
+.tool-card:nth-child(6){animation-delay:.30s;--tool-color:#a18cd1}
+.tool-card:nth-child(7){animation-delay:.35s;--tool-color:#fda085}
+.tool-card:nth-child(8){animation-delay:.40s;--tool-color:#4facfe}
+.tool-card:nth-child(9){animation-delay:.45s;--tool-color:#43e97b}
+.tool-card:nth-child(10){animation-delay:.50s;--tool-color:#f7971e}
+.tool-card:nth-child(11){animation-delay:.55s;--tool-color:#ff6584}
+.tool-card:nth-child(12){animation-delay:.60s;--tool-color:#6c63ff}
+.tool-card:nth-child(13){animation-delay:.65s;--tool-color:#e040fb}
+.tool-card:nth-child(14){animation-delay:.70s;--tool-color:#00bcd4}
+.tool-card:nth-child(15){animation-delay:.75s;--tool-color:#ffb300}
+
+@media(max-width:640px){
+  .logo{font-size:28px}
+  .tools-grid{grid-template-columns:1fr;padding:20px 14px 40px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="https://pmkisanwork.github.io/Home/" class="nav-brand">⚡ FileTools Pro</a>
+  <div class="nav-links">
+    <a href="https://pmkisanwork.github.io/Home/" class="nav-link">
+      🏠 <span class="nav-txt">Home</span>
+    </a>
+    <a href="https://pmkisanwork.github.io/Allservicelink/" class="nav-link active">
+      🛠️ <span class="nav-txt">Services</span>
+    </a>
+    <a href="https://pmkisanwork.github.io/Contact/" class="nav-link">
+      📞 <span class="nav-txt">Contact</span>
+    </a>
+  </div>
+</nav>
+
+<div class="site-header">
+  <div class="company-name">All Work Online</div>
+  <div class="company-tagline-top">Your Trusted Digital Service Partner</div>
+  <div class="logo">⚡ FileTools Pro</div>
+  <div class="tagline">Saare file tools ek jagah — Free, Fast, Browser mein</div>
+  <div class="tool-count-badge">15 Powerful Tools</div>
+</div>
+
+<div class="tools-grid">
+
+  <!-- ═══ 1. PDF COMPRESS ═══ -->
+  <div class="tool-card">
+    <div class="tool-header">
+      <div class="tool-icon">📦</div>
+      <div><div class="tool-title">PDF Compress</div><div class="tool-desc">PDF ka exact KB set karein</div></div>
+    </div>
+    <div class="card-drop" id="pdfCompDrop" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,'pdfCompFile')">
+      <div style="font-size:32px">📄</div>
+      <div class="drop-label">PDF drop karein ya click karein</div>
+      <input type="file" id="pdfCompFile" accept=".pdf" onchange="loadPDFInfo('pdfComp')"/>
+    </div>
+    <!-- MODE TOGGLE -->
+    <div class="control-row" style="margin-top:10px;gap:6px">
+      <button id="pdfCompModeAuto" onclick="setPDFCompMode('auto')" style="flex:1;padding:7px;border-radius:8px;border:1px solid var(--tool-color);background:var(--tool-color);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Auto Quality</button>
+      <button id="pdfCompModeKB" onclick="setPDFCompMode('kb')" style="flex:1;padding:7px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Target KB</button>
+    </div>
+    <!-- AUTO MODE -->
+    <div id="pdfCompAutoMode">
+      <div class="control-row">
+        <span class="ctrl-label">Quality:</span>
+        <input type="range" class="ctrl-range" id="pdfCompQ" min="20" max="100" value="72" oninput="document.getElementById('pdfCompQV').textContent=this.value+'%'"/>
+        <span class="ctrl-val" id="pdfCompQV">72%</span>
+      </div>
+    </div>
+    <!-- KB MODE -->
+    <div id="pdfCompKBMode" style="display:none">
+      <div class="control-row">
+        <span class="ctrl-label">Target Size:</span>
+        <input type="number" class="ctrl-input" id="pdfCompTargetKB" value="500" min="50" max="50000" style="width:90px"/>
+        <span class="ctrl-label">KB</span>
+      </div>
+      <div class="status-msg" id="pdfCompKBHint" style="color:var(--accent5);text-align:left;font-size:11px">PDF upload karein phir target KB dalein</div>
+    </div>
+    <div class="preview-box" id="pdfCompPrev">
+      <canvas id="pdfCompCanvas"></canvas>
+      <div class="preview-info"><span id="pdfCompOrig">—</span><span>→</span><span><b id="pdfCompNew">—</b></span></div>
+    </div>
+    <button class="action-btn" id="pdfCompBtn" onclick="compressPDF()" disabled>📦 Compress Karein</button>
+    <div class="status-msg" id="pdfCompStatus"></div>
+  </div>
+
+  <!-- ═══ 2. IMAGE COMPRESS ═══ -->
+  <div class="tool-card">
+    <div class="tool-header">
+      <div class="tool-icon">🖼️</div>
+      <div><div class="tool-title">Image Compress</div><div class="tool-desc">Image ka exact KB set karein</div></div>
+    </div>
+    <div class="card-drop" id="imgCompDrop" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,'imgCompFile')">
+      <div style="font-size:32px">🖼️</div>
+      <div class="drop-label">Image drop karein (JPG/PNG/WebP)</div>
+      <input type="file" id="imgCompFile" accept="image/*" onchange="loadImgComp()"/>
+    </div>
+    <!-- MODE TOGGLE -->
+    <div class="control-row" style="margin-top:10px;gap:6px">
+      <button id="imgCompModeAuto" onclick="setImgCompMode('auto')" style="flex:1;padding:7px;border-radius:8px;border:1px solid var(--tool-color);background:var(--tool-color);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Auto Quality</button>
+      <button id="imgCompModeKB" onclick="setImgCompMode('kb')" style="flex:1;padding:7px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Target KB</button>
+    </div>
+    <!-- AUTO MODE -->
+    <div id="imgCompAutoMode">
+      <div class="control-row">
+        <span class="ctrl-label">Quality:</span>
+        <input type="range" class="ctrl-range" id="imgCompQ" min="5" max="100" value="70" oninput="updateImgComp()"/>
+        <span class="ctrl-val" id="imgCompQV">70%</span>
+      </div>
+    </div>
+    <!-- KB MODE -->
+    <div id="imgCompKBMode" style="display:none">
+      <div class="control-row">
+        <span class="ctrl-label">Target Size:</span>
+        <input type="number" class="ctrl-input" id="imgCompTargetKB" value="100" min="5" max="10000" style="width:90px"/>
+        <span class="ctrl-label">KB</span>
+      </div>
+      <div class="status-msg" id="imgCompKBHint" style="color:var(--accent5);text-align:left;font-size:11px">Image upload karein phir target KB dalein</div>
+    </div>
+    <div class="control-row">
+      <span class="ctrl-label">Format:</span>
+      <select class="ctrl-select" id="imgCompFmt" onchange="updateImgComp()">
+        <option value="jpeg">JPEG</option>
+        <option value="png">PNG</option>
+        <option value="webp">WebP</option>
+      </select>
+    </div>
+    <div class="preview-box" id="imgCompPrev">
+      <img id="imgCompPreview" alt="preview"/>
+      <div class="preview-info"><span id="imgCompOrig">—</span><span>→</span><span><b id="imgCompNew">—</b></span></div>
+    </div>
+    <button class="action-btn" id="imgCompBtn" onclick="downloadImgComp()" disabled>🖼️ Compress & Download</button>
+    <div class="status-msg" id="imgCompStatus"></div>
+  </div>
+
+  <!-- ═══ 3. IMAGE → PDF ═══ -->
+  <div class="tool-card">
+    <div class="tool-header">
+      <div class="tool-icon">📑</div>
+      <div><div class="tool-title">Image → PDF</div><div class="tool-desc">Images ko PDF mein convert karein</div></div>
+    </div>
+    <div class="card-drop" id="img2pdfDrop" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,'img2pdfFile')">
+      <div style="font-size:32px">🖼️➡️📄</div>
+      <div class="drop-label">Multiple images select kar sakte hain</div>
+      <input type="file" id="img2pdfFile" accept="image/*" multiple onchange="loadImg2PDF()"/>
+    </div>
+    <div class="img-list" id="img2pdfList"></div>
+    <div class="control-row">
+      <span class="ctrl-label">Page size:</span>
+      <select class="ctrl-select" id="img2pdfSize">
+        <option value="a4">A4</option>
+        <option value="letter">Letter</option>
+        <option value="fit">Image ke hisaab se</option>
+      </select>
+    </div>
+    <button class="action-btn" id="img2pdfBtn" onclick="convertImg2PDF()" disabled>📑 PDF Banayein</button>
+    <div class="status-msg" id="img2pdfStatus"></div>
+  </div>
+
+  <!-- ═══ 4. PDF → IMAGE ═══ -->
+  <div class="tool-card">
+    <div class="tool-header">
+      <div class="tool-icon">🔄</div>
+      <div><div class="tool-title">PDF → Image</div><div class="tool-desc">PDF pages ko images mein convert karein</div></div>
+    </div>
+    <div class="card-drop" id="pdf2imgDrop" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,'pdf2imgFile')">
+      <div style="font-size:32px">📄➡️🖼️</div>
+      <div class="drop-label">PDF drop karein ya click karein</div>
+      <input type="file" id="pdf2imgFile" accept=".pdf" onchange="loadPDF2Img()"/>
+    </div>
+    <div class="control-row">
+      <span class="ctrl-label">Format:</span>
+      <select class="ctrl-select" id="pdf2imgFmt">
+        <option value="jpeg">JPEG</option>
+        <option value="png">PNG</option>
+      </select>
+      <span class="ctrl-label">Scale:</span>
+      <input type="range" class="ctrl-range" id="pdf2imgScale" min="1" max="4" value="2" step="0.5" oninput="document.getElementById('pdf2imgScaleV').textContent=this.value+'x'"/>
+      <span class="ctrl-val" id="pdf2imgScaleV">2x</span>
+    </div>
+    <div class="preview-box" id="pdf2imgPrev">
+      <canvas id="pdf2imgCanvas"></canvas>
+      <div class="preview-info"><span id="pdf2imgInfo">—</span></div>
+    </div>
+    <button class="action-btn" id="pdf2imgBtn" onclick="convertPDF2Img()" disabled>🔄 Convert Karein</button>
+    <div class="status-msg" id="pdf2imgStatus"></div>
+  </div>
+
+  <!-- ═══ 5. PDF CROP ═══ -->
+  <div class="tool-card">
+    <div class="tool-header">
+      <div class="tool-icon">✂️</div>
+      <div><div class="tool-title">PDF Crop</div><div class="tool-desc">PDF ka specific area crop karein</div></div>
+    </div>
+    <div class="card-drop" id="pdfCropDrop" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,'pdfCropFile')">
+      <div style="font-size:32px">✂️📄</div>
+      <div class="drop-label">PDF drop karein ya click karein</div>
+      <input type="file" id="pdfCropFile" accept=".pdf" onchange="loadPDFCrop()"/>
+    </div>
+    <div class="preview-box" id="pdfCropPrev" style="display:none">
+      <canvas id="cropCanvas"></canvas>
+      <div class="crop-hint">Mouse se area select karein jo crop karna hai</div>
+    </div>
+    <div class="control-row" id="pdfCropInfo" style="display:none">
+      <span class="ctrl-label" style="font-size:10px">X:<b id="cropX">0</b> Y:<b id="cropY">0</b> W:<b id="cropW">0</b> H:<b id="cropH">0</b></span>
+    </div>
+    <button class="action-btn" id="pdfCropBtn" onclick="cropAndDownload()" disabled>✂️ Crop & Download</button>
+    <div class="status-msg" id="pdfCropStatus"></div>
+  </div>
+
+  <!-- ═══ 6. IMAGE RESIZE / PIXEL ═══ -->
+  <div class="tool-card">
+    <div class="tool-header">
+      <div class="tool-icon">📐</div>
+      <div><div class="tool-title">Image Resize</div><div class="tool-desc">Image ka size/pixel change karein</div></div>
+    </div>
+    <div class="card-drop" id="imgResizeDrop" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,'imgResizeFile')">
+      <div style="font-size:32px">📐</div>
+      <div class="drop-label">Image drop karein ya click karein</div>
+      <input type="file" id="imgResizeFile" accept="image/*" onchange="loadImgResize()"/>
+    </div>
+    <div class="control-row" id="imgResizeControls" style="display:none">
+      <span class="ctrl-label">W:</span>
+      <input type="number" class="ctrl-input" id="resizeW" placeholder="Width" oninput="syncResizeAR('w')"/>
+      <span class="ctrl-label">H:</span>
+      <input type="number" class="ctrl-input" id="resizeH" placeholder="Height" oninput="syncResizeAR('h')"/>
+    </div>
+    <div class="control-row" id="imgResizeControls2" style="display:none">
+      <span class="ctrl-label">Format:</span>
+      <select class="ctrl-select" id="resizeFmt">
+        <option value="jpeg">JPEG</option>
+        <option value="png">PNG</option>
+        <option value="webp">WebP</option>
+      </select>
+      <label style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;cursor:pointer">
+        <input type="checkbox" id="resizeAR" checked/> AR lock
+      </label>
+    </div>
+    <div class="preview-box" id="imgResizePrev">
+      <img id="imgResizePreview" alt="preview"/>
+      <div class="preview-info"><span id="imgResizeOrig">—</span><span>→</span><span><b id="imgResizeNew">—</b></span></div>
+    </div>
+    <button class="action-btn" id="imgResizeBtn" onclick="downloadResized()" disabled>📐 Resize & Download</button>
+    <div class="status-msg" id="imgResizeStatus"></div>
+  </div>
+
+  <!-- ═══ 7. IMAGE KB TARGET ═══ -->
+  <div class="tool-card">
+    <div class="tool-header">
+      <div class="tool-icon">⚖️</div>
+      <div><div class="tool-title">Image KB Target</div><div class="tool-desc">Exact KB size mein image save karein</div></div>
+    </div>
+    <div class="card-drop" id="imgKBDrop" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,'imgKBFile')">
+      <div style="font-size:32px">⚖️</div>
+      <div class="drop-label">Image drop karein ya click karein</div>
+      <input type="file" id="imgKBFile" accept="image/*" onchange="loadImgKB()"/>
+    </div>
+    <div class="control-row">
+      <span class="ctrl-label">Target KB:</span>
+      <input type="number" class="ctrl-input" id="targetKB" value="100" min="10" max="5000"/>
+      <span class="ctrl-label" style="font-size:10px">kb</span>
+    </div>
+    <div class="preview-box" id="imgKBPrev">
+      <img id="imgKBPreview" alt="preview"/>
+      <div class="preview-info"><span id="imgKBOrig">—</span><span>→</span><span><b id="imgKBNew">—</b></span></div>
+    </div>
+    <button class="action-btn" id="imgKBBtn" onclick="compressToKB()" disabled>⚖️ Save as Target KB</button>
+    <div class="status-msg" id="imgKBStatus"></div>
+  </div>
+
+  <!-- ═══ 8. PDF MERGE ═══ -->
+  <div class="tool-card">
+    <div class="tool-header">
+      <div class="tool-icon">🔗</div>
+      <div><div class="tool-title">PDF Merge</div><div class="tool-desc">Multiple PDFs ko ek mein jodein</div></div>
+    </div>
+    <div class="card-drop" id="pdfMergeDrop" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,'pdfMergeFile')">
+      <div style="font-size:32px">🔗</div>
+      <div class="drop-label">Multiple PDFs select karein</div>
+      <input type="file" id="pdfMergeFile" accept=".pdf" multiple onchange="loadPDFMerge()"/>
+    </div>
+    <div class="img-list" id="pdfMergeList"></div>
+    <button class="action-btn" id="pdfMergeBtn" onclick="mergePDFs()" disabled>🔗 Merge & Download</button>
+    <div class="status-msg" id="pdfMergeStatus"></div>
+  </div>
+
+  <!-- ═══ 9. PDF SPLIT ═══ -->
+  <div class="tool-card">
+    <div class="tool-header">
+      <div class="tool-icon">📂</div>
+      <div><div class="tool-title">PDF Split</div><div class="tool-desc">PDF ko alag pages mein split karein</div></div>
+    </div>
+    <div class="card-drop" id="pdfSplitDrop" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,'pdfSplitFile')">
+      <div style="font-size:32px">📂</div>
+      <div class="drop-label">PDF drop karein ya click karein</div>
+      <input type="file" id="pdfSplitFile" accept=".pdf" onchange="loadPDFSplit()"/>
+    </div>
+    <div class="control-row">
+      <span class="ctrl-label">Pages (e.g. 1-3,5):</span>
+      <input type="text" class="ctrl-input" id="splitPages" placeholder="1,2,3" style="width:120px"/>
+    </div>
+    <div class="status-msg" id="pdfSplitInfo" style="color:var(--accent5)"></div>
+    <button class="action-btn" id="pdfSplitBtn" onclick="splitPDF()" disabled>📂 Split Karein</button>
+    <div class="status-msg" id="pdfSplitStatus"></div>
+  </div>
+
+  <!-- ═══ 10. IMAGE ROTATE/FLIP ═══ -->
+  <div class="tool-card">
+    <div class="tool-header">
+      <div class="tool-icon">🔃</div>
+      <div><div class="tool-title">Image Rotate / Flip</div><div class="tool-desc">Image rotate ya flip karein</div></div>
+    </div>
+    <div class="card-drop" id="imgRotDrop" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,'imgRotFile')">
+      <div style="font-size:32px">🔃</div>
+      <div class="drop-label">Image drop karein ya click karein</div>
+      <input type="file" id="imgRotFile" accept="image/*" onchange="loadImgRot()"/>
+    </div>
+    <div class="control-row">
+      <button onclick="rotateImg(-90)" class="action-btn" style="margin-top:0;flex:1;padding:8px">↺ 90°</button>
+      <button onclick="rotateImg(90)"  class="action-btn" style="margin-top:0;flex:1;padding:8px">↻ 90°</button>
+      <button onclick="rotateImg(180)" class="action-btn" style="margin-top:0;flex:1;padding:8px">↕ 180°</button>
+    </div>
+    <div class="control-row">
+      <button onclick="flipImg('h')" class="action-btn" style="margin-top:0;flex:1;padding:8px">⇔ Flip H</button>
+      <button onclick="flipImg('v')" class="action-btn" style="margin-top:0;flex:1;padding:8px">⇕ Flip V</button>
+    </div>
+    <div class="preview-box" id="imgRotPrev">
+      <canvas id="imgRotCanvas"></canvas>
+    </div>
+    <button class="action-btn" id="imgRotBtn" onclick="downloadRotated()" disabled>🔃 Download</button>
+    <div class="status-msg" id="imgRotStatus"></div>
+  </div>
+
+  <!-- ═══ 11. IMAGE GRAYSCALE / EFFECTS ═══ -->
+  <div class="tool-card">
+    <div class="tool-header">
+      <div class="tool-icon">🎨</div>
+      <div><div class="tool-title">Image Effects</div><div class="tool-desc">Grayscale, sepia, brightness, contrast</div></div>
+    </div>
+    <div class="card-drop" id="imgFxDrop" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,'imgFxFile')">
+      <div style="font-size:32px">🎨</div>
+      <div class="drop-label">Image drop karein ya click karein</div>
+      <input type="file" id="imgFxFile" accept="image/*" onchange="loadImgFx()"/>
+    </div>
+    <div class="control-row"><span class="ctrl-label">Brightness:</span><input type="range" class="ctrl-range" id="fxBright" min="0" max="200" value="100" oninput="applyFx()"/><span class="ctrl-val" id="fxBrightV">100</span></div>
+    <div class="control-row"><span class="ctrl-label">Contrast:</span><input type="range" class="ctrl-range" id="fxContrast" min="0" max="200" value="100" oninput="applyFx()"/><span class="ctrl-val" id="fxContrastV">100</span></div>
+    <div class="control-row"><span class="ctrl-label">Grayscale:</span><input type="range" class="ctrl-range" id="fxGray" min="0" max="100" value="0" oninput="applyFx()"/><span class="ctrl-val" id="fxGrayV">0</span></div>
+    <div class="control-row"><span class="ctrl-label">Sepia:</span><input type="range" class="ctrl-range" id="fxSepia" min="0" max="100" value="0" oninput="applyFx()"/><span class="ctrl-val" id="fxSepiaV">0</span></div>
+    <div class="preview-box" id="imgFxPrev">
+      <canvas id="imgFxCanvas"></canvas>
+    </div>
+    <button class="action-btn" id="imgFxBtn" onclick="downloadFx()" disabled>🎨 Download</button>
+    <div class="status-msg" id="imgFxStatus"></div>
+  </div>
+
+  <!-- ═══ 12. PDF ROTATE ═══ -->
+  <div class="tool-card">
+    <div class="tool-header">
+      <div class="tool-icon">🔁</div>
+      <div><div class="tool-title">PDF Rotate</div><div class="tool-desc">PDF pages ko rotate karein</div></div>
+    </div>
+    <div class="card-drop" id="pdfRotDrop" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,'pdfRotFile')">
+      <div style="font-size:32px">🔁</div>
+      <div class="drop-label">PDF drop karein ya click karein</div>
+      <input type="file" id="pdfRotFile" accept=".pdf" onchange="loadPDFRot()"/>
+    </div>
+    <div class="preview-box" id="pdfRotPrev">
+      <canvas id="pdfRotCanvas"></canvas>
+      <div class="preview-info"><span id="pdfRotInfo">—</span></div>
+    </div>
+    <div class="control-row">
+      <button onclick="setPDFRot(90)"  class="action-btn" style="margin-top:0;flex:1;padding:8px">↻ 90°</button>
+      <button onclick="setPDFRot(180)" class="action-btn" style="margin-top:0;flex:1;padding:8px">↕ 180°</button>
+      <button onclick="setPDFRot(270)" class="action-btn" style="margin-top:0;flex:1;padding:8px">↺ 270°</button>
+    </div>
+    <button class="action-btn" id="pdfRotBtn" onclick="downloadRotPDF()" disabled>🔁 Download</button>
+    <div class="status-msg" id="pdfRotStatus"></div>
+  </div>
+
+  <!-- ═══ 13. BG REMOVE ═══ -->
+  <div class="tool-card">
+    <div class="tool-header">
+      <div class="tool-icon">🪄</div>
+      <div><div class="tool-title">Background Remove</div><div class="tool-desc">Photo ka background hatayein (magic wand)</div></div>
+    </div>
+    <div class="card-drop" id="bgRemDrop" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,'bgRemFile')">
+      <div style="font-size:32px">🪄</div>
+      <div class="drop-label">Image drop karein ya click karein</div>
+      <input type="file" id="bgRemFile" accept="image/*" onchange="loadBgRem()"/>
+    </div>
+    <div class="control-row" style="margin-top:10px">
+      <span class="ctrl-label">Tolerance:</span>
+      <input type="range" class="ctrl-range" id="bgRemTol" min="10" max="120" value="40" oninput="document.getElementById('bgRemTolV').textContent=this.value"/>
+      <span class="ctrl-val" id="bgRemTolV">40</span>
+    </div>
+    <!-- BG COLOR OPTION -->
+    <div class="control-row" style="margin-top:6px;gap:8px;align-items:center">
+      <span class="ctrl-label">Fill Color:</span>
+      <input type="color" id="bgRemColorPicker" value="#ffffff"
+        style="width:44px;height:32px;border:none;border-radius:8px;cursor:pointer;background:none;flex-shrink:0"/>
+      <select class="ctrl-select" id="bgRemColorPreset"
+        onchange="document.getElementById('bgRemColorPicker').value=this.value">
+        <option value="transparent">🔲 Transparent (PNG)</option>
+        <option value="#ffffff" selected>⬜ White</option>
+        <option value="#000000">⬛ Black</option>
+        <option value="#1565c0">🔵 Blue</option>
+        <option value="#c62828">🔴 Red</option>
+        <option value="#2e7d32">🟢 Green</option>
+        <option value="#f9a825">🟡 Yellow</option>
+        <option value="#6a1b9a">🟣 Purple</option>
+        <option value="#00838f">🩵 Cyan</option>
+      </select>
+    </div>
+    <div class="control-row" style="font-size:11px;color:var(--muted)">
+      💡 Color choose karein, phir canvas pe background pe click karein
+    </div>
+    <div class="preview-box" id="bgRemPrev" style="display:none">
+      <canvas id="bgRemCanvas" style="cursor:crosshair;max-width:100%;display:block"></canvas>
+      <div class="preview-info"><span id="bgRemInfo">—</span><span style="color:var(--accent3)">Click = remove &amp; fill</span></div>
+    </div>
+    <div class="control-row" style="margin-top:8px;gap:6px">
+      <button onclick="bgRemUndo()" class="action-btn" style="margin-top:0;flex:1;padding:9px;font-size:12px">↩ Undo</button>
+      <button onclick="bgRemReset()" class="action-btn" style="margin-top:0;flex:1;padding:9px;font-size:12px;background:rgba(255,255,255,0.07);color:var(--muted)">🔄 Reset</button>
+    </div>
+    <button class="action-btn" id="bgRemBtn" onclick="downloadBgRem()" disabled>🪄 Download</button>
+    <div class="status-msg" id="bgRemStatus"></div>
+  </div>
+
+  <!-- ═══ 14. BG COLOR CHANGE ═══ -->
+  <div class="tool-card">
+    <div class="tool-header">
+      <div class="tool-icon">🎨</div>
+      <div><div class="tool-title">Background Color Change</div><div class="tool-desc">Photo ka background color badlein</div></div>
+    </div>
+    <div class="card-drop" id="bgColDrop" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,'bgColFile')">
+      <div style="font-size:32px">🎨</div>
+      <div class="drop-label">Image drop karein ya click karein</div>
+      <input type="file" id="bgColFile" accept="image/*" onchange="loadBgCol()"/>
+    </div>
+    <div class="control-row" style="margin-top:10px">
+      <span class="ctrl-label">Tolerance:</span>
+      <input type="range" class="ctrl-range" id="bgColTol" min="10" max="120" value="40" oninput="document.getElementById('bgColTolV').textContent=this.value"/>
+      <span class="ctrl-val" id="bgColTolV">40</span>
+    </div>
+    <div class="control-row">
+      <span class="ctrl-label">New Color:</span>
+      <input type="color" id="bgColPicker" value="#ffffff" style="width:48px;height:32px;border:none;border-radius:8px;cursor:pointer;background:none"/>
+      <select class="ctrl-select" id="bgColPreset" onchange="document.getElementById('bgColPicker').value=this.value;applyBgCol()">
+        <option value="#ffffff">⬜ White</option>
+        <option value="#000000">⬛ Black</option>
+        <option value="#1565c0">🔵 Blue</option>
+        <option value="#c62828">🔴 Red</option>
+        <option value="#2e7d32">🟢 Green</option>
+        <option value="#f9a825">🟡 Yellow</option>
+        <option value="#6a1b9a">🟣 Purple</option>
+        <option value="#00838f">🩵 Cyan</option>
+      </select>
+    </div>
+    <div class="control-row" style="font-size:11px;color:var(--muted)">
+      💡 Image upload karein, phir background pe click karein
+    </div>
+    <div class="preview-box" id="bgColPrev" style="display:none">
+      <canvas id="bgColCanvas" style="cursor:crosshair;max-width:100%;display:block"></canvas>
+      <div class="preview-info"><span id="bgColInfo">—</span><span style="color:var(--accent3)">Click = color replace</span></div>
+    </div>
+    <div class="control-row" style="margin-top:8px;gap:6px">
+      <button onclick="bgColUndo()" class="action-btn" style="margin-top:0;flex:1;padding:9px;font-size:12px">↩ Undo</button>
+      <button onclick="bgColReset()" class="action-btn" style="margin-top:0;flex:1;padding:9px;font-size:12px;background:rgba(255,255,255,0.07);color:var(--muted)">🔄 Reset</button>
+    </div>
+    <button class="action-btn" id="bgColBtn" onclick="downloadBgCol()" disabled>🎨 Download</button>
+    <div class="status-msg" id="bgColStatus"></div>
+  </div>
+
+  <!-- ═══ 15. PHOTO ENHANCE ═══ -->
+  <div class="tool-card">
+    <div class="tool-header">
+      <div class="tool-icon">✨</div>
+      <div><div class="tool-title">Photo Enhance</div><div class="tool-desc">Photo ki quality aur sharpness badhayein</div></div>
+    </div>
+    <div class="card-drop" id="enhDrop" ondragover="dOver(event,this)" ondragleave="dLeave(this)" ondrop="dDrop(event,'enhFile')">
+      <div style="font-size:32px">✨</div>
+      <div class="drop-label">Image drop karein ya click karein</div>
+      <input type="file" id="enhFile" accept="image/*" onchange="loadEnh()"/>
+    </div>
+    <div class="control-row"><span class="ctrl-label">Brightness:</span><input type="range" class="ctrl-range" id="enhBright" min="50" max="200" value="110" oninput="applyEnh()"/><span class="ctrl-val" id="enhBrightV">110</span></div>
+    <div class="control-row"><span class="ctrl-label">Contrast:</span><input type="range" class="ctrl-range" id="enhContrast" min="50" max="200" value="115" oninput="applyEnh()"/><span class="ctrl-val" id="enhContrastV">115</span></div>
+    <div class="control-row"><span class="ctrl-label">Saturation:</span><input type="range" class="ctrl-range" id="enhSat" min="0" max="300" value="130" oninput="applyEnh()"/><span class="ctrl-val" id="enhSatV">130</span></div>
+    <div class="control-row"><span class="ctrl-label">Sharpness:</span><input type="range" class="ctrl-range" id="enhSharp" min="0" max="5" value="2" step="0.5" oninput="applyEnh()"/><span class="ctrl-val" id="enhSharpV">2</span></div>
+    <div class="control-row"><span class="ctrl-label">Noise Reduce:</span><input type="range" class="ctrl-range" id="enhBlur" min="0" max="3" value="0" step="0.5" oninput="applyEnh()"/><span class="ctrl-val" id="enhBlurV">0</span></div>
+    <div class="control-row" style="gap:6px;margin-top:6px">
+      <button onclick="enhPreset('auto')" class="action-btn" style="margin-top:0;flex:1;padding:8px;font-size:11px">⚡ Auto</button>
+      <button onclick="enhPreset('portrait')" class="action-btn" style="margin-top:0;flex:1;padding:8px;font-size:11px">👤 Portrait</button>
+      <button onclick="enhPreset('vivid')" class="action-btn" style="margin-top:0;flex:1;padding:8px;font-size:11px">🌈 Vivid</button>
+      <button onclick="enhPreset('reset')" class="action-btn" style="margin-top:0;flex:1;padding:8px;font-size:11px;background:rgba(255,255,255,0.07);color:var(--muted)">↩ Reset</button>
+    </div>
+    <div class="preview-box" id="enhPrev" style="display:none">
+      <canvas id="enhCanvas"></canvas>
+      <div class="preview-info"><span id="enhInfo">—</span><span style="color:var(--accent3)" id="enhDiff">—</span></div>
+    </div>
+    <button class="action-btn" id="enhBtn" onclick="downloadEnh()" disabled>✨ Enhanced Download</button>
+    <div class="status-msg" id="enhStatus"></div>
+  </div>
+
+</div><!-- tools-grid -->
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-inner">
+
+    <!-- Brand col -->
+    <div class="footer-brand-col">
+      <div class="footer-logo">⚡ FileTools Pro</div>
+      <div class="footer-brand-desc">
+        Saare file tools ek jagah — PDF, Image, Convert, Compress sab kuch free mein.
+        Koi upload nahi, koi server nahi — 100% browser mein.
+      </div>
+      <div class="footer-company">Powered by <b>All Work Online</b></div>
+    </div>
+
+    <!-- Home col -->
+    <div class="footer-col">
+      <div class="footer-col-title">🏠 Home</div>
+      <a href="https://pmkisanwork.github.io/Home/">Home Page</a>
+      <a href="https://pmkisanwork.github.io/Home/">About Us</a>
+      <a href="https://pmkisanwork.github.io/Home/">Updates</a>
+    </div>
+
+    <!-- Services col -->
+    <div class="footer-col">
+      <div class="footer-col-title">🛠️ Services</div>
+      <a href="https://pmkisanwork.github.io/Allservicelink/">All Services</a>
+      <a href="https://pmkisanwork.github.io/Allservicelink/">PDF Tools</a>
+      <a href="https://pmkisanwork.github.io/Allservicelink/">Image Tools</a>
+      <a href="https://pmkisanwork.github.io/Allservicelink/">File Convert</a>
+    </div>
+
+    <!-- Contact col -->
+    <div class="footer-col">
+      <div class="footer-col-title">📞 Contact</div>
+      <a href="https://pmkisanwork.github.io/Contact/">Contact Us</a>
+      <a href="https://pmkisanwork.github.io/Contact/">Support</a>
+      <a href="https://pmkisanwork.github.io/Contact/">Feedback</a>
+    </div>
+
+  </div>
+
+  <hr class="footer-divider"/>
+
+  <div class="footer-bottom">
+    <div class="footer-copy">
+      © 2026 <b>All Work Online</b> — Sab rights reserved.
+    </div>
+    <div class="footer-badge">
+      🔒 100% Secure &nbsp;|&nbsp; Free Forever
+    </div>
+  </div>
+</footer>
+
+<script>
+// ─── PDF.js setup ───
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// ─── Drag & Drop helpers ───
+function dOver(e,el){e.preventDefault();el.classList.add('drag')}
+function dLeave(el){el.classList.remove('drag')}
+function dDrop(e,inputId){
+  e.preventDefault();e.currentTarget.classList.remove('drag');
+  const fi=document.getElementById(inputId);
+  const dt=new DataTransfer();
+  Array.from(e.dataTransfer.files).forEach(f=>dt.items.add(f));
+  fi.files=dt.files;fi.dispatchEvent(new Event('change'));
+}
+
+function kb(bytes){return bytes<1024?bytes+'B':bytes<1048576?(bytes/1024).toFixed(1)+'KB':(bytes/1048576).toFixed(2)+'MB'}
+function setStatus(id,msg,type){
+  const el=document.getElementById(id);
+  el.textContent=msg;
+  el.className='status-msg '+(type==='ok'?'status-ok':type==='err'?'status-err':'status-load');
+}
+
+// ════════════════════════════════
+// 1. PDF COMPRESS (with KB target)
+// ════════════════════════════════
+let pdfCompFile=null,pdfCompPDF=null,pdfCompMode='auto';
+
+function setPDFCompMode(mode){
+  pdfCompMode=mode;
+  document.getElementById('pdfCompModeAuto').style.background=mode==='auto'?'var(--tool-color)':'transparent';
+  document.getElementById('pdfCompModeAuto').style.color=mode==='auto'?'#fff':'var(--muted)';
+  document.getElementById('pdfCompModeAuto').style.borderColor=mode==='auto'?'var(--tool-color)':'var(--border)';
+  document.getElementById('pdfCompModeKB').style.background=mode==='kb'?'var(--tool-color)':'transparent';
+  document.getElementById('pdfCompModeKB').style.color=mode==='kb'?'#fff':'var(--muted)';
+  document.getElementById('pdfCompModeKB').style.borderColor=mode==='kb'?'var(--tool-color)':'var(--border)';
+  document.getElementById('pdfCompAutoMode').style.display=mode==='auto'?'block':'none';
+  document.getElementById('pdfCompKBMode').style.display=mode==='kb'?'block':'none';
+}
+
+async function loadPDFInfo(tool){
+  const fi=document.getElementById(tool+'File');
+  if(!fi.files[0])return;
+  pdfCompFile=fi.files[0];
+  setStatus('pdfCompStatus','PDF load ho raha hai...','load');
+  try{
+    const ab=await pdfCompFile.arrayBuffer();
+    pdfCompPDF=await pdfjsLib.getDocument({data:ab}).promise;
+    const page=await pdfCompPDF.getPage(1);
+    const vp=page.getViewport({scale:1.2});
+    const c=document.getElementById('pdfCompCanvas');
+    c.width=vp.width;c.height=vp.height;
+    await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+    document.getElementById('pdfCompOrig').textContent='Original: '+kb(pdfCompFile.size);
+    document.getElementById('pdfCompNew').textContent='Compressed ~';
+    document.getElementById('pdfCompPrev').style.display='block';
+    document.getElementById('pdfCompBtn').disabled=false;
+    document.getElementById('pdfCompKBHint').textContent='Original: '+kb(pdfCompFile.size)+' — Target KB dalein';
+    setStatus('pdfCompStatus','PDF ready! Mode aur KB choose karein.','ok');
+  }catch(e){setStatus('pdfCompStatus','Error: '+e.message,'err');}
+}
+
+async function compressPDF(){
+  if(!pdfCompPDF||!pdfCompFile)return;
+  document.getElementById('pdfCompBtn').disabled=true;
+
+  if(pdfCompMode==='kb'){
+    // Target KB mode — binary search on quality
+    const targetKB=parseInt(document.getElementById('pdfCompTargetKB').value)||500;
+    const targetBytes=targetKB*1024;
+    setStatus('pdfCompStatus','Best quality dhundh raha hoon (0-3 attempts)...','load');
+    try{
+      let lo=0.05,hi=0.95,bestBlob=null;
+      for(let attempt=0;attempt<18;attempt++){
+        const mid=(lo+hi)/2;
+        const blob=await renderPDFToBlob(mid);
+        bestBlob=blob;
+        const diff=Math.abs(blob.size-targetBytes);
+        setStatus('pdfCompStatus',`Try ${attempt+1}: ~${kb(blob.size)} (target ${targetKB}KB)...`,'load');
+        if(diff<targetBytes*0.04)break;
+        if(blob.size>targetBytes)hi=mid; else lo=mid;
+      }
+      document.getElementById('pdfCompNew').textContent='~'+kb(bestBlob.size);
+      const url=URL.createObjectURL(bestBlob);
+      const a=document.createElement('a');a.href=url;a.download='compressed_'+targetKB+'kb.pdf';a.click();
+      setStatus('pdfCompStatus','✅ ~'+kb(bestBlob.size)+' mein compress hua! (Target: '+targetKB+'KB)','ok');
+    }catch(e){setStatus('pdfCompStatus','Error: '+e.message,'err');}
+  } else {
+    // Auto quality slider mode
+    setStatus('pdfCompStatus','Compressing...','load');
+    try{
+      const q=parseInt(document.getElementById('pdfCompQ').value)/100;
+      const blob=await renderPDFToBlob(q);
+      document.getElementById('pdfCompNew').textContent='~'+kb(blob.size);
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download='compressed.pdf';a.click();
+      setStatus('pdfCompStatus','✅ Compressed! '+kb(pdfCompFile.size)+' → '+kb(blob.size),'ok');
+    }catch(e){setStatus('pdfCompStatus','Error: '+e.message,'err');}
+  }
+  document.getElementById('pdfCompBtn').disabled=false;
+}
+
+async function renderPDFToBlob(quality){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({compress:true});
+  const total=pdfCompPDF.numPages;
+  for(let i=1;i<=total;i++){
+    const page=await pdfCompPDF.getPage(i);
+    const vp=page.getViewport({scale:quality<0.3?1.2:quality<0.6?1.8:2.2});
+    const c=document.createElement('canvas');
+    c.width=vp.width;c.height=vp.height;
+    await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+    const imgData=c.toDataURL('image/jpeg',quality);
+    if(i>1)doc.addPage();
+    const pw=doc.internal.pageSize.getWidth();
+    const ph=doc.internal.pageSize.getHeight();
+    doc.addImage(imgData,'JPEG',0,0,pw,ph);
+  }
+  return doc.output('blob');
+}
+
+// ════════════════════════════════
+// 2. IMAGE COMPRESS
+// ════════════════════════════════
+let imgCompImg=new Image(),imgCompOrigSize=0,imgCompMode='auto';
+
+function setImgCompMode(mode){
+  imgCompMode=mode;
+  const tc=document.getElementById('pdfCompModeAuto') ? document.getElementById('imgCompModeAuto') : null;
+  document.getElementById('imgCompModeAuto').style.background=mode==='auto'?'var(--tool-color)':'transparent';
+  document.getElementById('imgCompModeAuto').style.color=mode==='auto'?'#fff':'var(--muted)';
+  document.getElementById('imgCompModeAuto').style.borderColor=mode==='auto'?'var(--tool-color)':'var(--border)';
+  document.getElementById('imgCompModeKB').style.background=mode==='kb'?'var(--tool-color)':'transparent';
+  document.getElementById('imgCompModeKB').style.color=mode==='kb'?'#fff':'var(--muted)';
+  document.getElementById('imgCompModeKB').style.borderColor=mode==='kb'?'var(--tool-color)':'var(--border)';
+  document.getElementById('imgCompAutoMode').style.display=mode==='auto'?'block':'none';
+  document.getElementById('imgCompKBMode').style.display=mode==='kb'?'block':'none';
+  if(imgCompImg.src) updateImgComp();
+}
+
+function loadImgComp(){
+  const fi=document.getElementById('imgCompFile');
+  if(!fi.files[0])return;
+  imgCompOrigSize=fi.files[0].size;
+  const url=URL.createObjectURL(fi.files[0]);
+  imgCompImg.onload=()=>{
+    document.getElementById('imgCompOrig').textContent='Original: '+kb(imgCompOrigSize);
+    document.getElementById('imgCompPrev').style.display='block';
+    document.getElementById('imgCompBtn').disabled=false;
+    document.getElementById('imgCompKBHint').textContent='Original: '+kb(imgCompOrigSize)+' — Target KB dalein';
+    updateImgComp();
+  };
+  imgCompImg.src=url;
+}
+
+function updateImgComp(){
+  if(!imgCompImg.src||!imgCompImg.naturalWidth)return;
+  const fmt=document.getElementById('imgCompFmt').value;
+  document.getElementById('imgCompQV').textContent=document.getElementById('imgCompQ').value+'%';
+  if(imgCompMode==='auto'){
+    const q=parseInt(document.getElementById('imgCompQ').value)/100;
+    const c=document.createElement('canvas');
+    c.width=imgCompImg.naturalWidth;c.height=imgCompImg.naturalHeight;
+    c.getContext('2d').drawImage(imgCompImg,0,0);
+    const url=c.toDataURL('image/'+fmt,fmt==='png'?undefined:q);
+    document.getElementById('imgCompPreview').src=url;
+    const approxBytes=Math.round((url.length-22)*3/4);
+    document.getElementById('imgCompNew').textContent='~'+kb(approxBytes);
+  }
+}
+
+async function downloadImgComp(){
+  const fmt=document.getElementById('imgCompFmt').value;
+  const c=document.createElement('canvas');
+  c.width=imgCompImg.naturalWidth;c.height=imgCompImg.naturalHeight;
+  c.getContext('2d').drawImage(imgCompImg,0,0);
+
+  if(imgCompMode==='kb'){
+    const targetKB=parseInt(document.getElementById('imgCompTargetKB').value)||100;
+    const targetBytes=targetKB*1024;
+    setStatus('imgCompStatus','Best quality dhundh raha hoon...','load');
+    document.getElementById('imgCompBtn').disabled=true;
+    let lo=0.01,hi=1.0,best=null;
+    for(let i=0;i<25;i++){
+      const mid=(lo+hi)/2;
+      const url=c.toDataURL('image/jpeg',mid);
+      const bytes=Math.round((url.length-22)*3/4);
+      best=url;
+      if(Math.abs(bytes-targetBytes)<targetBytes*0.03)break;
+      if(bytes>targetBytes)hi=mid; else lo=mid;
+    }
+    const finalBytes=Math.round((best.length-22)*3/4);
+    document.getElementById('imgCompPreview').src=best;
+    document.getElementById('imgCompNew').textContent='~'+kb(finalBytes);
+    const a=document.createElement('a');a.href=best;a.download='compressed_'+targetKB+'kb.jpg';a.click();
+    setStatus('imgCompStatus','✅ ~'+kb(finalBytes)+' mein save hua! (Target: '+targetKB+'KB)','ok');
+    document.getElementById('imgCompBtn').disabled=false;
+  } else {
+    const q=parseInt(document.getElementById('imgCompQ').value)/100;
+    const mime='image/'+fmt;
+    const url=c.toDataURL(mime,fmt==='png'?undefined:q);
+    const a=document.createElement('a');a.href=url;a.download='compressed.'+fmt;a.click();
+    const approxBytes=Math.round((url.length-22)*3/4);
+    setStatus('imgCompStatus','✅ Downloaded! ~'+kb(approxBytes),'ok');
+  }
+}
+
+// ════════════════════════════════
+// 3. IMAGE → PDF
+// ════════════════════════════════
+let img2pdfFiles=[];
+function loadImg2PDF(){
+  const fi=document.getElementById('img2pdfFile');
+  Array.from(fi.files).forEach(f=>{
+    if(!img2pdfFiles.find(x=>x.name===f.name))img2pdfFiles.push(f);
+  });
+  renderImg2PDFList();
+}
+function renderImg2PDFList(){
+  const list=document.getElementById('img2pdfList');
+  list.innerHTML='';
+  img2pdfFiles.forEach((f,i)=>{
+    const url=URL.createObjectURL(f);
+    list.innerHTML+=`<div class="img-item"><img class="im-thumb" src="${url}"/><span class="im-name">${f.name}</span><span class="im-remove" onclick="removeImg2PDF(${i})">✕</span></div>`;
+  });
+  document.getElementById('img2pdfBtn').disabled=img2pdfFiles.length===0;
+}
+function removeImg2PDF(i){img2pdfFiles.splice(i,1);renderImg2PDFList();}
+async function convertImg2PDF(){
+  if(!img2pdfFiles.length)return;
+  setStatus('img2pdfStatus','Converting...','load');
+  document.getElementById('img2pdfBtn').disabled=true;
+  try{
+    const {jsPDF}=window.jspdf;
+    const pageSize=document.getElementById('img2pdfSize').value;
+    const doc=pageSize==='fit'?null:new jsPDF({orientation:'portrait',unit:'mm',format:pageSize,compress:true});
+    for(let i=0;i<img2pdfFiles.length;i++){
+      const url=await new Promise(r=>{const fr=new FileReader();fr.onload=e=>r(e.target.result);fr.readAsDataURL(img2pdfFiles[i]);});
+      const img=await new Promise(r=>{const im=new Image();im.onload=()=>r(im);im.src=url;});
+      if(pageSize==='fit'){
+        const d=i===0?new jsPDF({unit:'px',format:[img.width,img.height],compress:true}):doc;
+        if(i>0){doc.addPage([img.width,img.height]);}
+        const use=i===0?d:doc;
+        if(i===0){use.addImage(url,'JPEG',0,0,img.width,img.height);img2pdfFiles._doc=use;}
+        else{img2pdfFiles._doc.addImage(url,'JPEG',0,0,img.width,img.height);}
+      } else {
+        if(i>0)doc.addPage();
+        const pw=doc.internal.pageSize.getWidth();
+        const ph=doc.internal.pageSize.getHeight();
+        const ratio=Math.min(pw/img.width,ph/img.height);
+        const iw=img.width*ratio,ih=img.height*ratio;
+        doc.addImage(url,'JPEG',(pw-iw)/2,(ph-ih)/2,iw,ih);
+      }
+    }
+    const finalDoc=pageSize==='fit'?(img2pdfFiles._doc||doc):doc;
+    finalDoc.save('images.pdf');
+    setStatus('img2pdfStatus','✅ PDF ready! '+img2pdfFiles.length+' images converted.','ok');
+  }catch(e){setStatus('img2pdfStatus','Error: '+e.message,'err');}
+  document.getElementById('img2pdfBtn').disabled=false;
+}
+
+// ════════════════════════════════
+// 4. PDF → IMAGE
+// ════════════════════════════════
+let pdf2imgPDF=null,pdf2imgFile=null;
+async function loadPDF2Img(){
+  const fi=document.getElementById('pdf2imgFile');
+  if(!fi.files[0])return;
+  pdf2imgFile=fi.files[0];
+  setStatus('pdf2imgStatus','Loading...','load');
+  try{
+    const ab=await pdf2imgFile.arrayBuffer();
+    pdf2imgPDF=await pdfjsLib.getDocument({data:ab}).promise;
+    const page=await pdf2imgPDF.getPage(1);
+    const vp=page.getViewport({scale:1});
+    const c=document.getElementById('pdf2imgCanvas');
+    c.width=vp.width;c.height=vp.height;
+    await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+    document.getElementById('pdf2imgPrev').style.display='block';
+    document.getElementById('pdf2imgInfo').textContent='Total pages: '+pdf2imgPDF.numPages;
+    document.getElementById('pdf2imgBtn').disabled=false;
+    setStatus('pdf2imgStatus','Ready! Convert karein.','ok');
+  }catch(e){setStatus('pdf2imgStatus','Error: '+e.message,'err');}
+}
+async function convertPDF2Img(){
+  if(!pdf2imgPDF)return;
+  setStatus('pdf2imgStatus','Converting all pages...','load');
+  document.getElementById('pdf2imgBtn').disabled=true;
+  try{
+    const scale=parseFloat(document.getElementById('pdf2imgScale').value);
+    const fmt=document.getElementById('pdf2imgFmt').value;
+    for(let i=1;i<=pdf2imgPDF.numPages;i++){
+      const page=await pdf2imgPDF.getPage(i);
+      const vp=page.getViewport({scale});
+      const c=document.createElement('canvas');
+      c.width=vp.width;c.height=vp.height;
+      await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+      const a=document.createElement('a');
+      a.href=c.toDataURL('image/'+fmt,0.92);
+      a.download='page_'+i+'.'+fmt;a.click();
+      await new Promise(r=>setTimeout(r,300));
+    }
+    setStatus('pdf2imgStatus','✅ All '+pdf2imgPDF.numPages+' pages downloaded!','ok');
+  }catch(e){setStatus('pdf2imgStatus','Error: '+e.message,'err');}
+  document.getElementById('pdf2imgBtn').disabled=false;
+}
+
+// ════════════════════════════════
+// 5. PDF CROP
+// ════════════════════════════════
+let pdfCropData=null,cropRect={x:0,y:0,w:0,h:0},cropDragging=false,cropStart={x:0,y:0};
+async function loadPDFCrop(){
+  const fi=document.getElementById('pdfCropFile');
+  if(!fi.files[0])return;
+  setStatus('pdfCropStatus','Loading...','load');
+  try{
+    const ab=await fi.files[0].arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+    const page=await pdf.getPage(1);
+    const vp=page.getViewport({scale:1.5});
+    const c=document.getElementById('cropCanvas');
+    c.width=vp.width;c.height=vp.height;
+    const ctx=c.getContext('2d');
+    await page.render({canvasContext:ctx,viewport:vp}).promise;
+    pdfCropData={canvas:c,ctx,pdf,page,vp};
+    document.getElementById('pdfCropPrev').style.display='block';
+    document.getElementById('pdfCropInfo').style.display='flex';
+    document.getElementById('pdfCropBtn').disabled=false;
+    setStatus('pdfCropStatus','Mouse se area select karein jo crop karna hai!','ok');
+    setupCropEvents(c);
+  }catch(e){setStatus('pdfCropStatus','Error: '+e.message,'err');}
+}
+function setupCropEvents(c){
+  c.onmousedown=e=>{
+    const r=c.getBoundingClientRect();
+    cropStart={x:e.clientX-r.left,y:e.clientY-r.top};
+    cropDragging=true;cropRect={x:cropStart.x,y:cropStart.y,w:0,h:0};
+  };
+  c.onmousemove=e=>{
+    if(!cropDragging)return;
+    const r=c.getBoundingClientRect();
+    const cx=e.clientX-r.left,cy=e.clientY-r.top;
+    cropRect={x:Math.min(cropStart.x,cx),y:Math.min(cropStart.y,cy),w:Math.abs(cx-cropStart.x),h:Math.abs(cy-cropStart.y)};
+    redrawCrop();
+  };
+  c.onmouseup=()=>{
+    cropDragging=false;
+    document.getElementById('cropX').textContent=Math.round(cropRect.x);
+    document.getElementById('cropY').textContent=Math.round(cropRect.y);
+    document.getElementById('cropW').textContent=Math.round(cropRect.w);
+    document.getElementById('cropH').textContent=Math.round(cropRect.h);
+  };
+}
+function redrawCrop(){
+  if(!pdfCropData)return;
+  const{canvas,ctx}=pdfCropData;
+  // redraw from imagedata not possible easily, so overlay
+  ctx.strokeStyle='#6c63ff';ctx.lineWidth=2;ctx.setLineDash([6,3]);
+  ctx.strokeRect(cropRect.x,cropRect.y,cropRect.w,cropRect.h);
+  ctx.fillStyle='rgba(108,99,255,0.08)';
+  ctx.fillRect(cropRect.x,cropRect.y,cropRect.w,cropRect.h);
+}
+async function cropAndDownload(){
+  if(!pdfCropData||cropRect.w<5||cropRect.h<5){setStatus('pdfCropStatus','Pehle area select karein!','err');return;}
+  try{
+    const c=document.createElement('canvas');
+    c.width=cropRect.w;c.height=cropRect.h;
+    c.getContext('2d').drawImage(pdfCropData.canvas,cropRect.x,cropRect.y,cropRect.w,cropRect.h,0,0,cropRect.w,cropRect.h);
+    const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='cropped.png';a.click();
+    setStatus('pdfCropStatus','✅ Cropped image downloaded!','ok');
+  }catch(e){setStatus('pdfCropStatus','Error: '+e.message,'err');}
+}
+
+// ════════════════════════════════
+// 6. IMAGE RESIZE
+// ════════════════════════════════
+let imgResizeSrc=new Image(),imgResizeOrigW=0,imgResizeOrigH=0;
+function loadImgResize(){
+  const fi=document.getElementById('imgResizeFile');
+  if(!fi.files[0])return;
+  const url=URL.createObjectURL(fi.files[0]);
+  imgResizeSrc.onload=()=>{
+    imgResizeOrigW=imgResizeSrc.naturalWidth;
+    imgResizeOrigH=imgResizeSrc.naturalHeight;
+    document.getElementById('resizeW').value=imgResizeOrigW;
+    document.getElementById('resizeH').value=imgResizeOrigH;
+    document.getElementById('imgResizeOrig').textContent=imgResizeOrigW+'×'+imgResizeOrigH;
+    document.getElementById('imgResizeControls').style.display='flex';
+    document.getElementById('imgResizeControls2').style.display='flex';
+    document.getElementById('imgResizePrev').style.display='block';
+    document.getElementById('imgResizeBtn').disabled=false;
+    updateResizePreview();
+  };
+  imgResizeSrc.src=url;
+}
+function syncResizeAR(changed){
+  if(!document.getElementById('resizeAR').checked)return;
+  const ratio=imgResizeOrigW/imgResizeOrigH;
+  if(changed==='w'){
+    const w=parseInt(document.getElementById('resizeW').value)||0;
+    document.getElementById('resizeH').value=Math.round(w/ratio);
+  } else {
+    const h=parseInt(document.getElementById('resizeH').value)||0;
+    document.getElementById('resizeW').value=Math.round(h*ratio);
+  }
+  updateResizePreview();
+}
+function updateResizePreview(){
+  const w=parseInt(document.getElementById('resizeW').value)||imgResizeOrigW;
+  const h=parseInt(document.getElementById('resizeH').value)||imgResizeOrigH;
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  c.getContext('2d').drawImage(imgResizeSrc,0,0,w,h);
+  document.getElementById('imgResizePreview').src=c.toDataURL();
+  document.getElementById('imgResizeNew').textContent=w+'×'+h;
+}
+function downloadResized(){
+  const w=parseInt(document.getElementById('resizeW').value)||imgResizeOrigW;
+  const h=parseInt(document.getElementById('resizeH').value)||imgResizeOrigH;
+  const fmt=document.getElementById('resizeFmt').value;
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  c.getContext('2d').drawImage(imgResizeSrc,0,0,w,h);
+  const a=document.createElement('a');a.href=c.toDataURL('image/'+fmt,0.92);a.download='resized.'+fmt;a.click();
+  setStatus('imgResizeStatus','✅ Downloaded! '+w+'×'+h,'ok');
+}
+
+// ════════════════════════════════
+// 7. IMAGE KB TARGET
+// ════════════════════════════════
+let imgKBSrc=new Image(),imgKBOrigSize=0;
+function loadImgKB(){
+  const fi=document.getElementById('imgKBFile');
+  if(!fi.files[0])return;
+  imgKBOrigSize=fi.files[0].size;
+  const url=URL.createObjectURL(fi.files[0]);
+  imgKBSrc.onload=()=>{
+    document.getElementById('imgKBOrig').textContent='Original: '+kb(imgKBOrigSize);
+    document.getElementById('imgKBPrev').style.display='block';
+    document.getElementById('imgKBPreview').src=url;
+    document.getElementById('imgKBBtn').disabled=false;
+    setStatus('imgKBStatus','Ready!','ok');
+  };
+  imgKBSrc.src=url;
+}
+async function compressToKB(){
+  const targetKB=parseInt(document.getElementById('targetKB').value)||100;
+  const targetBytes=targetKB*1024;
+  setStatus('imgKBStatus','Finding best quality...','load');
+  document.getElementById('imgKBBtn').disabled=true;
+  try{
+    const c=document.createElement('canvas');
+    c.width=imgKBSrc.naturalWidth;c.height=imgKBSrc.naturalHeight;
+    c.getContext('2d').drawImage(imgKBSrc,0,0);
+    let lo=0.01,hi=1.0,best=null,bestQ=0.5;
+    for(let i=0;i<20;i++){
+      const mid=(lo+hi)/2;
+      const url=c.toDataURL('image/jpeg',mid);
+      const bytes=Math.round((url.length-22)*3/4);
+      if(Math.abs(bytes-targetBytes)<targetBytes*0.05){bestQ=mid;best=url;break;}
+      if(bytes>targetBytes)hi=mid; else lo=mid;
+      bestQ=mid;best=url;
+    }
+    document.getElementById('imgKBPreview').src=best;
+    const finalBytes=Math.round((best.length-22)*3/4);
+    document.getElementById('imgKBNew').textContent='~'+kb(finalBytes);
+    const a=document.createElement('a');a.href=best;a.download='target_'+targetKB+'kb.jpg';a.click();
+    setStatus('imgKBStatus','✅ ~'+kb(finalBytes)+' mein save hua!','ok');
+  }catch(e){setStatus('imgKBStatus','Error: '+e.message,'err');}
+  document.getElementById('imgKBBtn').disabled=false;
+}
+
+// ════════════════════════════════
+// 8. PDF MERGE
+// ════════════════════════════════
+let pdfMergeFiles=[];
+function loadPDFMerge(){
+  const fi=document.getElementById('pdfMergeFile');
+  Array.from(fi.files).forEach(f=>{if(!pdfMergeFiles.find(x=>x.name===f.name))pdfMergeFiles.push(f);});
+  renderPDFMergeList();
+}
+function renderPDFMergeList(){
+  const list=document.getElementById('pdfMergeList');
+  list.innerHTML='';
+  pdfMergeFiles.forEach((f,i)=>{
+    list.innerHTML+=`<div class="img-item"><span style="font-size:18px">📄</span><span class="im-name">${f.name} (${kb(f.size)})</span><span class="im-remove" onclick="pdfMergeFiles.splice(${i},1);renderPDFMergeList()">✕</span></div>`;
+  });
+  document.getElementById('pdfMergeBtn').disabled=pdfMergeFiles.length<2;
+}
+async function mergePDFs(){
+  if(pdfMergeFiles.length<2){setStatus('pdfMergeStatus','Kam se kam 2 PDFs chahiye!','err');return;}
+  setStatus('pdfMergeStatus','Merging...','load');
+  document.getElementById('pdfMergeBtn').disabled=true;
+  try{
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({compress:true});
+    let first=true;
+    for(const file of pdfMergeFiles){
+      const ab=await file.arrayBuffer();
+      const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+      for(let i=1;i<=pdf.numPages;i++){
+        const page=await pdf.getPage(i);
+        const vp=page.getViewport({scale:2});
+        const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;
+        await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+        if(!first)doc.addPage(); first=false;
+        const pw=doc.internal.pageSize.getWidth();
+        const ph=doc.internal.pageSize.getHeight();
+        doc.addImage(c.toDataURL('image/jpeg',0.85),'JPEG',0,0,pw,ph);
+      }
+    }
+    doc.save('merged.pdf');
+    setStatus('pdfMergeStatus','✅ Merged! '+pdfMergeFiles.length+' PDFs combined.','ok');
+  }catch(e){setStatus('pdfMergeStatus','Error: '+e.message,'err');}
+  document.getElementById('pdfMergeBtn').disabled=false;
+}
+
+// ════════════════════════════════
+// 9. PDF SPLIT
+// ════════════════════════════════
+let pdfSplitData=null;
+async function loadPDFSplit(){
+  const fi=document.getElementById('pdfSplitFile');
+  if(!fi.files[0])return;
+  setStatus('pdfSplitStatus','Loading...','load');
+  try{
+    const ab=await fi.files[0].arrayBuffer();
+    pdfSplitData=await pdfjsLib.getDocument({data:ab}).promise;
+    document.getElementById('pdfSplitInfo').textContent='Total pages: '+pdfSplitData.numPages;
+    document.getElementById('splitPages').placeholder='e.g. 1,3,5 or leave blank for all';
+    document.getElementById('pdfSplitBtn').disabled=false;
+    setStatus('pdfSplitStatus','Ready! Pages enter karein.','ok');
+  }catch(e){setStatus('pdfSplitStatus','Error: '+e.message,'err');}
+}
+async function splitPDF(){
+  if(!pdfSplitData)return;
+  setStatus('pdfSplitStatus','Splitting...','load');
+  document.getElementById('pdfSplitBtn').disabled=true;
+  try{
+    const {jsPDF}=window.jspdf;
+    const input=document.getElementById('splitPages').value.trim();
+    let pages=[];
+    if(!input){for(let i=1;i<=pdfSplitData.numPages;i++)pages.push(i);}
+    else{
+      input.split(',').forEach(s=>{
+        s=s.trim();
+        if(s.includes('-')){const[a,b]=s.split('-').map(Number);for(let i=a;i<=b;i++)pages.push(i);}
+        else pages.push(parseInt(s));
+      });
+    }
+    pages=pages.filter(p=>p>=1&&p<=pdfSplitData.numPages);
+    for(const pn of pages){
+      const page=await pdfSplitData.getPage(pn);
+      const vp=page.getViewport({scale:2});
+      const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;
+      await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+      const doc=new jsPDF({unit:'px',format:[vp.width/2,vp.height/2],compress:true});
+      doc.addImage(c.toDataURL('image/jpeg',0.9),'JPEG',0,0,vp.width/2,vp.height/2);
+      doc.save('page_'+pn+'.pdf');
+      await new Promise(r=>setTimeout(r,300));
+    }
+    setStatus('pdfSplitStatus','✅ '+pages.length+' pages split aur download ho gayi!','ok');
+  }catch(e){setStatus('pdfSplitStatus','Error: '+e.message,'err');}
+  document.getElementById('pdfSplitBtn').disabled=false;
+}
+
+// ════════════════════════════════
+// 10. IMAGE ROTATE / FLIP
+// ════════════════════════════════
+let imgRotSrc=new Image(),imgRotAngle=0,imgRotFlipH=false,imgRotFlipV=false;
+function loadImgRot(){
+  const fi=document.getElementById('imgRotFile');
+  if(!fi.files[0])return;
+  imgRotAngle=0;imgRotFlipH=false;imgRotFlipV=false;
+  imgRotSrc.onload=()=>{
+    renderRot();
+    document.getElementById('imgRotPrev').style.display='block';
+    document.getElementById('imgRotBtn').disabled=false;
+    setStatus('imgRotStatus','Ready!','ok');
+  };
+  imgRotSrc.src=URL.createObjectURL(fi.files[0]);
+}
+function renderRot(){
+  const angle=(imgRotAngle%360+360)%360;
+  const sw=imgRotSrc.naturalWidth,sh=imgRotSrc.naturalHeight;
+  const swapped=angle===90||angle===270;
+  const c=document.getElementById('imgRotCanvas');
+  c.width=swapped?sh:sw;c.height=swapped?sw:sh;
+  const ctx=c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.save();
+  ctx.translate(c.width/2,c.height/2);
+  ctx.rotate(angle*Math.PI/180);
+  if(imgRotFlipH)ctx.scale(-1,1);
+  if(imgRotFlipV)ctx.scale(1,-1);
+  ctx.drawImage(imgRotSrc,-sw/2,-sh/2);
+  ctx.restore();
+}
+function rotateImg(deg){if(!imgRotSrc.src)return;imgRotAngle+=deg;renderRot();}
+function flipImg(dir){if(!imgRotSrc.src)return;if(dir==='h')imgRotFlipH=!imgRotFlipH;else imgRotFlipV=!imgRotFlipV;renderRot();}
+function downloadRotated(){
+  const c=document.getElementById('imgRotCanvas');
+  const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='rotated.png';a.click();
+  setStatus('imgRotStatus','✅ Downloaded!','ok');
+}
+
+// ════════════════════════════════
+// 11. IMAGE EFFECTS
+// ════════════════════════════════
+let imgFxSrc=new Image();
+function loadImgFx(){
+  const fi=document.getElementById('imgFxFile');
+  if(!fi.files[0])return;
+  imgFxSrc.onload=()=>{
+    applyFx();
+    document.getElementById('imgFxPrev').style.display='block';
+    document.getElementById('imgFxBtn').disabled=false;
+  };
+  imgFxSrc.src=URL.createObjectURL(fi.files[0]);
+}
+function applyFx(){
+  if(!imgFxSrc.src)return;
+  const bright=document.getElementById('fxBright').value;
+  const contrast=document.getElementById('fxContrast').value;
+  const gray=document.getElementById('fxGray').value;
+  const sepia=document.getElementById('fxSepia').value;
+  document.getElementById('fxBrightV').textContent=bright;
+  document.getElementById('fxContrastV').textContent=contrast;
+  document.getElementById('fxGrayV').textContent=gray;
+  document.getElementById('fxSepiaV').textContent=sepia;
+  const c=document.getElementById('imgFxCanvas');
+  c.width=imgFxSrc.naturalWidth;c.height=imgFxSrc.naturalHeight;
+  const ctx=c.getContext('2d');
+  ctx.filter=`brightness(${bright}%) contrast(${contrast}%) grayscale(${gray}%) sepia(${sepia}%)`;
+  ctx.drawImage(imgFxSrc,0,0);
+  ctx.filter='none';
+}
+function downloadFx(){
+  const c=document.getElementById('imgFxCanvas');
+  const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='edited.png';a.click();
+  setStatus('imgFxStatus','✅ Downloaded!','ok');
+}
+
+// ════════════════════════════════
+// 12. PDF ROTATE
+// ════════════════════════════════
+let pdfRotData=null,pdfRotAngle=90;
+async function loadPDFRot(){
+  const fi=document.getElementById('pdfRotFile');
+  if(!fi.files[0])return;
+  setStatus('pdfRotStatus','Loading...','load');
+  try{
+    const ab=await fi.files[0].arrayBuffer();
+    pdfRotData=await pdfjsLib.getDocument({data:ab}).promise;
+    const page=await pdfRotData.getPage(1);
+    const vp=page.getViewport({scale:1.2});
+    const c=document.getElementById('pdfRotCanvas');
+    c.width=vp.width;c.height=vp.height;
+    await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+    document.getElementById('pdfRotPrev').style.display='block';
+    document.getElementById('pdfRotInfo').textContent='Pages: '+pdfRotData.numPages;
+    document.getElementById('pdfRotBtn').disabled=false;
+    setStatus('pdfRotStatus','Ready! Rotation choose karein.','ok');
+  }catch(e){setStatus('pdfRotStatus','Error: '+e.message,'err');}
+}
+function setPDFRot(angle){
+  pdfRotAngle=angle;
+  setStatus('pdfRotStatus',angle+'° rotation set. Download karein!','ok');
+}
+async function downloadRotPDF(){
+  if(!pdfRotData)return;
+  setStatus('pdfRotStatus','Rotating...','load');
+  document.getElementById('pdfRotBtn').disabled=true;
+  try{
+    const {jsPDF}=window.jspdf;
+    const angle=pdfRotAngle;
+    const doc=new jsPDF({compress:true});
+    let first=true;
+    for(let i=1;i<=pdfRotData.numPages;i++){
+      const page=await pdfRotData.getPage(i);
+      const vp=page.getViewport({scale:2,rotation:angle});
+      const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;
+      await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+      if(!first)doc.addPage(); first=false;
+      const pw=doc.internal.pageSize.getWidth();
+      const ph=doc.internal.pageSize.getHeight();
+      doc.addImage(c.toDataURL('image/jpeg',0.88),'JPEG',0,0,pw,ph);
+    }
+    doc.save('rotated.pdf');
+    setStatus('pdfRotStatus','✅ Rotated PDF downloaded!','ok');
+  }catch(e){setStatus('pdfRotStatus','Error: '+e.message,'err');}
+  document.getElementById('pdfRotBtn').disabled=false;
+}
+
+// ════════════════════════════════
+// 13. BACKGROUND REMOVE (flood fill → transparent)
+// ════════════════════════════════
+let bgRemImg=new Image(), bgRemOrigData=null, bgRemHistory=[];
+function loadBgRem(){
+  const fi=document.getElementById('bgRemFile');
+  if(!fi.files[0])return;
+  bgRemImg.onload=()=>{
+    const c=document.getElementById('bgRemCanvas');
+    const scale=Math.min(1,360/bgRemImg.naturalWidth);
+    c.width=Math.round(bgRemImg.naturalWidth*scale);
+    c.height=Math.round(bgRemImg.naturalHeight*scale);
+    const ctx=c.getContext('2d');
+    ctx.drawImage(bgRemImg,0,0,c.width,c.height);
+    bgRemOrigData=ctx.getImageData(0,0,c.width,c.height);
+    bgRemHistory=[];
+    document.getElementById('bgRemPrev').style.display='block';
+    document.getElementById('bgRemBtn').disabled=false;
+    document.getElementById('bgRemInfo').textContent=bgRemImg.naturalWidth+'×'+bgRemImg.naturalHeight;
+    setStatus('bgRemStatus','Ready! Background pe click karein','ok');
+    c.onclick=(e)=>bgRemClick(e,c);
+  };
+  bgRemImg.src=URL.createObjectURL(fi.files[0]);
+}
+function bgRemClick(e,c){
+  const rect=c.getBoundingClientRect();
+  const scaleX=c.width/rect.width,scaleY=c.height/rect.height;
+  const x=Math.floor((e.clientX-rect.left)*scaleX);
+  const y=Math.floor((e.clientY-rect.top)*scaleY);
+  const tol=parseInt(document.getElementById('bgRemTol').value);
+  const preset=document.getElementById('bgRemColorPreset').value;
+  const pickerVal=document.getElementById('bgRemColorPicker').value;
+  // Determine fill color
+  let fillColor;
+  if(preset==='transparent'){
+    fillColor=[0,0,0,0]; // fully transparent
+  } else {
+    const hex=pickerVal;
+    fillColor=[parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16),255];
+  }
+  const ctx=c.getContext('2d');
+  const imgData=ctx.getImageData(0,0,c.width,c.height);
+  bgRemHistory.push(new Uint8ClampedArray(imgData.data));
+  floodFill(imgData,x,y,tol,fillColor);
+  ctx.putImageData(imgData,0,0);
+  const colorName=preset==='transparent'?'Transparent':pickerVal;
+  setStatus('bgRemStatus','✅ Done! Fill: '+colorName+' — Aur click karein ya download karein','ok');
+}
+function bgRemUndo(){
+  if(!bgRemHistory.length)return;
+  const c=document.getElementById('bgRemCanvas');
+  const ctx=c.getContext('2d');
+  const imgData=ctx.getImageData(0,0,c.width,c.height);
+  imgData.data.set(bgRemHistory.pop());
+  ctx.putImageData(imgData,0,0);
+  setStatus('bgRemStatus','Undo done','ok');
+}
+function bgRemReset(){
+  if(!bgRemOrigData)return;
+  const c=document.getElementById('bgRemCanvas');
+  c.getContext('2d').putImageData(bgRemOrigData,0,0);
+  bgRemHistory=[];
+  setStatus('bgRemStatus','Reset ho gaya','ok');
+}
+function downloadBgRem(){
+  const c=document.getElementById('bgRemCanvas');
+  const preset=document.getElementById('bgRemColorPreset').value;
+  const a=document.createElement('a');
+  if(preset==='transparent'){
+    a.href=c.toDataURL('image/png');
+    a.download='bg_removed.png';
+    setStatus('bgRemStatus','✅ PNG downloaded (transparent bg)!','ok');
+  } else {
+    a.href=c.toDataURL('image/jpeg',0.95);
+    a.download='bg_color_changed.jpg';
+    setStatus('bgRemStatus','✅ JPG downloaded with new background!','ok');
+  }
+  a.click();
+}
+
+// ════════════════════════════════
+// 14. BACKGROUND COLOR CHANGE (flood fill → color)
+// ════════════════════════════════
+let bgColImg=new Image(), bgColOrigData=null, bgColHistory=[];
+function loadBgCol(){
+  const fi=document.getElementById('bgColFile');
+  if(!fi.files[0])return;
+  bgColImg.onload=()=>{
+    const c=document.getElementById('bgColCanvas');
+    const scale=Math.min(1,360/bgColImg.naturalWidth);
+    c.width=Math.round(bgColImg.naturalWidth*scale);
+    c.height=Math.round(bgColImg.naturalHeight*scale);
+    const ctx=c.getContext('2d');
+    ctx.drawImage(bgColImg,0,0,c.width,c.height);
+    bgColOrigData=ctx.getImageData(0,0,c.width,c.height);
+    bgColHistory=[];
+    document.getElementById('bgColPrev').style.display='block';
+    document.getElementById('bgColBtn').disabled=false;
+    document.getElementById('bgColInfo').textContent=bgColImg.naturalWidth+'×'+bgColImg.naturalHeight;
+    setStatus('bgColStatus','Ready! Background pe click karein','ok');
+    c.onclick=(e)=>bgColClick(e,c);
+  };
+  bgColImg.src=URL.createObjectURL(fi.files[0]);
+}
+function hexToRgba(hex){
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return[r,g,b,255];
+}
+function applyBgCol(){}
+function bgColClick(e,c){
+  const rect=c.getBoundingClientRect();
+  const scaleX=c.width/rect.width,scaleY=c.height/rect.height;
+  const x=Math.floor((e.clientX-rect.left)*scaleX);
+  const y=Math.floor((e.clientY-rect.top)*scaleY);
+  const tol=parseInt(document.getElementById('bgColTol').value);
+  const newColor=hexToRgba(document.getElementById('bgColPicker').value);
+  const ctx=c.getContext('2d');
+  const imgData=ctx.getImageData(0,0,c.width,c.height);
+  bgColHistory.push(new Uint8ClampedArray(imgData.data));
+  floodFill(imgData,x,y,tol,newColor);
+  ctx.putImageData(imgData,0,0);
+  setStatus('bgColStatus','✅ Color change ho gaya! Aur click karein ya download karein','ok');
+}
+function bgColUndo(){
+  if(!bgColHistory.length)return;
+  const c=document.getElementById('bgColCanvas');
+  const ctx=c.getContext('2d');
+  const imgData=ctx.getImageData(0,0,c.width,c.height);
+  imgData.data.set(bgColHistory.pop());
+  ctx.putImageData(imgData,0,0);
+  setStatus('bgColStatus','Undo done','ok');
+}
+function bgColReset(){
+  if(!bgColOrigData)return;
+  const c=document.getElementById('bgColCanvas');
+  c.getContext('2d').putImageData(bgColOrigData,0,0);
+  bgColHistory=[];
+  setStatus('bgColStatus','Reset ho gaya','ok');
+}
+function downloadBgCol(){
+  const c=document.getElementById('bgColCanvas');
+  const a=document.createElement('a');a.href=c.toDataURL('image/jpeg',0.95);a.download='bg_changed.jpg';a.click();
+  setStatus('bgColStatus','✅ Downloaded!','ok');
+}
+
+// ── SHARED FLOOD FILL (BFS) ──
+function floodFill(imgData,sx,sy,tol,fillColor){
+  const d=imgData.data,w=imgData.width,h=imgData.height;
+  const idx=(x,y)=>(y*w+x)*4;
+  const si=idx(sx,sy);
+  const sr=d[si],sg=d[si+1],sb=d[si+2],sa=d[si+3];
+  if(fillColor[3]>0&&Math.abs(sr-fillColor[0])<3&&Math.abs(sg-fillColor[1])<3&&Math.abs(sb-fillColor[2])<3)return;
+  const match=(i)=>{
+    const dr=d[i]-sr,dg=d[i+1]-sg,db=d[i+2]-sb,da=d[i+3]-sa;
+    return Math.sqrt(dr*dr+dg*dg+db*db+da*da)<=tol*2.2;
+  };
+  const visited=new Uint8Array(w*h);
+  const queue=[[sx,sy]];
+  visited[sy*w+sx]=1;
+  while(queue.length){
+    const[x,y]=queue.shift();
+    const i=idx(x,y);
+    d[i]=fillColor[0];d[i+1]=fillColor[1];d[i+2]=fillColor[2];d[i+3]=fillColor[3];
+    for(const[nx,ny]of[[x-1,y],[x+1,y],[x,y-1],[x,y+1]]){
+      if(nx<0||nx>=w||ny<0||ny>=h)continue;
+      if(visited[ny*w+nx])continue;
+      visited[ny*w+nx]=1;
+      if(match(idx(nx,ny)))queue.push([nx,ny]);
+    }
+  }
+}
+
+// ════════════════════════════════
+// 15. PHOTO ENHANCE
+// ════════════════════════════════
+let enhSrc=new Image(),enhOrigPixels=null;
+function loadEnh(){
+  const fi=document.getElementById('enhFile');
+  if(!fi.files[0])return;
+  enhSrc.onload=()=>{
+    const c=document.getElementById('enhCanvas');
+    c.width=enhSrc.naturalWidth;c.height=enhSrc.naturalHeight;
+    const ctx=c.getContext('2d');
+    ctx.drawImage(enhSrc,0,0);
+    enhOrigPixels=ctx.getImageData(0,0,c.width,c.height);
+    document.getElementById('enhPrev').style.display='block';
+    document.getElementById('enhBtn').disabled=false;
+    document.getElementById('enhInfo').textContent=enhSrc.naturalWidth+'×'+enhSrc.naturalHeight;
+    applyEnh();
+    setStatus('enhStatus','Ready! Sliders adjust karein','ok');
+  };
+  enhSrc.src=URL.createObjectURL(fi.files[0]);
+}
+function applyEnh(){
+  if(!enhOrigPixels)return;
+  const bright=parseInt(document.getElementById('enhBright').value);
+  const contrast=parseInt(document.getElementById('enhContrast').value);
+  const sat=parseInt(document.getElementById('enhSat').value);
+  const sharp=parseFloat(document.getElementById('enhSharp').value);
+  const blurVal=parseFloat(document.getElementById('enhBlur').value);
+  document.getElementById('enhBrightV').textContent=bright;
+  document.getElementById('enhContrastV').textContent=contrast;
+  document.getElementById('enhSatV').textContent=sat;
+  document.getElementById('enhSharpV').textContent=sharp;
+  document.getElementById('enhBlurV').textContent=blurVal;
+  const c=document.getElementById('enhCanvas');
+  const ctx=c.getContext('2d');
+  let filters=`brightness(${bright}%) contrast(${contrast}%) saturate(${sat}%)`;
+  if(blurVal>0)filters+=` blur(${blurVal*0.4}px)`;
+  ctx.filter=filters;
+  ctx.drawImage(enhSrc,0,0);
+  ctx.filter='none';
+  if(sharp>0){
+    const imgData=ctx.getImageData(0,0,c.width,c.height);
+    applySharpen(ctx,imgData,c.width,c.height,sharp);
+  }
+  document.getElementById('enhDiff').textContent='Enhanced ✨';
+}
+function applySharpen(ctx,imgData,w,h,amount){
+  const d=imgData.data;
+  const k=[-1,-1,-1,-1,8+amount*1.5,-1,-1,-1,-1];
+  const out=new Uint8ClampedArray(d.length);
+  for(let y=1;y<h-1;y++){
+    for(let x=1;x<w-1;x++){
+      const i=(y*w+x)*4;
+      for(let ch=0;ch<3;ch++){
+        let val=0;
+        for(let ky=-1;ky<=1;ky++)for(let kx=-1;kx<=1;kx++)val+=d[((y+ky)*w+(x+kx))*4+ch]*k[(ky+1)*3+(kx+1)];
+        out[i+ch]=Math.min(255,Math.max(0,val/amount+d[i+ch]*(1-1/amount)));
+      }
+      out[i+3]=d[i+3];
+    }
+  }
+  for(let x=0;x<w;x++){for(let ch=0;ch<4;ch++){out[x*4+ch]=d[x*4+ch];out[((h-1)*w+x)*4+ch]=d[((h-1)*w+x)*4+ch];}}
+  for(let y=0;y<h;y++){for(let ch=0;ch<4;ch++){out[(y*w)*4+ch]=d[(y*w)*4+ch];out[(y*w+w-1)*4+ch]=d[(y*w+w-1)*4+ch];}}
+  imgData.data.set(out);
+  ctx.putImageData(imgData,0,0);
+}
+function enhPreset(type){
+  const set=(b,c,s,sh,bl)=>{
+    document.getElementById('enhBright').value=b;
+    document.getElementById('enhContrast').value=c;
+    document.getElementById('enhSat').value=s;
+    document.getElementById('enhSharp').value=sh;
+    document.getElementById('enhBlur').value=bl;
+    applyEnh();
+  };
+  if(type==='auto')    set(115,120,130,2,0);
+  if(type==='portrait')set(108,110,110,1.5,0.5);
+  if(type==='vivid')   set(110,130,170,2.5,0);
+  if(type==='reset')   set(100,100,100,0,0);
+}
+function downloadEnh(){
+  const c=document.getElementById('enhCanvas');
+  const a=document.createElement('a');a.href=c.toDataURL('image/jpeg',0.95);a.download='enhanced.jpg';a.click();
+  setStatus('enhStatus','✅ Enhanced photo downloaded!','ok');
+}
+</script>
+</body>
+</html>

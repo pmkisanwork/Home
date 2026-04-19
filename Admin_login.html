@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PM KISAN – Secure Admin Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhai+2:wght@500;700;800&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g1: #0d3b1e; --g2: #1b5e20; --g3: #2e7d32; --g4: #43a047;
+  --saffron: #e65100; --gold: #f9a825;
+  --bg: #f0f4f0; --card: #ffffff; --border: #d0e8d0;
+  --text: #1a2614; --muted: #6b7f6b;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans',sans-serif; background:var(--bg); min-height:100vh; color:var(--text); }
+
+/* ── LOGIN ── */
+.login-overlay {
+  position:fixed; inset:0;
+  background:linear-gradient(135deg, #0d3b1e 0%, #1b5e20 50%, #2e7d32 100%);
+  display:flex; align-items:center; justify-content:center; z-index:9999;
+  padding:20px;
+}
+.login-box {
+  background:white; border-radius:24px; padding:48px 40px;
+  width:100%; max-width:420px;
+  box-shadow:0 24px 80px rgba(0,0,0,0.4);
+  text-align:center; position:relative; overflow:hidden;
+}
+.login-box::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:5px;
+  background:linear-gradient(90deg, var(--saffron), var(--gold), var(--saffron));
+}
+.login-logo { font-size:60px; margin-bottom:8px; }
+.login-box h1 { font-family:'Baloo Bhai 2',cursive; font-size:24px; font-weight:800; color:var(--g1); margin-bottom:4px; }
+.login-box .subtitle { font-size:13px; color:var(--muted); margin-bottom:30px; }
+
+.input-group { margin-bottom:16px; text-align:left; }
+.input-group label { font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; display:block; }
+.input-group .input-wrap-login { position:relative; }
+.login-input {
+  width:100%; padding:14px 44px 14px 16px;
+  border:2px solid var(--border); border-radius:12px;
+  font-size:15px; outline:none; font-family:'Noto Sans',sans-serif;
+  transition:border-color 0.2s, box-shadow 0.2s;
+  background:#fafffe;
+}
+.login-input:focus { border-color:var(--g3); box-shadow:0 0 0 4px rgba(46,125,50,0.10); }
+.toggle-pass {
+  position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  cursor:pointer; font-size:18px; user-select:none; color:var(--muted);
+}
+
+.login-btn {
+  width:100%; padding:15px; margin-top:8px;
+  background:linear-gradient(135deg, var(--g3), var(--g1));
+  color:white; border:none; border-radius:12px;
+  font-size:16px; font-weight:700; cursor:pointer;
+  font-family:'Noto Sans',sans-serif;
+  transition:transform 0.15s, box-shadow 0.15s;
+  letter-spacing:0.5px;
+}
+.login-btn:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(27,94,32,0.35); }
+.login-btn:active { transform:translateY(0); }
+
+.login-err {
+  background:#ffebee; border:1px solid #ef9a9a; border-radius:10px;
+  color:#c62828; font-size:13px; padding:10px 16px; margin-top:14px;
+  display:none; font-weight:600;
+}
+.attempt-warn { color:var(--saffron); font-size:12px; margin-top:8px; display:none; }
+.secure-badge {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  margin-top:20px; font-size:12px; color:var(--muted);
+}
+
+/* ── HEADER ── */
+.header { background:linear-gradient(135deg,var(--g1),var(--g2)); padding:0 24px; }
+.header-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:14px 0; }
+.header-left { display:flex; align-items:center; gap:14px; }
+.header-emblem { width:50px; height:50px; background:rgba(255,255,255,0.15); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; border:2px solid rgba(255,255,255,0.3); flex-shrink:0; }
+.header-title h1 { font-family:'Baloo Bhai 2',cursive; font-size:18px; font-weight:800; color:white; }
+.header-title p { font-size:11px; color:rgba(255,255,255,0.7); margin-top:2px; }
+.header-right { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.stat-pill { background:rgba(255,255,255,0.15); border-radius:20px; padding:5px 12px; font-size:12px; color:white; font-weight:600; }
+.user-badge { background:rgba(255,255,255,0.2); border-radius:20px; padding:5px 14px; font-size:12px; color:white; font-weight:700; display:flex; align-items:center; gap:6px; }
+.btn-logout { background:rgba(231,57,57,0.3); border:1px solid rgba(255,100,100,0.4); color:white; padding:7px 14px; border-radius:8px; font-size:13px; cursor:pointer; font-family:'Noto Sans',sans-serif; transition:background 0.2s; }
+.btn-logout:hover { background:rgba(231,57,57,0.5); }
+.fb-status { font-size:11px; padding:4px 10px; border-radius:20px; font-weight:600; }
+.fb-status.on { background:#e8f5e9; color:#1b5e20; }
+.fb-status.off { background:#ffebee; color:#c62828; }
+.saffron-bar { height:4px; background:linear-gradient(90deg,var(--saffron),var(--gold),var(--saffron)); }
+
+/* ── TABS ── */
+.tabs-bar { background:white; border-bottom:2px solid #e8f5e9; padding:0 24px; }
+.tabs-inner { max-width:1200px; margin:0 auto; display:flex; gap:4px; }
+.tab-btn {
+  padding:14px 22px; font-size:14px; font-weight:600; cursor:pointer;
+  border:none; background:none; color:var(--muted); font-family:'Noto Sans',sans-serif;
+  border-bottom:3px solid transparent; margin-bottom:-2px; transition:all 0.2s;
+  display:flex; align-items:center; gap:8px;
+}
+.tab-btn:hover { color:var(--g2); }
+.tab-btn.active { color:var(--g1); border-bottom-color:var(--g2); }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+
+/* ── MAIN LAYOUT ── */
+.main { max-width:1200px; margin:24px auto; padding:0 16px; }
+
+/* FORM CARD */
+.form-card { background:var(--card); border-radius:18px; padding:28px; box-shadow:0 4px 20px rgba(0,0,0,0.07); border:1px solid var(--border); margin-bottom:20px; }
+.form-card h2 { font-family:'Baloo Bhai 2',cursive; font-size:17px; color:var(--g1); margin-bottom:22px; display:flex; align-items:center; gap:8px; border-bottom:2px solid #e8f5e9; padding-bottom:12px; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+.form-group { display:flex; flex-direction:column; gap:5px; }
+.form-group.full { grid-column:1/-1; }
+.form-label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+.form-input, .form-textarea { padding:11px 14px; border:2px solid var(--border); border-radius:9px; font-size:14px; font-family:'Noto Sans',sans-serif; outline:none; transition:border-color 0.2s; background:#fafffe; color:var(--text); }
+.form-input:focus, .form-textarea:focus { border-color:var(--g3); box-shadow:0 0 0 3px rgba(46,125,50,0.08); }
+.form-textarea { resize:vertical; min-height:70px; }
+.form-actions { display:flex; gap:10px; margin-top:20px; }
+.btn-save { flex:1; padding:13px; background:linear-gradient(135deg,var(--g3),var(--g1)); color:white; border:none; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer; font-family:'Noto Sans',sans-serif; transition:transform 0.1s; }
+.btn-save:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(27,94,32,0.3); }
+.btn-clear { padding:13px 18px; background:#f5f5f5; color:#666; border:2px solid #ddd; border-radius:10px; font-size:14px; cursor:pointer; font-family:'Noto Sans',sans-serif; }
+.toast { display:none; background:#e8f5e9; border:1px solid #a5d6a7; border-radius:10px; padding:12px 16px; margin-top:14px; font-size:14px; color:var(--g2); font-weight:600; animation:fadeIn 0.3s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+/* RECORDS TABLE */
+.records-card { background:var(--card); border-radius:18px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,0.07); border:1px solid var(--border); }
+.records-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
+.records-top h2 { font-family:'Baloo Bhai 2',cursive; font-size:17px; color:var(--g1); }
+.search-bar { padding:10px 14px; border:2px solid var(--border); border-radius:8px; font-size:13px; outline:none; font-family:'Noto Sans',sans-serif; width:260px; }
+.search-bar:focus { border-color:var(--g3); }
+
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { background:#e8f5e9; color:var(--g1); font-weight:700; padding:12px 14px; text-align:left; white-space:nowrap; border-bottom:2px solid var(--border); }
+td { padding:11px 14px; border-bottom:1px solid #f0f4f0; vertical-align:middle; }
+tr:hover td { background:#f9fdf9; }
+.status-badge-t { font-size:11px; font-weight:700; border-radius:12px; padding:3px 10px; text-transform:uppercase; white-space:nowrap; }
+.status-badge-t.pending  { background:#fff3e0; color:#e65100; }
+.status-badge-t.approved { background:#e8f5e9; color:#1b5e20; }
+.status-badge-t.rejected { background:#ffebee; color:#b71c1c; }
+.btn-edit   { background:#e3f2fd; color:#1565c0; border:none; border-radius:6px; padding:5px 10px; font-size:12px; cursor:pointer; margin-right:4px; font-family:'Noto Sans',sans-serif; }
+.btn-del    { background:#ffebee; color:#c62828; border:none; border-radius:6px; padding:5px 10px; font-size:12px; cursor:pointer; font-family:'Noto Sans',sans-serif; }
+.no-data    { text-align:center; padding:40px; color:var(--muted); font-size:14px; }
+
+/* STATS TAB */
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:24px; }
+.stat-card { background:white; border-radius:16px; padding:24px; box-shadow:0 4px 16px rgba(0,0,0,0.07); border:1px solid var(--border); text-align:center; }
+.stat-card .stat-num { font-family:'Baloo Bhai 2',cursive; font-size:42px; font-weight:800; }
+.stat-card .stat-label { font-size:13px; color:var(--muted); margin-top:4px; font-weight:600; }
+.stat-card.total .stat-num  { color:var(--g2); }
+.stat-card.approved .stat-num{ color:#1b5e20; }
+.stat-card.pending .stat-num { color:#e65100; }
+.stat-card.rejected .stat-num{ color:#c62828; }
+
+@media(max-width:900px) { .form-grid { grid-template-columns:1fr 1fr; } }
+@media(max-width:600px) { .form-grid { grid-template-columns:1fr; } .header-right .stat-pill { display:none; } .search-bar { width:100%; } }
+
+/* ── PDF UPLOAD ── */
+.pdf-card { background:var(--card); border-radius:18px; padding:28px; box-shadow:0 4px 20px rgba(0,0,0,0.07); border:1px solid var(--border); margin-bottom:20px; }
+.pdf-card h2 { font-family:'Baloo Bhai 2',cursive; font-size:17px; color:var(--g1); margin-bottom:22px; display:flex; align-items:center; gap:8px; border-bottom:2px solid #e8f5e9; padding-bottom:12px; }
+.pdf-drop-zone {
+  border:2.5px dashed var(--g3); border-radius:14px; padding:42px 24px;
+  text-align:center; background:#f6fdf6; cursor:pointer;
+  transition:all 0.2s; position:relative; margin-bottom:18px;
+}
+.pdf-drop-zone:hover, .pdf-drop-zone.dragover { background:#e8f5e9; border-color:var(--g1); }
+.pdf-drop-zone .drop-icon { font-size:48px; margin-bottom:10px; }
+.pdf-drop-zone p { font-size:15px; color:var(--g2); font-weight:600; margin-bottom:6px; }
+.pdf-drop-zone small { font-size:12px; color:var(--muted); }
+.pdf-drop-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+.pdf-meta-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; }
+.pdf-preview-bar {
+  background:#f0f4f0; border-radius:10px; padding:12px 16px;
+  display:none; align-items:center; gap:12px; margin-bottom:16px;
+  border:1px solid var(--border);
+}
+.pdf-preview-bar.show { display:flex; }
+.pdf-preview-bar .pdf-icon { font-size:28px; flex-shrink:0; }
+.pdf-preview-bar .pdf-info { flex:1; }
+.pdf-preview-bar .pdf-info strong { font-size:14px; color:var(--g1); display:block; }
+.pdf-preview-bar .pdf-info span { font-size:12px; color:var(--muted); }
+.pdf-preview-bar .remove-file { cursor:pointer; font-size:20px; color:#c62828; flex-shrink:0; }
+.upload-progress { display:none; margin-bottom:14px; }
+.upload-progress label { font-size:12px; color:var(--muted); font-weight:600; margin-bottom:5px; display:block; }
+.progress-bar-wrap { background:#e0e0e0; border-radius:10px; height:10px; overflow:hidden; }
+.progress-bar-fill { height:10px; background:linear-gradient(90deg,var(--g3),var(--g4)); border-radius:10px; width:0%; transition:width 0.3s ease; }
+.btn-upload { width:100%; padding:14px; background:linear-gradient(135deg,#1565c0,#0d47a1); color:white; border:none; border-radius:10px; font-size:15px; font-weight:600; cursor:pointer; font-family:'Noto Sans',sans-serif; transition:transform 0.1s; display:flex; align-items:center; justify-content:center; gap:8px; }
+.btn-upload:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(21,101,192,0.3); }
+.btn-upload:disabled { background:#bdbdbd; cursor:not-allowed; transform:none; box-shadow:none; }
+
+/* PDF LIST */
+.pdf-list-card { background:var(--card); border-radius:18px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,0.07); border:1px solid var(--border); }
+.pdf-list-card h2 { font-family:'Baloo Bhai 2',cursive; font-size:17px; color:var(--g1); margin-bottom:18px; display:flex; align-items:center; gap:8px; border-bottom:2px solid #e8f5e9; padding-bottom:12px; }
+.pdf-list { display:flex; flex-direction:column; gap:10px; }
+.pdf-item {
+  display:flex; align-items:center; gap:14px; padding:14px 16px;
+  background:#f6fdf6; border-radius:12px; border:1px solid var(--border);
+  transition:background 0.2s;
+}
+.pdf-item:hover { background:#e8f5e9; }
+.pdf-item .pi-icon { font-size:30px; flex-shrink:0; }
+.pdf-item .pi-info { flex:1; min-width:0; }
+.pdf-item .pi-info strong { font-size:14px; color:var(--g1); display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pdf-item .pi-info span { font-size:11px; color:var(--muted); }
+.pdf-item .pi-tag { font-size:11px; font-weight:700; background:#e3f2fd; color:#1565c0; border-radius:8px; padding:3px 9px; white-space:nowrap; }
+.pdf-item .pi-actions { display:flex; gap:6px; flex-shrink:0; }
+.btn-view-pdf { background:#e3f2fd; color:#1565c0; border:none; border-radius:6px; padding:6px 12px; font-size:12px; cursor:pointer; font-family:'Noto Sans',sans-serif; font-weight:600; text-decoration:none; }
+.btn-del-pdf { background:#ffebee; color:#c62828; border:none; border-radius:6px; padding:6px 10px; font-size:12px; cursor:pointer; }
+.pdf-empty { text-align:center; padding:40px; color:var(--muted); font-size:14px; }
+.pdf-toast { display:none; background:#e3f2fd; border:1px solid #90caf9; border-radius:10px; padding:12px 16px; margin-top:14px; font-size:14px; color:#1565c0; font-weight:600; animation:fadeIn 0.3s ease; }
+
+/* ── OTP OVERLAY ── */
+.otp-overlay {
+  display:none; position:fixed; inset:0; z-index:99999;
+  background:rgba(0,0,0,0.85); backdrop-filter:blur(12px);
+  align-items:center; justify-content:center; padding:20px;
+}
+.otp-overlay.show { display:flex; }
+@keyframes otpSlide { from{opacity:0;transform:translateY(30px) scale(0.95)} to{opacity:1;transform:translateY(0) scale(1)} }
+.otp-box {
+  background:#fff;
+  border-radius:28px; padding:0;
+  width:100%; max-width:420px; text-align:center;
+  box-shadow:0 32px 100px rgba(0,0,0,0.6);
+  animation:otpSlide 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  overflow:hidden;
+}
+.otp-header {
+  background:linear-gradient(135deg,#0d3b1e,#2e7d32);
+  padding:28px 32px 24px;
+  position:relative;
+}
+.otp-lock-icon {
+  width:64px; height:64px; background:rgba(255,208,86,0.2);
+  border:3px solid rgba(255,208,86,0.5); border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:28px; margin:0 auto 12px;
+  box-shadow:0 0 0 8px rgba(255,208,86,0.1);
+}
+.otp-header h2 { font-family:'Baloo Bhai 2',cursive; font-size:1.5rem; color:#ffd056; margin-bottom:4px; }
+.otp-header p { font-size:0.8rem; color:rgba(255,255,255,0.6); }
+.otp-email-chip {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,208,86,0.15); border:1px solid rgba(255,208,86,0.35);
+  border-radius:20px; padding:5px 14px; margin-top:10px;
+  font-size:0.76rem; color:#ffd056; font-weight:700;
+}
+.otp-body { padding:28px 28px 24px; }
+.otp-inputs {
+  display:flex; gap:10px; justify-content:center; margin-bottom:20px;
+}
+.otp-input {
+  width:50px; height:58px; text-align:center;
+  font-size:1.6rem; font-weight:800;
+  border:2.5px solid #e0e0e0;
+  border-radius:14px; background:#f8f9fa;
+  color:#1b5e20; outline:none;
+  font-family:'Noto Sans',sans-serif;
+  transition:all 0.2s;
+  caret-color:transparent;
+}
+.otp-input:focus {
+  border-color:#2e7d32;
+  background:#f0faf0;
+  box-shadow:0 0 0 4px rgba(46,125,50,0.15);
+  transform:scale(1.08);
+}
+.otp-input.filled {
+  border-color:#2e7d32;
+  background:linear-gradient(135deg,#e8f5e9,#f1f8e9);
+  color:#1b5e20;
+}
+.otp-input.error-shake {
+  border-color:#e53935;
+  background:#fff5f5;
+  animation:shake 0.4s ease;
+}
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
+.otp-progress {
+  display:flex; gap:6px; justify-content:center; margin-bottom:18px;
+}
+.otp-dot {
+  width:8px; height:8px; border-radius:50%;
+  background:#e0e0e0; transition:all 0.3s;
+}
+.otp-dot.active { background:#2e7d32; transform:scale(1.3); }
+.otp-timer-wrap {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  background:#f8f9fa; border-radius:12px; padding:10px 16px;
+  margin-bottom:20px;
+}
+.otp-timer-circle {
+  width:38px; height:38px; border-radius:50%;
+  background:linear-gradient(135deg,#e8f5e9,#c8e6c9);
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.7rem; font-weight:800; color:#1b5e20;
+  border:2px solid #a5d6a7;
+}
+.otp-timer-text { font-size:0.8rem; color:#666; }
+.otp-timer-text strong { color:#1b5e20; font-size:0.9rem; }
+.otp-err {
+  display:none; background:#fff5f5; border:1.5px solid #ffcdd2;
+  border-radius:10px; padding:10px 14px; font-size:0.78rem;
+  color:#c62828; margin-bottom:16px; font-weight:600;
+}
+.otp-verify-btn {
+  width:100%; padding:14px;
+  background:linear-gradient(135deg,#43a047,#1b5e20);
+  border:none; border-radius:14px; color:#fff; font-size:1rem;
+  font-weight:700; cursor:pointer; font-family:'Noto Sans',sans-serif;
+  box-shadow:0 8px 24px rgba(27,94,32,0.4); margin-bottom:10px;
+  transition:all 0.25s; letter-spacing:0.5px;
+}
+.otp-verify-btn:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(27,94,32,0.5); }
+.otp-verify-btn:active { transform:translateY(0); }
+.otp-back-btn {
+  width:100%; padding:11px; background:#f5f5f5;
+  border:1.5px solid #e0e0e0; border-radius:14px;
+  color:#888; font-size:0.85rem; cursor:pointer;
+  font-family:'Noto Sans',sans-serif; margin-bottom:16px;
+  transition:all 0.2s;
+}
+.otp-back-btn:hover { background:#eeeeee; color:#555; }
+.otp-resend-row { font-size:0.78rem; color:#999; }
+.otp-resend-row button {
+  background:none; border:none; color:#2e7d32; font-weight:700;
+  cursor:pointer; font-size:0.78rem; font-family:'Noto Sans',sans-serif;
+  text-decoration:underline;
+}
+.otp-resend-row button:disabled { color:#bbb; cursor:not-allowed; text-decoration:none; }
+.otp-footer-note {
+  background:#f0faf0; border-top:1px solid #e8f5e9;
+  padding:12px 20px; font-size:0.72rem; color:#6b7f6b;
+  display:flex; align-items:center; gap:8px;
+}
+</style>
+</head>
+<body>
+
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<!-- ── OTP OVERLAY ── -->
+<div class="otp-overlay" id="otpOverlay">
+  <div class="otp-box">
+    <!-- Header -->
+    <div class="otp-header">
+      <div class="otp-lock-icon">🔐</div>
+      <h2>OTP Verification</h2>
+      <p>Admin ke email par 6-digit code bheja gaya</p>
+      <div class="otp-email-chip">📧 shivamgupta18@zohomail.in</div>
+    </div>
+    <!-- Body -->
+    <div class="otp-body">
+      <!-- Progress dots -->
+      <div class="otp-progress">
+        <div class="otp-dot" id="od1"></div>
+        <div class="otp-dot" id="od2"></div>
+        <div class="otp-dot" id="od3"></div>
+        <div class="otp-dot" id="od4"></div>
+        <div class="otp-dot" id="od5"></div>
+        <div class="otp-dot" id="od6"></div>
+      </div>
+      <!-- OTP Inputs -->
+      <div class="otp-inputs" id="otpInputsRow">
+        <input class="otp-input" id="oi1" type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]"/>
+        <input class="otp-input" id="oi2" type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]"/>
+        <input class="otp-input" id="oi3" type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]"/>
+        <input class="otp-input" id="oi4" type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]"/>
+        <input class="otp-input" id="oi5" type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]"/>
+        <input class="otp-input" id="oi6" type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]"/>
+      </div>
+      <!-- Error -->
+      <div class="otp-err" id="otpErr">❌ Galat OTP! Dobara try karein</div>
+      <!-- Timer -->
+      <div class="otp-timer-wrap">
+        <div class="otp-timer-circle" id="otpCountdown">2:00</div>
+        <div class="otp-timer-text" id="otpTimer">OTP <strong>2 minutes</strong> mein expire hoga</div>
+      </div>
+      <!-- Buttons -->
+      <button class="otp-verify-btn" onclick="verifyAdminOtp()">✅ Verify & Login</button>
+      <button class="otp-back-btn" onclick="closeOtpOverlay()">← Wapas Login Par Jaayein</button>
+      <div class="otp-resend-row">OTP nahi aaya? &nbsp;<button id="resendBtn" onclick="resendAdminOtp()" disabled>🔄 Resend OTP</button></div>
+    </div>
+    <!-- Footer -->
+    <div class="otp-footer-note">
+      📩 Inbox ya spam folder check karein &nbsp;|&nbsp; OTP 2 min valid hai
+    </div>
+  </div>
+</div>
+
+<!-- ── LOGIN OVERLAY ── -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">🌾</div>
+    <h1>PM KISAN Admin Portal</h1>
+    <p class="subtitle">Secure Access — Authorized Personnel Only</p>
+
+    <div class="input-group">
+      <label>👤 Username</label>
+      <div class="input-wrap-login">
+        <input type="text" class="login-input" id="userInput" placeholder="Username dalein" autocomplete="off" onkeydown="if(event.key==='Enter') doLogin()" />
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>🔒 Password</label>
+      <div class="input-wrap-login">
+        <input type="password" class="login-input" id="passInput" placeholder="Password dalein" id="passInput" onkeydown="if(event.key==='Enter') doLogin()" />
+        <span class="toggle-pass" onclick="togglePass()">👁️</span>
+      </div>
+    </div>
+
+    <button class="login-btn" onclick="doLogin()">🔓 Secure Login</button>
+    <div class="login-err" id="loginErr">❌ Galat Username ya Password!</div>
+    <div class="attempt-warn" id="attemptWarn"></div>
+    <div class="secure-badge">🔐 256-bit Encrypted &nbsp;|&nbsp; Secure Portal</div>
+  </div>
+</div>
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="header-emblem">🌾</div>
+      <div class="header-title">
+        <h1>PM KISAN – Admin Portal</h1>
+        <p>Farmer Status Management System</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="fb-status off" id="fbStatus">⚪ Connecting...</span>
+      <div class="stat-pill">Total: <span id="hTotal">0</span></div>
+      <div class="stat-pill">✅ <span id="hApproved">0</span></div>
+      <div class="stat-pill">⏳ <span id="hPending">0</span></div>
+      <div class="user-badge">👤 <span id="loggedUser">Admin</span></div>
+      <button class="btn-logout" onclick="doLogout()">🚪 Logout</button>
+    </div>
+  </div>
+</div>
+<div class="saffron-bar"></div>
+
+<!-- ── TABS ── -->
+<div class="tabs-bar">
+  <div class="tabs-inner">
+    <button class="tab-btn active" onclick="switchTab('add')" id="tab-add">➕ Farmer Add / Edit</button>
+    <button class="tab-btn" onclick="switchTab('records')" id="tab-records">📋 Saare Records</button>
+    <button class="tab-btn" onclick="switchTab('stats')" id="tab-stats">📊 Statistics</button>
+    <button class="tab-btn" onclick="switchTab('pdf')" id="tab-pdf">📄 PDF Upload</button>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- ADD TAB -->
+  <div class="tab-content active" id="content-add">
+    <div class="form-card">
+      <h2>📝 <span id="formTitle">Naya Farmer Add Karein</span></h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">🆔 Registration No *</label>
+          <input class="form-input" id="fReg" placeholder="e.g. UP252237194" style="text-transform:uppercase" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">📊 Status *</label>
+          <select class="form-input" id="fStatus">
+            <option value="Pending">⏳ Pending</option>
+            <option value="Approved">✅ Approved</option>
+            <option value="Rejected">❌ Rejected</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">💰 Payment</label>
+          <select class="form-input" id="fPayment">
+            <option value="">-- Select --</option>
+            <option value="Received">Received</option>
+            <option value="Pending">Pending</option>
+            <option value="Not Eligible">Not Eligible</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">👨‍🌾 Farmer Name</label>
+          <input class="form-input" id="fName" placeholder="Farmer ka naam" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">👴 Father Name</label>
+          <input class="form-input" id="fFather" placeholder="Pita ka naam" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">📱 Mobile No</label>
+          <input class="form-input" id="fMobile" placeholder="10 digit mobile" maxlength="10" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">🏘️ Village</label>
+          <input class="form-input" id="fVillage" placeholder="Gaon ka naam" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">📍 Sub District</label>
+          <input class="form-input" id="fSub" placeholder="Block / Tehsil" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">🏙️ District</label>
+          <input class="form-input" id="fDist" placeholder="Zila" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">🗺️ State</label>
+          <input class="form-input" id="fState" value="UTTAR PRADESH" />
+        </div>
+        <div class="form-group full">
+          <label class="form-label">📝 Remark</label>
+          <textarea class="form-textarea" id="fRemark" placeholder="Koi note ya comment..."></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-save" onclick="saveRecord()">💾 Save Karein</button>
+        <button class="btn-clear" onclick="clearForm()">🗑️ Clear</button>
+      </div>
+      <div class="toast" id="toast"></div>
+    </div>
+  </div>
+
+  <!-- RECORDS TAB -->
+  <div class="tab-content" id="content-records">
+    <div class="records-card">
+      <div class="records-top">
+        <h2>📋 Saare Farmers</h2>
+        <input type="text" class="search-bar" id="searchBar" placeholder="🔍 Naam, Reg No, Village..." oninput="renderTable()" />
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>🆔 Reg No</th>
+              <th>👨‍🌾 Farmer Name</th>
+              <th>👴 Father</th>
+              <th>📱 Mobile</th>
+              <th>🏘️ Village</th>
+              <th>🏙️ District</th>
+              <th>💰 Payment</th>
+              <th>📊 Status</th>
+              <th>⚙️ Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"><tr><td colspan="9" class="no-data">🔄 Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS TAB -->
+  <div class="tab-content" id="content-stats">
+    <div class="stats-grid">
+      <div class="stat-card total">
+        <div class="stat-num" id="sTot">0</div>
+        <div class="stat-label">📊 Total Farmers</div>
+      </div>
+      <div class="stat-card approved">
+        <div class="stat-num" id="sApp">0</div>
+        <div class="stat-label">✅ Approved</div>
+      </div>
+      <div class="stat-card pending">
+        <div class="stat-num" id="sPen">0</div>
+        <div class="stat-label">⏳ Pending</div>
+      </div>
+      <div class="stat-card rejected">
+        <div class="stat-num" id="sRej">0</div>
+        <div class="stat-label">❌ Rejected</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDF UPLOAD TAB -->
+  <div class="tab-content" id="content-pdf">
+
+    <!-- Upload Card -->
+    <div class="pdf-card">
+      <h2>📤 PDF Document Upload Karein</h2>
+
+      <!-- Drop Zone -->
+      <div class="pdf-drop-zone" id="pdfDropZone">
+        <input type="file" accept="application/pdf" id="pdfFileInput" onchange="handleFileSelect(this.files[0])" />
+        <div class="drop-icon">📄</div>
+        <p>PDF file yahan drag & drop karein</p>
+        <small>ya click karke select karein (sirf PDF • max 10MB)</small>
+      </div>
+
+      <!-- Preview bar -->
+      <div class="pdf-preview-bar" id="pdfPreviewBar">
+        <span class="pdf-icon">📄</span>
+        <div class="pdf-info">
+          <strong id="pdfFileName">—</strong>
+          <span id="pdfFileSize">—</span>
+        </div>
+        <span class="remove-file" onclick="removeSelectedFile()" title="Hatao">✖</span>
+      </div>
+
+      <!-- Meta inputs -->
+      <div class="pdf-meta-grid">
+        <div class="form-group">
+          <label class="form-label">🏷️ Document Title</label>
+          <input class="form-input" id="pdfTitle" placeholder="e.g. Farmer List October 2024" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">📂 Category</label>
+          <select class="form-input" id="pdfCategory">
+            <option value="">-- Category --</option>
+            <option value="Farmer List">Farmer List</option>
+            <option value="Payment Report">Payment Report</option>
+            <option value="Government Order">Government Order</option>
+            <option value="Application Form">Application Form</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="upload-progress" id="uploadProgress">
+        <label>Uploading... <span id="uploadPct">0</span>%</label>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill"></div></div>
+      </div>
+
+      <button class="btn-upload" id="uploadBtn" onclick="uploadPDF()" disabled>
+        📤 Upload Karein
+      </button>
+      <div class="pdf-toast" id="pdfToast"></div>
+    </div>
+
+    <!-- PDF List Card -->
+    <div class="pdf-list-card">
+      <h2>📁 Uploaded Documents</h2>
+      <div class="pdf-list" id="pdfList">
+        <div class="pdf-empty">🔄 Loading...</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-storage.js";
+
+// ── CREDENTIALS ──
+const ADMIN_USER = "8960947991";
+const ADMIN_PASS = "Shivamgupta$264491";
+let failedAttempts = 0;
+let locked = false;
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCzlnSTBslBvU6sWyU-cEmNR-7zuo5z1JI",
+  authDomain: "pmkisan-1b4e3.firebaseapp.com",
+  databaseURL: "https://pmkisan-1b4e3-default-rtdb.firebaseio.com",
+  projectId: "pmkisan-1b4e3",
+  storageBucket: "pmkisan-1b4e3.firebasestorage.app",
+  messagingSenderId: "753615038345",
+  appId: "1:753615038345:web:860971a1969bb4883e2358"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const storage = getStorage(app);
+let allData = {};
+
+// ── EMAILJS CONFIG ──
+const EJS_PUBLIC_KEY  = 'oxyRIaQ-IoizhZPAG';
+const EJS_SERVICE_ID  = 'service_bol8ldq';
+const EJS_TEMPLATE_ID = 'template_zegeumr';
+const ADMIN_EMAIL     = 'shivamgupta18@zohomail.in';
+emailjs.init({publicKey: EJS_PUBLIC_KEY});
+
+let _otpCode = '';
+let _otpTimer = null;
+
+function generateOtp() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+async function sendAdminOtp() {
+  _otpCode = generateOtp();
+  try {
+    await emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {
+      email:      ADMIN_EMAIL,
+      otp_code:   _otpCode,
+      admin_name: 'Shivam'
+    });
+  } catch(err) {
+    console.error('EmailJS Error:', err);
+  }
+}
+
+function startOtpTimer() {
+  clearInterval(_otpTimer);
+  document.getElementById('resendBtn').disabled = true;
+  let secs = 120;
+  function tick() {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    const cd = document.getElementById('otpCountdown');
+    const tm = document.getElementById('otpTimer');
+    if(cd) cd.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+    if (secs <= 0) {
+      clearInterval(_otpTimer);
+      if(tm) tm.innerHTML = '⏱️ OTP expire ho gaya';
+      if(cd) cd.textContent = '0:00';
+      document.getElementById('resendBtn').disabled = false;
+      return;
+    }
+    secs--;
+  }
+  tick();
+  _otpTimer = setInterval(tick, 1000);
+}
+
+// ── OTP INPUT AUTO-JUMP ──
+const otpIds = ['oi1','oi2','oi3','oi4','oi5','oi6'];
+
+function setupOtpInputs() {
+  otpIds.forEach((id, idx) => {
+    const el = document.getElementById(id);
+
+    el.addEventListener('input', function() {
+      // Only allow digits
+      this.value = this.value.replace(/[^0-9]/g, '');
+      if (this.value.length > 1) this.value = this.value.slice(-1);
+
+      // Update dot
+      document.getElementById('od'+(idx+1)).classList.toggle('active', this.value !== '');
+      this.classList.toggle('filled', this.value !== '');
+
+      // Auto jump to next
+      if (this.value && idx < 5) {
+        document.getElementById(otpIds[idx+1]).focus();
+      }
+
+      // Auto verify if all filled
+      const all = otpIds.map(i => document.getElementById(i).value).join('');
+      if (all.length === 6) verifyAdminOtp();
+    });
+
+    el.addEventListener('keydown', function(e) {
+      if (e.key === 'Backspace' && !this.value && idx > 0) {
+        document.getElementById(otpIds[idx-1]).focus();
+      }
+    });
+
+    // Handle paste
+    el.addEventListener('paste', function(e) {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g,'').slice(0,6);
+      otpIds.forEach((i, k) => {
+        const inp = document.getElementById(i);
+        inp.value = pasted[k] || '';
+        inp.classList.toggle('filled', inp.value !== '');
+        document.getElementById('od'+(k+1)).classList.toggle('active', inp.value !== '');
+      });
+      const last = Math.min(pasted.length, 5);
+      document.getElementById(otpIds[last]).focus();
+      if (pasted.length === 6) setTimeout(verifyAdminOtp, 300);
+    });
+  });
+}
+
+window.verifyAdminOtp = function() {
+  const entered = ['oi1','oi2','oi3','oi4','oi5','oi6'].map(id => document.getElementById(id).value).join('');
+  if (entered.length < 6) { alert('6 digit OTP daalna zaroori hai'); return; }
+  if (entered === _otpCode) {
+    clearInterval(_otpTimer);
+    document.getElementById('otpOverlay').classList.remove('show');
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('loggedUser').textContent = ADMIN_USER;
+    failedAttempts = 0;
+    _otpCode = '';
+    startListening();
+  } else {
+    document.getElementById('otpErr').style.display = 'block';
+    otpIds.forEach((id,k) => {
+      const el = document.getElementById(id);
+      el.classList.add('error-shake');
+      setTimeout(() => el.classList.remove('error-shake'), 400);
+      el.value = ''; el.classList.remove('filled');
+      document.getElementById('od'+(k+1)).classList.remove('active');
+    });
+    document.getElementById('oi1').focus();
+  }
+}
+
+window.resendAdminOtp = async function() {
+  document.getElementById('resendBtn').disabled = true;
+  await sendAdminOtp();
+  startOtpTimer();
+}
+
+window.closeOtpOverlay = function() {
+  document.getElementById('otpOverlay').classList.remove('show');
+  clearInterval(_otpTimer);
+  _otpCode = '';
+}
+
+// ── LOGIN ──
+window.doLogin = async function() {
+  if (locked) { document.getElementById('loginErr').textContent = '🔒 Account locked! 5 minute baad try karein.'; document.getElementById('loginErr').style.display='block'; return; }
+  const user = document.getElementById('userInput').value.trim();
+  const pass = document.getElementById('passInput').value;
+  if (user === ADMIN_USER && pass === ADMIN_PASS) {
+    document.getElementById('loginErr').style.display = 'none';
+    // Reset OTP fields
+    otpIds.forEach((id,k) => {
+      const el = document.getElementById(id);
+      el.value = ''; el.classList.remove('filled','error-shake');
+      document.getElementById('od'+(k+1)).classList.remove('active');
+    });
+    document.getElementById('otpErr').style.display = 'none';
+    await sendAdminOtp();
+    document.getElementById('otpOverlay').classList.add('show');
+    setupOtpInputs();
+    setTimeout(() => document.getElementById('oi1').focus(), 200);
+    startOtpTimer();
+    failedAttempts = 0;
+  } else {
+    failedAttempts++;
+    document.getElementById('loginErr').style.display = 'block';
+    if (failedAttempts >= 3) {
+      locked = true;
+      document.getElementById('attemptWarn').style.display = 'block';
+      document.getElementById('attemptWarn').textContent = '⚠️ 3 galat attempts! 5 minute ke liye locked.';
+      setTimeout(() => { locked = false; failedAttempts = 0; document.getElementById('attemptWarn').style.display='none'; }, 300000);
+    } else {
+      document.getElementById('attemptWarn').style.display = 'block';
+      document.getElementById('attemptWarn').textContent = `⚠️ ${failedAttempts}/3 attempts. ${3-failedAttempts} mauke baaki.`;
+    }
+    document.getElementById('passInput').value = '';
+  }
+}
+
+window.doLogout = function() {
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('userInput').value = '';
+  document.getElementById('passInput').value = '';
+  document.getElementById('loginErr').style.display = 'none';
+  document.getElementById('attemptWarn').style.display = 'none';
+}
+
+window.togglePass = function() {
+  const p = document.getElementById('passInput');
+  p.type = p.type === 'password' ? 'text' : 'password';
+}
+
+// ── FIREBASE ──
+function startListening() {
+  onValue(ref(db, 'farmers'), (snap) => {
+    allData = snap.val() || {};
+    document.getElementById('fbStatus').textContent = '🟢 Connected';
+    document.getElementById('fbStatus').className = 'fb-status on';
+    renderTable();
+    updateStats();
+  }, () => {
+    document.getElementById('fbStatus').textContent = '🔴 Error';
+    document.getElementById('fbStatus').className = 'fb-status off';
+  });
+}
+
+// ── SAVE ──
+window.saveRecord = async function() {
+  const reg = document.getElementById('fReg').value.trim().toUpperCase();
+  if (!reg) { alert('Registration Number zaroori hai!'); return; }
+  const record = {
+    reg, name: document.getElementById('fName').value.trim(),
+    father: document.getElementById('fFather').value.trim(),
+    mobile: document.getElementById('fMobile').value.trim(),
+    village: document.getElementById('fVillage').value.trim(),
+    sub: document.getElementById('fSub').value.trim(),
+    dist: document.getElementById('fDist').value.trim(),
+    state: document.getElementById('fState').value.trim(),
+    payment: document.getElementById('fPayment').value,
+    status: document.getElementById('fStatus').value,
+    remark: document.getElementById('fRemark').value.trim(),
+    updated: new Date().toLocaleString('hi-IN')
+  };
+  const key = reg.replace(/[.#$[\]]/g, '_');
+  await set(ref(db, 'farmers/' + key), record);
+  showToast('✅ ' + reg + ' — Firebase mein save ho gaya!');
+  clearForm();
+}
+
+window.editRecord = function(key) {
+  const r = allData[key]; if (!r) return;
+  document.getElementById('fReg').value = r.reg||'';
+  document.getElementById('fName').value = r.name||'';
+  document.getElementById('fFather').value = r.father||'';
+  document.getElementById('fMobile').value = r.mobile||'';
+  document.getElementById('fVillage').value = r.village||'';
+  document.getElementById('fSub').value = r.sub||'';
+  document.getElementById('fDist').value = r.dist||'';
+  document.getElementById('fState').value = r.state||'UTTAR PRADESH';
+  document.getElementById('fPayment').value = r.payment||'';
+  document.getElementById('fStatus').value = r.status||'Pending';
+  document.getElementById('fRemark').value = r.remark||'';
+  document.getElementById('formTitle').textContent = 'Edit: ' + r.reg;
+  switchTab('add');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+window.deleteRecord = async function(key) {
+  if (!confirm('Yeh record delete karein?')) return;
+  await remove(ref(db, 'farmers/' + key));
+  showToast('🗑️ Record delete ho gaya!');
+}
+
+window.clearForm = function() {
+  ['fReg','fName','fFather','fMobile','fVillage','fSub','fDist','fRemark'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('fState').value = 'UTTAR PRADESH';
+  document.getElementById('fStatus').value = 'Pending';
+  document.getElementById('fPayment').value = '';
+  document.getElementById('formTitle').textContent = 'Naya Farmer Add Karein';
+}
+
+// ── TABLE ──
+function getStatusCls(s) {
+  s=(s||'').toLowerCase();
+  if(s.includes('approved')) return 'approved';
+  if(s.includes('rejected')) return 'rejected';
+  if(s.includes('pending')) return 'pending';
+  return 'unknown';
+}
+
+window.renderTable = function() {
+  const q = (document.getElementById('searchBar').value||'').toLowerCase();
+  const entries = Object.entries(allData);
+  const filtered = q ? entries.filter(([k,r]) =>
+    (r.reg||'').toLowerCase().includes(q) ||
+    (r.name||'').toLowerCase().includes(q) ||
+    (r.village||'').toLowerCase().includes(q) ||
+    (r.mobile||'').includes(q)
+  ) : entries;
+
+  if (filtered.length === 0) {
+    document.getElementById('tableBody').innerHTML = `<tr><td colspan="9" class="no-data">Koi record nahi mila</td></tr>`;
+    return;
+  }
+  document.getElementById('tableBody').innerHTML = filtered.map(([key,r]) => {
+    const cls = getStatusCls(r.status);
+    return `<tr>
+      <td><strong>${r.reg||'—'}</strong></td>
+      <td>${r.name||'—'}</td>
+      <td>${r.father||'—'}</td>
+      <td>${r.mobile||'—'}</td>
+      <td>${r.village||'—'}</td>
+      <td>${r.dist||'—'}</td>
+      <td>${r.payment||'—'}</td>
+      <td><span class="status-badge-t ${cls}">${r.status||'—'}</span></td>
+      <td>
+        <button class="btn-edit" onclick="editRecord('${key}')">✏️ Edit</button>
+        <button class="btn-del" onclick="deleteRecord('${key}')">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function updateStats() {
+  const vals = Object.values(allData);
+  const tot = vals.length;
+  const app = vals.filter(r=>r.status==='Approved').length;
+  const pen = vals.filter(r=>r.status==='Pending').length;
+  const rej = vals.filter(r=>r.status==='Rejected').length;
+  document.getElementById('hTotal').textContent = tot;
+  document.getElementById('hApproved').textContent = app;
+  document.getElementById('hPending').textContent = pen;
+  document.getElementById('sTot').textContent = tot;
+  document.getElementById('sApp').textContent = app;
+  document.getElementById('sPen').textContent = pen;
+  document.getElementById('sRej').textContent = rej;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3000);
+}
+
+// ── TABS ──
+window.switchTab = function(tab) {
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('content-'+tab).classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if (tab === 'records') renderTable();
+  if (tab === 'pdf') loadPDFList();
+}
+
+// ── PDF UPLOAD ──
+let selectedPDFFile = null;
+
+// Drag & Drop
+const dropZone = document.getElementById('pdfDropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFileSelect(file);
+});
+
+window.handleFileSelect = function(file) {
+  if (!file) return;
+  if (file.type !== 'application/pdf') { alert('Sirf PDF file allowed hai!'); return; }
+  if (file.size > 10 * 1024 * 1024) { alert('File 10MB se badi hai!'); return; }
+  selectedPDFFile = file;
+  document.getElementById('pdfFileName').textContent = file.name;
+  document.getElementById('pdfFileSize').textContent = (file.size / 1024).toFixed(1) + ' KB';
+  document.getElementById('pdfPreviewBar').classList.add('show');
+  document.getElementById('uploadBtn').disabled = false;
+}
+
+window.removeSelectedFile = function() {
+  selectedPDFFile = null;
+  document.getElementById('pdfFileInput').value = '';
+  document.getElementById('pdfPreviewBar').classList.remove('show');
+  document.getElementById('uploadBtn').disabled = true;
+}
+
+window.uploadPDF = async function() {
+  if (!selectedPDFFile) { alert('Pehle ek PDF file select karein!'); return; }
+  const title = document.getElementById('pdfTitle').value.trim() || selectedPDFFile.name;
+  const category = document.getElementById('pdfCategory').value || 'Other';
+  const timestamp = Date.now();
+  const safeName = timestamp + '_' + selectedPDFFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const storageRef = sRef(storage, 'pdfs/' + safeName);
+  const uploadTask = uploadBytesResumable(storageRef, selectedPDFFile);
+
+  document.getElementById('uploadBtn').disabled = true;
+  document.getElementById('uploadProgress').style.display = 'block';
+
+  uploadTask.on('state_changed',
+    (snap) => {
+      const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+      document.getElementById('uploadPct').textContent = pct;
+      document.getElementById('progressFill').style.width = pct + '%';
+    },
+    (err) => {
+      document.getElementById('uploadProgress').style.display = 'none';
+      document.getElementById('uploadBtn').disabled = false;
+      alert('Upload failed: ' + err.message);
+    },
+    async () => {
+      const url = await getDownloadURL(uploadTask.snapshot.ref);
+      const pdfMeta = {
+        title, category, url,
+        fileName: selectedPDFFile.name,
+        storagePath: 'pdfs/' + safeName,
+        size: (selectedPDFFile.size / 1024).toFixed(1) + ' KB',
+        uploadedAt: new Date().toLocaleString('hi-IN'),
+        timestamp
+      };
+      const key = 'pdf_' + timestamp;
+      await set(ref(db, 'pdfs/' + key), pdfMeta);
+      document.getElementById('uploadProgress').style.display = 'none';
+      document.getElementById('progressFill').style.width = '0%';
+      showPDFToast('✅ PDF successfully upload ho gaya: ' + title);
+      removeSelectedFile();
+      document.getElementById('pdfTitle').value = '';
+      document.getElementById('pdfCategory').value = '';
+      loadPDFList();
+    }
+  );
+}
+
+function loadPDFList() {
+  onValue(ref(db, 'pdfs'), (snap) => {
+    const data = snap.val() || {};
+    const list = document.getElementById('pdfList');
+    const entries = Object.entries(data).sort((a,b) => (b[1].timestamp||0) - (a[1].timestamp||0));
+    if (entries.length === 0) {
+      list.innerHTML = '<div class="pdf-empty">📭 Abhi koi PDF upload nahi hua</div>';
+      return;
+    }
+    list.innerHTML = entries.map(([key, p]) => `
+      <div class="pdf-item">
+        <span class="pi-icon">📄</span>
+        <div class="pi-info">
+          <strong>${p.title || p.fileName}</strong>
+          <span>${p.uploadedAt || ''} &nbsp;•&nbsp; ${p.size || ''}</span>
+        </div>
+        <span class="pi-tag">${p.category || 'Other'}</span>
+        <div class="pi-actions">
+          <a class="btn-view-pdf" href="${p.url}" target="_blank">👁️ View</a>
+          <button class="btn-del-pdf" onclick="deletePDF('${key}', '${p.storagePath}')">🗑️</button>
+        </div>
+      </div>
+    `).join('');
+  }, { onlyOnce: true });
+}
+
+window.deletePDF = async function(key, path) {
+  if (!confirm('Yeh PDF delete karein?')) return;
+  try {
+    const fileRef = sRef(storage, path);
+    await deleteObject(fileRef);
+  } catch(e) { /* file already gone */ }
+  await remove(ref(db, 'pdfs/' + key));
+  showPDFToast('🗑️ PDF delete ho gaya!');
+  loadPDFList();
+}
+
+function showPDFToast(msg) {
+  const t = document.getElementById('pdfToast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 3500);
+}
+</script>
+</body>
+</html>

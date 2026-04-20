@@ -417,8 +417,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       </a>
       <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
         <a href="https://allworkonline.xyz/" target="_blank" style="padding:7px 13px;border-radius:20px;color:#2a5c2a;font-size:.78rem;font-weight:600;text-decoration:none;background:rgba(37,168,74,.08);transition:all .2s" onmouseover="this.style.background='rgba(37,168,74,.18)'" onmouseout="this.style.background='rgba(37,168,74,.08)'">🏠 Home</a>
-        <a href="https://pmkisanwork.github.io/Allservicelink/" target="_blank" style="padding:7px 13px;border-radius:20px;color:#2a5c2a;font-size:.78rem;font-weight:600;text-decoration:none;background:rgba(37,168,74,.08);transition:all .2s" onmouseover="this.style.background='rgba(37,168,74,.18)'" onmouseout="this.style.background='rgba(37,168,74,.08)'">⚙️ Services</a>
-        <a href="https://pmkisanwork.github.io/Status-/" target="_blank" style="padding:7px 13px;border-radius:20px;color:#2a5c2a;font-size:.78rem;font-weight:600;text-decoration:none;background:rgba(37,168,74,.08);transition:all .2s" onmouseover="this.style.background='rgba(37,168,74,.18)'" onmouseout="this.style.background='rgba(37,168,74,.08)'">📋 Status</a>
+        <a href="https://allworkonline.xyz/Service-Link.html" target="_blank" style="padding:7px 13px;border-radius:20px;color:#2a5c2a;font-size:.78rem;font-weight:600;text-decoration:none;background:rgba(37,168,74,.08);transition:all .2s" onmouseover="this.style.background='rgba(37,168,74,.18)'" onmouseout="this.style.background='rgba(37,168,74,.08)'">⚙️ Services</a>
+        <a href="https://allworkonline.xyz/Customer_status.html" target="_blank" style="padding:7px 13px;border-radius:20px;color:#2a5c2a;font-size:.78rem;font-weight:600;text-decoration:none;background:rgba(37,168,74,.08);transition:all .2s" onmouseover="this.style.background='rgba(37,168,74,.18)'" onmouseout="this.style.background='rgba(37,168,74,.08)'">📋 Status</a>
         <a href="#" onclick="switchAuthTab('login')" style="padding:7px 16px;border-radius:20px;background:linear-gradient(135deg,var(--g2),var(--g3));color:#fff;font-size:.78rem;font-weight:700;text-decoration:none;box-shadow:0 4px 12px rgba(37,168,74,.35);">🔐 Login</a>
       </div>
     </div>
@@ -793,6 +793,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           </div>
           <button class="dd-btn" onclick="showPage('user-dash-page');renderUserDash()">📊 Mera Dashboard</button>
           <button class="dd-btn" onclick="showPage('form-page');resetForm()">📝 Naya Application</button>
+          <button class="dd-btn" style="color:#f9a825;font-weight:700" onclick="openCustomerStatus();document.getElementById('u-dd2').classList.remove('open')">📋 Customer Status</button>
           <button class="dd-btn" onclick="openUserProfile();document.getElementById('u-dd2').classList.remove('open')">👤 Profile Update Karein</button>
           <button class="dd-btn" onclick="openUserChangePass()">🔑 Password Change Karein</button>
           <button class="dd-btn red" onclick="doLogout()">🚪 Logout</button>
@@ -840,10 +841,26 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <!-- CONTENT -->
   <div class="udash-content">
 
+    <!-- Customer Status Quick Access -->
+    <div style="margin-bottom:20px">
+      <button onclick="openCustomerStatus()" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(135deg,rgba(249,168,37,.12),rgba(240,165,0,.08));border:1.5px solid rgba(249,168,37,.35);border-radius:16px;padding:14px 20px;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s"
+        onmouseover="this.style.background='linear-gradient(135deg,rgba(249,168,37,.2),rgba(240,165,0,.14))';"
+        onmouseout="this.style.background='linear-gradient(135deg,rgba(249,168,37,.12),rgba(240,165,0,.08))';">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;background:linear-gradient(135deg,#e65100,#f9a825);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 4px 12px rgba(249,168,37,.35)">📋</div>
+          <div style="text-align:left">
+            <div style="font-weight:700;font-size:.9rem;color:#ffd056">Customer Status Check Karein</div>
+            <div style="font-size:.7rem;color:rgba(255,255,255,.45);margin-top:2px">Apni application ka PM KISAN portal status dekhen</div>
+          </div>
+        </div>
+        <span style="color:rgba(255,255,255,.4);font-size:1rem">&#8594;</span>
+      </button>
+    </div>
+
     <!-- Pending Section -->
     <div class="udash-section-head">
       <div class="udash-section-dot udash-section-dot-pending"></div>
-      <div class="udash-section-title">⏳ Pending Applications</div>
+      <div class="udash-section-title">&#x23F3; Pending Applications</div>
       <span class="udash-section-badge udash-badge-pending" id="u-pending-badge">0</span>
     </div>
     <div id="user-pending-list"></div>
@@ -4773,4 +4790,585 @@ async function saveEmailAndContinue(){
       await db.ref('users/'+s.mobile).update({email: email});
       hideLoading();
     }catch(e){
-    
+          hideLoading();
+    }
+  }catch(e){ hideLoading(); }
+  // Update session
+  const sess = getSession();
+  if(sess){ sess.email = email; saveSession(sess); }
+  document.getElementById('email-add-popup').style.display = 'none';
+  if(_emailAddCallback){ _emailAddCallback(); _emailAddCallback=null; }
+}
+</script>
+
+<!-- ══════════════════════════════════════════════════════
+     CUSTOMER STATUS OVERLAY — Full Integrated
+     User apni ID ke submissions se auto-load + manual search
+     A4 Print support
+══════════════════════════════════════════════════════ -->
+<style>
+/* ── Customer Status Overlay ── */
+#cs-overlay{
+  display:none;position:fixed;inset:0;z-index:99997;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(8px);
+  align-items:flex-start;justify-content:center;padding:12px;
+  overflow-y:auto;
+}
+#cs-overlay.open{display:flex;}
+#cs-modal{
+  background:#fff;border-radius:22px;width:100%;max-width:700px;
+  box-shadow:0 24px 80px rgba(0,0,0,.45);overflow:hidden;
+  animation:csSlide .32s ease both;
+  margin:auto;
+}
+@keyframes csSlide{from{opacity:0;transform:translateY(-20px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* Banner */
+#cs-banner{
+  background:linear-gradient(135deg,#0d3b1e,#1b5e20,#2e7d32);
+  padding:18px 22px 16px;position:relative;overflow:hidden;
+}
+#cs-banner::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(255,255,255,.02) 20px,rgba(255,255,255,.02) 40px);
+}
+.cs-saffron-bar{height:4px;background:linear-gradient(90deg,#e65100,#f9a825,#e65100);}
+#cs-body{padding:20px 22px 24px;}
+
+/* Search card */
+.cs-search-card{
+  background:#f4f8f4;border:1.5px solid #d0e8d0;border-radius:16px;
+  padding:20px;margin-bottom:18px;
+}
+.cs-search-card h3{
+  font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;
+  color:#1b5e20;margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.cs-input-row{display:flex;gap:9px;}
+#cs-reg-input{
+  flex:1;padding:13px 16px;border:2px solid #d0e8d0;border-radius:11px;
+  font-size:.9rem;font-family:'Poppins',sans-serif;outline:none;
+  background:#fff;transition:all .2s;text-transform:uppercase;letter-spacing:.5px;
+  color:#1a2614;
+}
+#cs-reg-input::placeholder{text-transform:none;color:#bbb;font-size:.82rem;}
+#cs-reg-input:focus{border-color:#2e7d32;box-shadow:0 0 0 3px rgba(46,125,50,.1);}
+.cs-btn-check{
+  background:linear-gradient(135deg,#1b5e20,#2e7d32);color:#fff;
+  border:none;padding:13px 20px;border-radius:11px;font-size:.84rem;
+  font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;
+  white-space:nowrap;transition:all .2s;
+}
+.cs-btn-check:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(27,94,32,.3);}
+
+/* My Reg Numbers chips */
+.cs-chips-wrap{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
+.cs-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  background:#e8f5e9;border:1.5px solid #a5d6a7;
+  color:#1b5e20;padding:5px 12px;border-radius:20px;
+  font-size:.75rem;font-weight:700;cursor:pointer;
+  font-family:'Poppins',sans-serif;transition:all .15s;
+}
+.cs-chip:hover{background:#c8e6c9;border-color:#66bb6a;}
+.cs-chip-lbl{font-size:.65rem;color:#78909c;font-weight:500;}
+
+/* Result card */
+.cs-result-wrap{animation:popIn .38s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popIn{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+.cs-rc-top{padding:20px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.cs-rc-top.pending{background:linear-gradient(135deg,#fff3e0,#ffe0b2);}
+.cs-rc-top.approved{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);}
+.cs-rc-top.rejected{background:linear-gradient(135deg,#ffebee,#ffcdd2);}
+.cs-rc-top.unknown{background:linear-gradient(135deg,#e3f2fd,#bbdefb);}
+
+.cs-rc-name{font-family:'Baloo 2',cursive;font-size:1.2rem;font-weight:800;line-height:1.2;}
+.cs-rc-name.pending{color:#e65100;}.cs-rc-name.approved{color:#1b5e20;}
+.cs-rc-name.rejected{color:#b71c1c;}.cs-rc-name.unknown{color:#0d47a1;}
+.cs-rc-reg{font-size:.72rem;color:#78909c;margin-top:3px;letter-spacing:.5px;}
+
+.cs-badge-icon{font-size:34px;}
+.cs-badge-label{font-size:.68rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;border-radius:20px;padding:4px 12px;}
+.cs-badge-label.pending{background:#ff9800;color:#fff;}
+.cs-badge-label.approved{background:#2e7d32;color:#fff;}
+.cs-badge-label.rejected{background:#c62828;color:#fff;}
+.cs-badge-label.unknown{background:#1565c0;color:#fff;}
+
+.cs-divider{height:1px;background:#f0f0f0;}
+.cs-grid{display:grid;grid-template-columns:1fr 1fr;}
+.cs-field{padding:12px 22px;border-bottom:1px solid #f5f5f5;}
+.cs-field:nth-child(odd){border-right:1px solid #f5f5f5;}
+.cs-field-lbl{font-size:.68rem;color:#78909c;text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;}
+.cs-field-val{font-size:.88rem;font-weight:600;color:#1a2614;}
+.cs-field-val.empty{color:#ccc;font-weight:400;font-style:italic;font-size:.78rem;}
+.cs-remark{margin:4px 22px 16px;background:#fffde7;border-left:4px solid #f9a825;border-radius:0 10px 10px 0;padding:10px 14px;}
+.cs-updated{padding:6px 22px 14px;font-size:.68rem;color:#78909c;text-align:right;}
+
+.cs-error-card{background:#fff;border-radius:14px;padding:30px 20px;text-align:center;}
+.cs-error-icon{font-size:44px;margin-bottom:10px;}
+.cs-error-card h3{font-size:1rem;color:#c62828;margin-bottom:6px;font-family:'Baloo 2',cursive;}
+.cs-error-card p{font-size:.8rem;color:#78909c;line-height:1.7;}
+
+.cs-loading{text-align:center;padding:36px;background:#fafffe;border-radius:14px;}
+.cs-spin{display:inline-block;animation:spin 1s linear infinite;font-size:32px;}
+
+/* Print Button */
+.cs-print-btn{
+  display:flex;align-items:center;gap:7px;
+  background:linear-gradient(135deg,#1b5e20,#43a047);
+  color:#fff;border:none;padding:10px 20px;border-radius:11px;
+  font-size:.82rem;font-weight:700;font-family:'Poppins',sans-serif;
+  cursor:pointer;box-shadow:0 4px 14px rgba(27,94,32,.3);
+  transition:all .2s;
+}
+.cs-print-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(27,94,32,.4);}
+
+/* Error box */
+.cs-err-inline{
+  background:rgba(229,62,62,.08);border:1px solid rgba(229,62,62,.25);
+  border-radius:9px;padding:8px 13px;font-size:.73rem;color:#c62828;
+  margin-top:8px;display:none;
+}
+
+/* ── A4 PRINT STYLES ── */
+@media print{
+  body > *:not(#cs-print-area){ display:none !important; }
+  #cs-print-area{
+    display:block !important;
+    position:fixed;inset:0;z-index:999999;background:#fff;
+  }
+  @page{
+    size:A4 portrait;
+    margin:15mm 15mm 15mm 15mm;
+  }
+  #cs-print-area *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+}
+#cs-print-area{ display:none; }
+</style>
+
+<!-- Customer Status Overlay HTML -->
+<div id="cs-overlay">
+  <div id="cs-modal">
+
+    <!-- Banner -->
+    <div id="cs-banner">
+      <div style="display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:52px;height:52px;background:rgba(255,255,255,.14);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;border:2px solid rgba(255,255,255,.28);flex-shrink:0;">🌾</div>
+          <div>
+            <div style="font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800;color:#fff;line-height:1.2;">PM KISAN SAMMAN NIDHI</div>
+            <div style="font-size:.72rem;color:rgba(255,255,255,.75);margin-top:3px;">Application Status Check | आवेदन स्थिति जांच</div>
+          </div>
+        </div>
+        <button onclick="closeCustomerStatus()" style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s;"
+          onmouseover="this.style.background='rgba(229,62,62,.4)'" onmouseout="this.style.background='rgba(255,255,255,.14)'">✕</button>
+      </div>
+    </div>
+    <div class="cs-saffron-bar"></div>
+
+    <!-- Body -->
+    <div id="cs-body">
+
+      <!-- Search Card -->
+      <div class="cs-search-card">
+        <h3><span style="background:#e8f5e9;border-radius:9px;padding:5px 10px;font-size:.95rem;">🔍</span> Registration Number se Status Check Karein</h3>
+
+        <!-- My Reg Numbers (auto-loaded) -->
+        <div id="cs-my-regs" style="display:none;margin-bottom:12px;">
+          <div style="font-size:.72rem;color:#78909c;font-weight:600;margin-bottom:7px;display:flex;align-items:center;gap:5px;">
+            <span>🆔</span> Aapke Registered Numbers — tap karke check karein:
+          </div>
+          <div class="cs-chips-wrap" id="cs-chips-container"></div>
+        </div>
+
+        <div class="cs-input-row">
+          <input type="text" id="cs-reg-input" placeholder="Apna Registration Number dalein..."
+            onkeydown="if(event.key==='Enter') csCheckStatus()" />
+          <button class="cs-btn-check" onclick="csCheckStatus()">✅ Check</button>
+        </div>
+        <div class="cs-err-inline" id="cs-input-err">Registration number daalna zaroori hai</div>
+        <p style="font-size:.68rem;color:#78909c;padding-left:2px;margin-top:6px;">* Apna Registration Number dalein aur Check dabayein</p>
+      </div>
+
+      <!-- Result Area -->
+      <div id="cs-result"></div>
+
+      <!-- Info Box -->
+      <div style="background:#e8f5e9;border:1px dashed #a5d6a7;border-radius:12px;padding:14px 16px;font-size:.75rem;color:#2d5a2d;line-height:2;">
+        📋 <strong>Status ka matlab:</strong><br>
+        🟠 <strong>Pending</strong> — Aapka application process mein hai<br>
+        🟢 <strong>Approved</strong> — Badhai ho! Aapka application approve ho gaya<br>
+        🔴 <strong>Rejected</strong> — Aapka application reject hua, karyalay se sampark karein
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- A4 Print Area (hidden, shown only during print) -->
+<div id="cs-print-area"></div>
+
+<script type="module">
+// ── Customer Status: Firebase (PM KISAN DB) ──
+import { initializeApp as initCSApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getDatabase as getCSDB, ref as csRef, get as csGet } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
+
+const csFirebaseConfig = {
+  apiKey: "AIzaSyCzlnSTBslBvU6sWyU-cEmNR-7zuo5z1JI",
+  authDomain: "pmkisan-1b4e3.firebaseapp.com",
+  databaseURL: "https://pmkisan-1b4e3-default-rtdb.firebaseio.com",
+  projectId: "pmkisan-1b4e3",
+  storageBucket: "pmkisan-1b4e3.firebasestorage.app",
+  messagingSenderId: "753615038345",
+  appId: "1:753615038345:web:860971a1969bb4883e2358"
+};
+
+let _csApp, _csDb;
+try {
+  _csApp = initCSApp(csFirebaseConfig, 'cs-app');
+  _csDb  = getCSDB(_csApp);
+} catch(e) {
+  // Already initialized
+  _csApp = initCSApp(csFirebaseConfig, 'cs-app-'+Date.now());
+  _csDb  = getCSDB(_csApp);
+}
+
+// ── Helpers ──
+function csGetStatusCls(s){
+  s = (s||'').toLowerCase();
+  if(s.includes('approved')) return 'approved';
+  if(s.includes('rejected')) return 'rejected';
+  if(s.includes('pending'))  return 'pending';
+  return 'unknown';
+}
+
+function csVal(val){
+  return (val && String(val).trim()) ? String(val).trim() : '<span class="cs-field-val empty">—</span>';
+}
+
+// ── Open / Close ──
+window.openCustomerStatus = function(){
+  document.getElementById('cs-overlay').classList.add('open');
+  document.getElementById('cs-result').innerHTML = '';
+  document.getElementById('cs-reg-input').value = '';
+  document.getElementById('cs-input-err').style.display = 'none';
+
+  // Auto-load user's own registration numbers from main DB
+  try {
+    const sess = window.getSession ? window.getSession() : JSON.parse(localStorage.getItem('awo_sess')||'null');
+    if(sess && sess.mobile){
+      // Get submissions for this user from main Firebase
+      const mainDb = window.db;
+      if(mainDb){
+        mainDb.ref('submissions').orderByChild('userMobile').equalTo(sess.mobile).once('value').then(snap=>{
+          const data = snap.val();
+          const chipsContainer = document.getElementById('cs-chips-container');
+          const myRegsDiv = document.getElementById('cs-my-regs');
+          if(data && chipsContainer){
+            const subs = Object.values(data);
+            const regsWithNos = subs.filter(s => s.regno && s.regno.trim());
+            if(regsWithNos.length > 0){
+              myRegsDiv.style.display = 'block';
+              chipsContainer.innerHTML = regsWithNos.map(s => `
+                <button class="cs-chip" onclick="csLoadReg('${s.regno}')">
+                  <span>🆔</span>
+                  <span>${s.regno}</span>
+                  <span class="cs-chip-lbl">${s.name||''}</span>
+                </button>
+              `).join('');
+            } else {
+              myRegsDiv.style.display = 'none';
+            }
+          } else {
+            if(myRegsDiv) myRegsDiv.style.display = 'none';
+          }
+        }).catch(()=>{});
+      }
+    }
+  } catch(e){}
+};
+
+window.closeCustomerStatus = function(){
+  document.getElementById('cs-overlay').classList.remove('open');
+};
+
+// Click outside to close
+document.getElementById('cs-overlay').addEventListener('click', function(e){
+  if(e.target === this) window.closeCustomerStatus();
+});
+
+// Load a reg number from chip click
+window.csLoadReg = function(regNo){
+  document.getElementById('cs-reg-input').value = regNo;
+  window.csCheckStatus();
+};
+
+// ── Main Check Function ──
+window.csCheckStatus = async function(){
+  const regNo = document.getElementById('cs-reg-input').value.trim().toUpperCase();
+  const resultDiv = document.getElementById('cs-result');
+  const errEl = document.getElementById('cs-input-err');
+
+  if(!regNo){
+    errEl.style.display = 'block';
+    document.getElementById('cs-reg-input').style.borderColor = '#e53935';
+    setTimeout(()=>{
+      document.getElementById('cs-reg-input').style.borderColor = '';
+      errEl.style.display = 'none';
+    }, 1800);
+    return;
+  }
+  errEl.style.display = 'none';
+
+  resultDiv.innerHTML = `<div class="cs-loading"><div class="cs-spin">⏳</div><br><br><span style="font-family:'Poppins',sans-serif;font-size:.84rem;color:#78909c;">Dhundh raha hai...</span></div>`;
+
+  try {
+    const key = regNo.replace(/[.#$[\]]/g, '_');
+    const snapshot = await csGet(csRef(_csDb, 'farmers/' + key));
+
+    if(!snapshot.exists()){
+      resultDiv.innerHTML = `
+        <div class="cs-result-wrap">
+          <div class="cs-error-card">
+            <div class="cs-error-icon">🔍</div>
+            <h3>Record Nahi Mila</h3>
+            <p>Registration Number <strong>${regNo}</strong> ka koi record nahi mila.<br>
+            Sahi number dalein ya karyalay se sampark karein.</p>
+          </div>
+        </div>`;
+      return;
+    }
+
+    const f = snapshot.val();
+    const cls = csGetStatusCls(f.status);
+    const icons  = { approved:'✅', rejected:'❌', pending:'⏳', unknown:'📋' };
+    const labels = { approved:'APPROVED', rejected:'REJECTED', pending:'PENDING', unknown: f.status||'UNKNOWN' };
+    const remark = f.remark && f.remark.trim();
+
+    const resultHTML = `
+      <div class="cs-result-wrap" style="margin-bottom:16px;">
+        <div style="background:#fff;border:1px solid #d0e8d0;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(30,90,30,.1);">
+          <div class="cs-rc-top ${cls}">
+            <div>
+              <div class="cs-rc-name ${cls}">${csVal(f.name)}</div>
+              <div class="cs-rc-reg">🆔 ${f.reg||regNo}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;">
+              <div class="cs-badge-icon">${icons[cls]}</div>
+              <div class="cs-badge-label ${cls}">${labels[cls]}</div>
+            </div>
+          </div>
+          <div class="cs-divider"></div>
+          <div class="cs-grid">
+            <div class="cs-field"><div class="cs-field-lbl">👴 Pita ka Naam</div><div class="cs-field-val">${csVal(f.father)}</div></div>
+            <div class="cs-field"><div class="cs-field-lbl">📱 Mobile No</div><div class="cs-field-val">${csVal(f.mobile)}</div></div>
+            <div class="cs-field"><div class="cs-field-lbl">🏘️ Village</div><div class="cs-field-val">${csVal(f.village)}</div></div>
+            <div class="cs-field"><div class="cs-field-lbl">📍 Sub District</div><div class="cs-field-val">${csVal(f.sub)}</div></div>
+            <div class="cs-field"><div class="cs-field-lbl">🏙️ District</div><div class="cs-field-val">${csVal(f.dist)}</div></div>
+            <div class="cs-field"><div class="cs-field-lbl">🗺️ State</div><div class="cs-field-val">${csVal(f.state)}</div></div>
+            <div class="cs-field"><div class="cs-field-lbl">💰 Payment</div><div class="cs-field-val">${csVal(f.payment)}</div></div>
+            <div class="cs-field"><div class="cs-field-lbl">📊 Status</div><div class="cs-field-val"><span class="cs-badge-label ${cls}" style="font-size:.7rem;">${labels[cls]}</span></div></div>
+          </div>
+          ${remark ? `<div class="cs-remark"><div class="cs-field-lbl" style="margin-bottom:5px;">📝 Remark</div><div class="cs-field-val" style="font-size:.84rem;font-weight:500;color:#5d4037;">${remark}</div></div>` : '<div style="height:6px"></div>'}
+          ${f.updated ? `<div class="cs-updated">🕐 Last updated: ${f.updated}</div>` : ''}
+        </div>
+
+        <!-- Print Button -->
+        <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+          <button class="cs-print-btn" onclick="csPrintStatus(${JSON.stringify({f, cls, labels, icons, regNo}).replace(/</g,'&lt;').replace(/>/g,'&gt;')})">
+            🖨️ Print / Download (A4)
+          </button>
+        </div>
+      </div>`;
+
+    resultDiv.innerHTML = resultHTML;
+
+    // Store last result for print
+    window._csLastResult = { f, cls, labels, icons, regNo };
+
+    // Re-render print button with proper event
+    resultDiv.querySelector('.cs-print-btn').onclick = function(){
+      csPrintStatus(window._csLastResult);
+    };
+
+  } catch(e) {
+    resultDiv.innerHTML = `
+      <div class="cs-result-wrap">
+        <div class="cs-error-card">
+          <div class="cs-error-icon">⚠️</div>
+          <h3>Error Aaya</h3>
+          <p>Data load nahi ho saka. Internet check karein aur dobara try karein.</p>
+        </div>
+      </div>`;
+  }
+};
+
+// ── A4 PRINT FUNCTION ──
+window.csPrintStatus = function(data){
+  const { f, cls, labels, icons, regNo } = data;
+  const remark = f.remark && f.remark.trim();
+  const now = new Date().toLocaleString('hi-IN');
+
+  // Operator name from session
+  const sess = window.getSession ? window.getSession() : JSON.parse(localStorage.getItem('awo_sess')||'null');
+  const operatorName = (sess && sess.name) ? sess.name : 'Operator';
+  const operatorMob  = (sess && sess.mobile) ? sess.mobile : '';
+
+  const statusColors = {
+    approved: { bg:'#e8f5e9', border:'#2e7d32', text:'#1b5e20', badge:'#2e7d32' },
+    pending:  { bg:'#fff3e0', border:'#e65100', text:'#bf360c', badge:'#ff9800' },
+    rejected: { bg:'#ffebee', border:'#c62828', text:'#b71c1c', badge:'#c62828' },
+    unknown:  { bg:'#e3f2fd', border:'#1565c0', text:'#0d47a1', badge:'#1565c0' },
+  };
+  const sc = statusColors[cls] || statusColors.unknown;
+
+  const v = val => (val && String(val).trim()) ? String(val).trim() : '—';
+
+  const printContent = `<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"/>
+<title>PM KISAN Status — ${regNo}</title>
+<style>
+  @page { size:A4 portrait; margin:15mm; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:'Noto Sans',Arial,sans-serif; background:#fff; color:#1a2614; font-size:13px; }
+  .page-wrap{ max-width:180mm; margin:0 auto; }
+
+  /* Header */
+  .print-header{
+    background:linear-gradient(135deg,#0d3b1e,#1b5e20);
+    padding:16px 20px 14px; border-radius:10px 10px 0 0;
+    display:flex; align-items:center; gap:14px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .print-emblem{
+    width:58px; height:58px; border-radius:50%;
+    background:rgba(255,255,255,.15); border:2px solid rgba(255,255,255,.3);
+    display:flex; align-items:center; justify-content:center; font-size:28px; flex-shrink:0;
+  }
+  .print-title{ color:#fff; }
+  .print-title h1{ font-size:16px; font-weight:800; }
+  .print-title p{ font-size:10px; color:rgba(255,255,255,.8); margin-top:3px; }
+  .saffron-bar{ height:5px; background:linear-gradient(90deg,#e65100,#f9a825,#e65100); -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+
+  /* Status Top */
+  .status-top{
+    padding:18px 22px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    background:${sc.bg};
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .farmer-name{ font-size:18px; font-weight:800; color:${sc.text}; }
+  .farmer-reg{ font-size:10px; color:#78909c; margin-top:3px; }
+  .status-badge-big{ text-align:center; }
+  .status-icon{ font-size:30px; }
+  .status-label{
+    display:inline-block; padding:4px 12px; border-radius:20px;
+    font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase;
+    background:${sc.badge}; color:#fff; margin-top:4px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+
+  /* Info grid */
+  .info-grid{ display:grid; grid-template-columns:1fr 1fr; border:1px solid #e0e0e0; }
+  .info-cell{ padding:10px 16px; border-bottom:1px solid #f0f0f0; }
+  .info-cell:nth-child(odd){ border-right:1px solid #f0f0f0; }
+  .info-lbl{ font-size:9px; color:#78909c; text-transform:uppercase; letter-spacing:.6px; margin-bottom:3px; }
+  .info-val{ font-size:13px; font-weight:600; }
+
+  .remark-box{
+    margin:0; padding:12px 16px;
+    background:#fffde7; border-left:4px solid #f9a825;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+
+  /* Footer */
+  .print-footer{
+    margin-top:14px; padding:10px 16px; background:#f4f6f0; border-radius:0 0 10px 10px;
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;
+    font-size:9px; color:#78909c;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .portal-seal{
+    display:flex; align-items:center; gap:6px;
+    background:#1b5e20; color:#fff; padding:5px 12px; border-radius:20px;
+    font-size:9px; font-weight:700;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .watermark{
+    position:fixed; bottom:40mm; left:50%; transform:translateX(-50%) rotate(-35deg);
+    font-size:52px; font-weight:900; color:rgba(27,94,32,.06); white-space:nowrap;
+    pointer-events:none; z-index:0; letter-spacing:8px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+  <div class="print-header">
+    <div class="print-emblem">🌾</div>
+    <div class="print-title">
+      <h1>PM KISAN SAMMAN NIDHI</h1>
+      <p>Application Status Report &nbsp;|&nbsp; आवेदन स्थिति रिपोर्ट</p>
+      <p style="margin-top:2px;color:rgba(255,255,255,.6)">All Work Online — CSC Authorized Portal</p>
+    </div>
+  </div>
+  <div class="saffron-bar"></div>
+
+  <div class="status-top">
+    <div>
+      <div class="farmer-name">${v(f.name)}</div>
+      <div class="farmer-reg">🆔 ${f.reg || regNo}</div>
+    </div>
+    <div class="status-badge-big">
+      <div class="status-icon">${icons[cls]}</div>
+      <div class="status-label">${labels[cls]}</div>
+    </div>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-cell"><div class="info-lbl">👴 Pita ka Naam</div><div class="info-val">${v(f.father)}</div></div>
+    <div class="info-cell"><div class="info-lbl">📱 Mobile No</div><div class="info-val">${v(f.mobile)}</div></div>
+    <div class="info-cell"><div class="info-lbl">🏘️ Village</div><div class="info-val">${v(f.village)}</div></div>
+    <div class="info-cell"><div class="info-lbl">📍 Sub District</div><div class="info-val">${v(f.sub)}</div></div>
+    <div class="info-cell"><div class="info-lbl">🏙️ District</div><div class="info-val">${v(f.dist)}</div></div>
+    <div class="info-cell"><div class="info-lbl">🗺️ State</div><div class="info-val">${v(f.state)}</div></div>
+    <div class="info-cell"><div class="info-lbl">💰 Payment</div><div class="info-val">${v(f.payment)}</div></div>
+    <div class="info-cell"><div class="info-lbl">📊 Application Status</div><div class="info-val" style="color:${sc.text};font-weight:800;">${labels[cls]}</div></div>
+  </div>
+
+  ${remark ? `<div class="remark-box"><div class="info-lbl" style="margin-bottom:5px;">📝 Remark / Tippani</div><div style="font-size:13px;font-weight:500;color:#5d4037;">${remark}</div></div>` : ''}
+  ${f.updated ? `<div style="padding:6px 16px;font-size:9px;color:#78909c;text-align:right;background:#fafafa;">🕐 Last Updated: ${f.updated}</div>` : ''}
+
+  <div class="print-footer">
+    <div>
+      <div>🖨️ Print Date: ${now}</div>
+      <div style="margin-top:3px;">Registration No: <strong>${f.reg || regNo}</strong></div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:10px;font-weight:800;color:#0d4a1f;margin-bottom:5px;letter-spacing:.3px;">
+        👤 ${operatorName}${operatorMob ? ' &nbsp;|&nbsp; 📱 '+operatorMob : ''}
+      </div>
+      <div class="portal-seal">✅ CSC Authorized</div>
+    </div>
+  </div>
+</div>
+<div class="watermark">PM KISAN</div>
+</body>
+</html>`;
+
+  // Open print window
+  const pw = window.open('', '_blank', 'width=794,height=1123');
+  if(!pw){ alert('Popup block hai. Browser mein popup allow karein.'); return; }
+  pw.document.write(printContent);
+  pw.document.close();
+  pw.focus();
+  setTimeout(()=>{ pw.print(); }, 600);
+};
+
+</script>
+
+</body>
+</html>

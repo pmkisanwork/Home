@@ -1849,6 +1849,8 @@ async function fpSendOtp(){
 
   showLoading('OTP bheja ja raha hai...');
   try{
+    // Password reset - hamesha Gmail service
+    // Password reset template
     await emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {
       email:      email,
       otp_code:   _fpOtpCode,
@@ -1918,6 +1920,8 @@ async function fpResendOtp(){
   document.getElementById('fp-resend-btn').disabled=true;
   _fpOtpCode=generateOtp();
   try{
+    // Password reset - hamesha Gmail service
+    // Password reset template
     await emailjs.send(EJS_SERVICE_ID, EJS_TEMPLATE_ID, {
       email: _fpOtpEmail, otp_code: _fpOtpCode,
       admin_name: _fpOtpRole==='admin'?'Shivam':'User', mobile: _fpOtpMobile
@@ -2037,10 +2041,11 @@ function showStatusInfo(){
     window.scrollTo({top:0,behavior:'smooth'});
   }
 }
-const EJS_PUBLIC_KEY       = 'oxyRIaQ-IoizhZPAG';
-const EJS_SERVICE_ID       = 'service_0odznsj';
-const EJS_TEMPLATE_ID      = 'template_00s6fhl';       // Forgot Password (user + admin)
-const EJS_ADMIN_TEMPLATE_ID= 'template_zegeumr';       // Admin Login OTP
+const EJS_PUBLIC_KEY       = 'WOUFfoXIKmV4WaRBJ';
+const EJS_SERVICE_ID       = 'service_jzgwcq7';
+const EJS_ADMIN_SERVICE_ID = 'service_jzgwcq7';        // Admin Login OTP Service
+const EJS_TEMPLATE_ID      = 'template_ocudq3s';       // Password Reset (user + admin)
+const EJS_ADMIN_TEMPLATE_ID= 'template_uz7y95i';       // Admin Login OTP
 const ADMIN_EMAIL          = 'shivamgupta18@zohomail.in';
 emailjs.init({publicKey: EJS_PUBLIC_KEY});
 
@@ -2059,10 +2064,11 @@ async function sendOtp(mobile, targetEmail){
   // targetEmail: user ki apni email ya admin email
   const emailTo = targetEmail || ADMIN_EMAIL;
   const recipientName = targetEmail ? (_otpPending && _otpPending.name ? _otpPending.name : 'User') : 'Shivam';
-  // Admin login OTP ke liye alag template use karo
+  // Admin login OTP ke liye alag template aur service use karo
   const templateId = (!targetEmail) ? EJS_ADMIN_TEMPLATE_ID : EJS_TEMPLATE_ID;
+  const serviceId  = (!targetEmail) ? EJS_ADMIN_SERVICE_ID  : EJS_SERVICE_ID;
   try{
-    await emailjs.send(EJS_SERVICE_ID, templateId, {
+    await emailjs.send(serviceId, templateId, {
       email:      emailTo,
       otp_code:   _otpCode,
       admin_name: recipientName,

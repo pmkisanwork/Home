@@ -2798,11 +2798,23 @@ async function doRegister(){
 }
 
 // ── SHOW USER APP ──
-function showUserApp(user){
+async function showUserApp(user){
   showPage('form-page');
   loadFormQR();
-  const dp = localStorage.getItem('user_dp_'+user.mobile);
-  applyUserProfile(user.name||'', user.mobile||'', dp);
+  // First apply with localStorage DP (fast)
+  const localDp = localStorage.getItem('user_dp_'+user.mobile);
+  applyUserProfile(user.name||'', user.mobile||'', localDp);
+  // Then load from Firebase (cross-browser fix) if no local DP
+  if(!localDp){
+    try{
+      const snap = await db.ref('users/'+user.mobile+'/dp').once('value');
+      const fbDp = snap.val();
+      if(fbDp){
+        localStorage.setItem('user_dp_'+user.mobile, fbDp);
+        applyUserProfile(user.name||'', user.mobile||'', fbDp);
+      }
+    } catch(e){}
+  }
   // Show offer popup after short delay
   setTimeout(()=>document.getElementById('offer-popup').classList.add('show'), 1200);
   // Start auto logout timer
@@ -2840,6 +2852,7 @@ function showAdminDash(){
 function toggleUdd(){document.getElementById('u-dd').classList.toggle('open');}
 function toggleUdd2(){document.getElementById('u-dd2').classList.toggle('open');}
 document.addEventListener('click',function(e){
+  if(typeof _upCameraOpen !== 'undefined' && _upCameraOpen) return; // camera open hai to close mat karo
   ['u-dd','u-dd2'].forEach(id=>{
     const d=document.getElementById(id);
     if(d&&!d.parentElement.contains(e.target))d.classList.remove('open');
@@ -2933,6 +2946,7 @@ function toggleAdminMenu(){
   document.getElementById('admin-dd').classList.toggle('open');
 }
 document.addEventListener('click',function(e){
+  if(typeof _upCameraOpen !== 'undefined' && _upCameraOpen) return; // camera open hai to close mat karo
   ['u-dd','u-dd2','admin-dd'].forEach(id=>{
     const d=document.getElementById(id);
     if(d&&!d.parentElement.contains(e.target))d.classList.remove('open');
@@ -2995,7 +3009,7 @@ async function doChangePass(){
 // ══════════════════════════════════════════
 let _upDpBase64 = null; // temp storage for selected DP
 
-function openUserProfile(){
+async function openUserProfile(){
   const s = getSession();
   document.getElementById('up-name').value = s ? s.name||'' : '';
   document.getElementById('up-mobile').value = s ? s.mobile||'' : '';
@@ -3016,8 +3030,15 @@ function openUserProfile(){
   }
   document.getElementById('up-err').style.display='none';
   _upDpBase64 = null;
-  // Load saved DP
-  const savedDp = localStorage.getItem('user_dp_'+( s ? s.mobile : ''));
+  // Load saved DP — first localStorage, then Firebase (cross-browser fix)
+  let savedDp = localStorage.getItem('user_dp_'+( s ? s.mobile : ''));
+  if(!savedDp && s && s.mobile){
+    try{
+      const snap = await db.ref('users/'+s.mobile+'/dp').once('value');
+      savedDp = snap.val() || null;
+      if(savedDp) localStorage.setItem('user_dp_'+s.mobile, savedDp);
+    } catch(e){}
+  }
   const prev = document.getElementById('up-dp-preview');
   if(savedDp){
     prev.innerHTML='';
@@ -3044,15 +3065,174 @@ function upDpSelected(inp){
   const reader = new FileReader();
   reader.onload = function(e){
     _upDpBase64 = e.target.result;
-    const prev = document.getElementById('up-dp-preview');
-    prev.innerHTML='';
-    prev.style.background='none';
-    const img = document.createElement('img');
-    img.src = _upDpBase64;
-    img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%';
-    prev.appendChild(img);
+    _upShowDpPreview(_upDpBase64);
   };
   reader.readAsDataURL(file);
+}
+function _upShowDpPreview(dataUrl){
+  const prev = document.getElementById('up-dp-preview');
+  prev.innerHTML='';
+  prev.style.background='none';
+  const img = document.createElement('img');
+  img.src = dataUrl;
+  img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%';
+  prev.appendChild(img);
+}
+
+// ── CAMERA (LIVE SELFIE) — Dynamic DOM injection ──
+let _upCameraStream = null;
+let _upCameraOpen   = false;
+
+function upOpenCamera(evt){
+  if(evt){ evt.stopPropagation(); evt.preventDefault(); }
+  _upCameraOpen = true;
+
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    alert('Camera support nahi hai. HTTPS pe kholein ya Chrome use karein.');
+    _upCameraOpen = false;
+    return;
+  }
+
+  // Purana overlay hata do agar already hai
+  var old = document.getElementById('up-camera-overlay');
+  if(old) old.parentNode.removeChild(old);
+
+  // Naya overlay directly document.body mein inject karo
+  var overlay = document.createElement('div');
+  overlay.id = 'up-camera-overlay';
+  overlay.style.cssText = [
+    'position:fixed','top:0','left:0','width:100%','height:100%',
+    'background:rgba(0,0,0,0.96)','z-index:2147483647',
+    'display:flex','flex-direction:column',
+    'align-items:center','justify-content:center',
+    'gap:14px','padding:20px','box-sizing:border-box'
+  ].join(';');
+  overlay.onclick = function(e){ e.stopPropagation(); };
+
+  var title = document.createElement('div');
+  title.style.cssText = "font-family:'Baloo 2',cursive;font-size:1.2rem;font-weight:800;color:#fff";
+  title.textContent = '📸 Live Selfie Khichein';
+
+  var status = document.createElement('div');
+  status.id = 'up-camera-status';
+  status.style.cssText = 'font-size:.75rem;color:rgba(255,255,255,.6);margin-top:-6px';
+  status.textContent = 'Camera permission maanga ja raha hai...';
+
+  var video = document.createElement('video');
+  video.id = 'up-camera-video';
+  video.autoplay = true;
+  video.playsInline = true;
+  video.muted = true;
+  video.setAttribute('playsinline','');
+  video.style.cssText = [
+    'width:min(270px,70vw)','height:min(270px,70vw)',
+    'border-radius:50%','object-fit:cover',
+    'border:4px solid #25a84a','background:#333','display:block'
+  ].join(';');
+
+  var canvas = document.createElement('canvas');
+  canvas.id = 'up-camera-canvas';
+  canvas.style.display = 'none';
+
+  var btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:12px;margin-top:6px';
+  btnRow.onclick = function(e){ e.stopPropagation(); };
+
+  var btnCapture = document.createElement('button');
+  btnCapture.textContent = '✅ Photo Lo';
+  btnCapture.style.cssText = [
+    'background:linear-gradient(135deg,#1a7a35,#25a84a)',
+    'border:none','color:#fff',
+    "font-family:'Poppins',sans-serif",
+    'font-size:.9rem','font-weight:700',
+    'padding:13px 30px','border-radius:25px','cursor:pointer',
+    'box-shadow:0 4px 16px rgba(37,168,74,.4)'
+  ].join(';');
+  btnCapture.onclick = function(e){ e.stopPropagation(); upCapturePhoto(); };
+
+  var btnClose = document.createElement('button');
+  btnClose.textContent = '✕ Band Karein';
+  btnClose.style.cssText = [
+    'background:rgba(255,82,82,.2)',
+    'border:1.5px solid rgba(255,82,82,.5)',
+    'color:#ff6b6b',
+    "font-family:'Poppins',sans-serif",
+    'font-size:.9rem','font-weight:700',
+    'padding:13px 24px','border-radius:25px','cursor:pointer'
+  ].join(';');
+  btnClose.onclick = function(e){ e.stopPropagation(); upCloseCamera(); };
+
+  var hint = document.createElement('div');
+  hint.style.cssText = 'font-size:.68rem;color:rgba(255,255,255,.35);text-align:center;max-width:270px';
+  hint.textContent = 'Agar camera nahi aaya to browser mein permission allow karein (address bar mein camera icon)';
+
+  btnRow.appendChild(btnCapture);
+  btnRow.appendChild(btnClose);
+  overlay.appendChild(title);
+  overlay.appendChild(status);
+  overlay.appendChild(video);
+  overlay.appendChild(canvas);
+  overlay.appendChild(btnRow);
+  overlay.appendChild(hint);
+
+  // BODY mein seedha append — koi parent stacking context nahi
+  document.body.appendChild(overlay);
+
+  // Camera start karo
+  var constraints = { video: { facingMode: 'user' }, audio: false };
+  navigator.mediaDevices.getUserMedia(constraints)
+    .catch(function(){ return navigator.mediaDevices.getUserMedia({ video: true, audio: false }); })
+    .then(function(stream){
+      _upCameraStream = stream;
+      video.srcObject = stream;
+      video.play().catch(function(){});
+      status.textContent = '✅ Camera ready — Photo Lo button dabao!';
+    })
+    .catch(function(err){
+      _upCameraOpen = false;
+      if(overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      if(err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'){
+        toast('❌ Camera permission deny hua. Browser address bar mein camera icon pe click karke Allow karein.','fail');
+      } else if(err.name === 'NotFoundError'){
+        toast('❌ Device mein camera nahi mila.','fail');
+      } else {
+        toast('❌ Camera error: ' + (err.message||err.name),'fail');
+      }
+    });
+}
+
+function upCloseCamera(){
+  _upCameraOpen = false;
+  if(_upCameraStream){
+    _upCameraStream.getTracks().forEach(function(t){ t.stop(); });
+    _upCameraStream = null;
+  }
+  var overlay = document.getElementById('up-camera-overlay');
+  if(overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+}
+
+function upCapturePhoto(){
+  var video  = document.getElementById('up-camera-video');
+  var canvas = document.getElementById('up-camera-canvas');
+  if(!video || !video.videoWidth || video.videoWidth === 0){
+    var status = document.getElementById('up-camera-status');
+    if(status) status.textContent = '⚠️ Camera abhi taiyaar nahi, 1-2 second ruko...';
+    return;
+  }
+  var size = 500;
+  canvas.width = size; canvas.height = size;
+  var ctx = canvas.getContext('2d');
+  var vw = video.videoWidth, vh = video.videoHeight;
+  var side = Math.min(vw, vh);
+  var sx = (vw - side) / 2, sy = (vh - side) / 2;
+  ctx.save();
+  ctx.translate(size, 0); ctx.scale(-1, 1);
+  ctx.drawImage(video, sx, sy, side, side, 0, 0, size, size);
+  ctx.restore();
+  _upDpBase64 = canvas.toDataURL('image/jpeg', 0.90);
+  _upShowDpPreview(_upDpBase64);
+  upCloseCamera();
+  toast('✅ Selfie li gayi! Ab Profile Save Karein dabao.','ok');
 }
 async function saveUserProfile(){
   const name   = document.getElementById('up-name').value.trim();
@@ -3075,12 +3255,12 @@ async function saveUserProfile(){
   }
   if(!ok) return;
   const s = getSession();
-  // Save DP
+  // Save DP to localStorage for fast local access
   if(_upDpBase64){
     localStorage.setItem('user_dp_'+mobile, _upDpBase64);
     if(s && s.mobile !== mobile) localStorage.removeItem('user_dp_'+s.mobile);
   }
-  // Update Firebase user data
+  // Update Firebase user data (including DP so it works across browsers)
   showLoading('Profile save ho raha hai...');
   try{
     if(s && !s.isAdmin){
@@ -3089,11 +3269,14 @@ async function saveUserProfile(){
       const snap = await userRef.once('value');
       if(snap.exists()){
         const userData = snap.val();
+        const dpToSave = _upDpBase64 || localStorage.getItem('user_dp_'+mobile) || userData.dp || null;
         if(mobile !== oldMob){
-          await db.ref('users/'+mobile).set({...userData, name, mobile, email});
+          await db.ref('users/'+mobile).set({...userData, name, mobile, email, dp: dpToSave});
           await userRef.remove();
         } else {
-          await userRef.update({name, mobile, email});
+          const updateData = {name, mobile, email};
+          if(dpToSave) updateData.dp = dpToSave;
+          await userRef.update(updateData);
         }
       }
     }
@@ -3106,7 +3289,8 @@ async function saveUserProfile(){
     document.getElementById('up-email-current').style.display = 'block';
     document.getElementById('up-email-none').style.display    = 'none';
     // Update all UI elements
-    applyUserProfile(name, mobile, _upDpBase64 || localStorage.getItem('user_dp_'+mobile));
+    const finalDp = _upDpBase64 || localStorage.getItem('user_dp_'+mobile);
+    applyUserProfile(name, mobile, finalDp);
     closeUserProfile();
     toast('✅ Profile update ho gaya!','ok');
   } catch(e){ hideLoading(); toast('❌ Error: '+e.message,'fail'); }
@@ -3237,7 +3421,7 @@ function applyAdminProfile(name, mobile, dp){
   if(ddMob) ddMob.textContent='📱 '+mobile;
 }
 // Load saved profiles on page load
-function loadSavedProfiles(){
+async function loadSavedProfiles(){
   const s=getSession();
   if(!s) return;
   if(s.isAdmin){
@@ -3246,8 +3430,19 @@ function loadSavedProfiles(){
     const mob=s.mobile||'8960947991';
     applyAdminProfile(nm, mob, dp);
   } else {
-    const dp=localStorage.getItem('user_dp_'+s.mobile);
+    let dp=localStorage.getItem('user_dp_'+s.mobile);
     applyUserProfile(s.name||'', s.mobile||'', dp);
+    // Cross-browser fix: load from Firebase if localStorage is empty
+    if(!dp){
+      try{
+        const snap = await db.ref('users/'+s.mobile+'/dp').once('value');
+        const fbDp = snap.val();
+        if(fbDp){
+          localStorage.setItem('user_dp_'+s.mobile, fbDp);
+          applyUserProfile(s.name||'', s.mobile||'', fbDp);
+        }
+      } catch(e){}
+    }
   }
 }
 
@@ -3398,6 +3593,7 @@ function toggleNotifPanel(){
 
 // Close notif panel on outside click
 document.addEventListener('click', function(e){
+  if(typeof _upCameraOpen !== 'undefined' && _upCameraOpen) return;
   const bell = document.getElementById('notif-bell-wrap');
   if(bell && !bell.contains(e.target)){
     _notifPanelOpen = false;
@@ -5873,12 +6069,16 @@ async function pmkCheckStatus(){
     </div>
     <!-- DP Upload Circle -->
     <div style="padding:24px 26px 0;text-align:center">
-      <div style="position:relative;display:inline-block;margin-bottom:16px">
-        <div id="up-dp-preview" onclick="document.getElementById('up-dp-input').click()" style="width:90px;height:90px;border-radius:50%;border:3px solid #25a84a;overflow:hidden;cursor:pointer;margin:0 auto;background:linear-gradient(135deg,#1a7a35,#25a84a);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:#fff;transition:all .2s;box-shadow:0 4px 16px rgba(37,168,74,.3)" title="Gallery se DP chunein">U</div>
-        <div onclick="document.getElementById('up-dp-input').click()" style="position:absolute;bottom:2px;right:2px;width:26px;height:26px;background:#25a84a;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3);font-size:13px;border:2px solid #fff">📷</div>
+      <div style="position:relative;display:inline-block;margin-bottom:12px">
+        <div id="up-dp-preview" style="width:90px;height:90px;border-radius:50%;border:3px solid #25a84a;overflow:hidden;margin:0 auto;background:linear-gradient(135deg,#1a7a35,#25a84a);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:#fff;box-shadow:0 4px 16px rgba(37,168,74,.3)">U</div>
         <input id="up-dp-input" type="file" accept="image/*" style="display:none" onchange="upDpSelected(this)">
       </div>
-      <div style="font-size:.72rem;color:#7a9a7a;margin-bottom:4px">Tap karein gallery se photo chunne ke liye</div>
+      <!-- Camera / Gallery Buttons -->
+      <div style="display:flex;gap:8px;justify-content:center;margin-bottom:4px">
+        <button type="button" onclick="upOpenCamera(event)" style="display:flex;align-items:center;gap:5px;background:linear-gradient(135deg,#1a7a35,#25a84a);border:none;color:#fff;font-family:'Poppins',sans-serif;font-size:.74rem;font-weight:700;padding:7px 14px;border-radius:20px;cursor:pointer;box-shadow:0 3px 10px rgba(37,168,74,.3)">📸 Live Selfie</button>
+        <button type="button" onclick="document.getElementById('up-dp-input').click()" style="display:flex;align-items:center;gap:5px;background:rgba(37,168,74,.1);border:1.5px solid rgba(37,168,74,.3);color:#1a6e2e;font-family:'Poppins',sans-serif;font-size:.74rem;font-weight:700;padding:7px 14px;border-radius:20px;cursor:pointer">🖼️ Gallery</button>
+      </div>
+      <div style="font-size:.68rem;color:#7a9a7a">Live selfie lein ya gallery se chunein</div>
     </div>
     <!-- Fields -->
     <div style="padding:16px 26px 24px">
@@ -6802,6 +7002,8 @@ async function doAdminSetup(){
 }
 
 </script>
+
+<!-- Camera overlay is created dynamically by JS -->
 
 </body>
 </html>

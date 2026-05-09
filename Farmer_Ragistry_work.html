@@ -967,8 +967,24 @@ let submissions = [];
 // ═══════════════════════════════
 // QR CODE MANAGEMENT
 // ═══════════════════════════════
-function loadQrCode() {
-  const savedQr = localStorage.getItem(QR_KEY);
+async function loadQrCode() {
+  // Pehle cloud se load karo (sab browsers pe same dikhega)
+  let cloudQr = null;
+  try {
+    const res = await fetch(BIN_API + '/latest', {
+      headers: { 'X-Master-Key': BIN_KEY, 'X-Bin-Meta': 'false' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.qrCode) {
+        cloudQr = data.qrCode;
+        localStorage.setItem(QR_KEY, cloudQr); // local cache bhi update karo
+      }
+    }
+  } catch(e) {}
+
+  // Agar cloud se nahi mila toh localStorage se
+  const savedQr = cloudQr || localStorage.getItem(QR_KEY);
   if (savedQr) {
     document.getElementById('formQrImage').src = savedQr;
   }
@@ -999,22 +1015,48 @@ function previewNewQr(input) {
   reader.readAsDataURL(file);
 }
 
-function saveNewQr() {
+async function saveNewQr() {
   const newSrc = document.getElementById('newQrPreviewImg').src;
   if (!newSrc || newSrc === window.location.href) {
     showQrAlert('⚠️ Pehle QR image select karein!', '#FEF3C7', '#92400E');
     return;
   }
+
+  const btn = document.getElementById('qrSaveBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Save ho raha hai...';
+
+  // localStorage mein save karo (local cache)
   localStorage.setItem(QR_KEY, newSrc);
+
+  // Cloud (JSONBin) mein bhi save karo taaki har browser pe same QR dikhe
+  try {
+    const getRes = await fetch(BIN_API + '/latest', {
+      headers: { 'X-Master-Key': BIN_KEY, 'X-Bin-Meta': 'false' }
+    });
+    let existing = {};
+    if (getRes.ok) existing = await getRes.json();
+    const saveRes = await fetch(BIN_API, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': BIN_KEY, 'X-Bin-Versioning': 'false' },
+      body: JSON.stringify({ ...existing, qrCode: newSrc })
+    });
+    if (!saveRes.ok) throw new Error('Cloud save failed');
+    showQrAlert('✅ QR Code update ho gaya! Ab sabhi browsers pe same QR dikhega।', '#D1FAE5', '#065F46');
+  } catch(e) {
+    showQrAlert('⚠️ QR local mein save hua, cloud sync fail hua। Internet check karein।', '#FEF3C7', '#92400E');
+  }
+
   // Update form QR
   document.getElementById('formQrImage').src = newSrc;
   // Update admin preview
   document.getElementById('adminQrPreview').src = newSrc;
   // Reset
   document.getElementById('newQrPreviewBox').style.display = 'none';
-  document.getElementById('qrSaveBtn').style.display = 'none';
+  btn.style.display = 'none';
+  btn.disabled = false;
+  btn.textContent = '💾 Save & Update QR';
   document.getElementById('qrFileInput').value = '';
-  showQrAlert('✅ QR Code update ho gaya! Form mein dikhne lagega।', '#D1FAE5', '#065F46');
 }
 
 function showQrAlert(msg, bg, col) {

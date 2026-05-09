@@ -399,6 +399,74 @@ footer a{color:var(--yellow);}
 </head>
 <body>
 
+<!-- ══ BANNER POPUP ══ -->
+<style>
+#bannerPopupOv {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeInOv 0.35s ease;
+}
+@keyframes fadeInOv {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+#bannerPopupBox {
+  position: relative;
+  max-width: 720px;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes popIn {
+  from { transform: scale(0.7); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+#bannerPopupBox img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+#bannerCloseBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0,0,0,0.65);
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.7);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+}
+#bannerCloseBtn:hover {
+  background: #e53935;
+  transform: scale(1.1);
+}
+</style>
+
+<div id="bannerPopupOv">
+  <div id="bannerPopupBox">
+    <img src="10680.webp" alt="Kisan Registry Banner" />
+    <button id="bannerCloseBtn" onclick="document.getElementById('bannerPopupOv').style.display='none'" title="Band karein">&#x2715;</button>
+  </div>
+</div>
+
 <!-- NAVBAR -->
 <nav>
   <div class="nav-inner">

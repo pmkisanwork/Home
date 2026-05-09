@@ -827,10 +827,42 @@ footer a{color:var(--yellow);}
     </div>
 
     <div class="admin-body">
+      <!-- QR CODE UPLOAD SECTION -->
+      <div style="background:linear-gradient(135deg,#E8F5E9,#F1F8F1);border:2px solid #A5D6A7;border-radius:14px;padding:18px 20px;margin-bottom:18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-size:0.95rem;font-weight:800;color:#1B5E20;margin-bottom:4px;">💳 Payment QR Code Update Karein</div>
+            <div style="font-size:0.78rem;color:#5a7a5a;">Naya QR upload karo — form mein turant update ho jayega</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <!-- Current QR Preview -->
+            <div style="text-align:center;">
+              <div style="font-size:0.72rem;color:#888;margin-bottom:4px;font-weight:600;">Current QR</div>
+              <img id="adminQrPreview" src="" alt="QR" style="width:72px;height:72px;border-radius:10px;border:2px solid #A5D6A7;object-fit:cover;background:#f5f5f5;">
+            </div>
+            <!-- Upload Controls -->
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <label style="display:inline-flex;align-items:center;gap:8px;background:#1B5E20;color:#fff;padding:9px 16px;border-radius:10px;cursor:pointer;font-size:0.83rem;font-weight:700;font-family:'Poppins',sans-serif;">
+                📷 QR Select Karein
+                <input type="file" id="qrFileInput" accept="image/*" onchange="previewNewQr(this)" style="display:none;">
+              </label>
+              <button id="qrSaveBtn" onclick="saveNewQr()" style="display:none;padding:9px 16px;background:linear-gradient(135deg,#2E7D32,#388E3C);color:#fff;border:none;border-radius:10px;font-size:0.83rem;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;">
+                ✅ Save & Update Karein
+              </button>
+            </div>
+            <!-- New QR Preview -->
+            <div id="newQrPreviewBox" style="display:none;text-align:center;">
+              <div style="font-size:0.72rem;color:#888;margin-bottom:4px;font-weight:600;">Naya QR (Preview)</div>
+              <img id="newQrPreviewImg" src="" alt="New QR" style="width:72px;height:72px;border-radius:10px;border:2px solid #FFD54F;object-fit:cover;">
+            </div>
+          </div>
+        </div>
+        <div id="qrUpdateAlert" style="display:none;margin-top:12px;padding:8px 14px;border-radius:8px;font-size:0.82rem;font-weight:700;"></div>
+      </div>
+
       <div class="admin-alert" id="adminAlert"></div>
 
-      <!-- SEARCH -->
-      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      <!-- SEARCH -->      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
         <input type="text" id="adminSearch" placeholder="🔍 Naam ya mobile se search..." oninput="renderTable()"
           style="padding:8px 14px;border:2px solid #ddd;border-radius:8px;font-size:13px;font-family:'Poppins',sans-serif;outline:none;flex:1;min-width:200px;">
         <select id="adminFilter" onchange="renderTable()"
@@ -928,8 +960,71 @@ const BIN_ID     = '69ba7978c3097a1dd536d863';
 const BIN_KEY    = '$2a$10$yN0HYHeVAablf.1euvFDXu4CYAyG4E2ta9FQUi7mxFa/Zpp6Z22Va';
 const BIN_API    = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 const LOCAL_KEY  = 'farmer_submissions';
+const QR_KEY     = 'farmer_payment_qr';
 
 let submissions = [];
+
+// ═══════════════════════════════
+// QR CODE MANAGEMENT
+// ═══════════════════════════════
+function loadQrCode() {
+  const savedQr = localStorage.getItem(QR_KEY);
+  if (savedQr) {
+    document.getElementById('formQrImage').src = savedQr;
+  }
+  // Admin panel preview
+  const adminPreview = document.getElementById('adminQrPreview');
+  if (adminPreview) {
+    adminPreview.src = savedQr || document.getElementById('formQrImage').src;
+  }
+}
+
+function previewNewQr(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  if (!file.type.startsWith('image/')) {
+    showQrAlert('⚠️ Sirf image file select karein!', '#FEF3C7', '#92400E');
+    return;
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    showQrAlert('⚠️ Image 2MB se chhoti honi chahiye!', '#FEF3C7', '#92400E');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('newQrPreviewImg').src = e.target.result;
+    document.getElementById('newQrPreviewBox').style.display = 'block';
+    document.getElementById('qrSaveBtn').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveNewQr() {
+  const newSrc = document.getElementById('newQrPreviewImg').src;
+  if (!newSrc || newSrc === window.location.href) {
+    showQrAlert('⚠️ Pehle QR image select karein!', '#FEF3C7', '#92400E');
+    return;
+  }
+  localStorage.setItem(QR_KEY, newSrc);
+  // Update form QR
+  document.getElementById('formQrImage').src = newSrc;
+  // Update admin preview
+  document.getElementById('adminQrPreview').src = newSrc;
+  // Reset
+  document.getElementById('newQrPreviewBox').style.display = 'none';
+  document.getElementById('qrSaveBtn').style.display = 'none';
+  document.getElementById('qrFileInput').value = '';
+  showQrAlert('✅ QR Code update ho gaya! Form mein dikhne lagega।', '#D1FAE5', '#065F46');
+}
+
+function showQrAlert(msg, bg, col) {
+  const el = document.getElementById('qrUpdateAlert');
+  el.textContent = msg;
+  el.style.background = bg;
+  el.style.color = col;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
 
 function getAdminPw() {
   return localStorage.getItem(PW_KEY) || DEFAULT_PW;
@@ -1151,7 +1246,7 @@ function openAdmin() {
   document.getElementById('otpPanel').style.display     = 'none';
   document.getElementById('adminContent').style.display = loggedIn ? 'block' : 'none';
   document.getElementById('adminOverlay').classList.add('open');
-  if (loggedIn) loadSubmissions();
+  if (loggedIn) { loadSubmissions(); loadQrCode(); }
 }
 
 function closeAdmin() {
@@ -1571,6 +1666,9 @@ document.addEventListener('click', function(e) {
 document.getElementById('adminOverlay').addEventListener('click', function(e) {
   if (e.target === this) closeAdmin();
 });
+
+// Load saved QR on page start
+loadQrCode();
 </script>
 </body>
 </html>

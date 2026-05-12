@@ -933,6 +933,82 @@
   /* New card button on dashboard */
   #main-page { display: none; }
 
+  /* ===== PROFILE MODAL ===== */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); z-index: 9999;
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-box {
+    background: #fff; border-radius: 18px;
+    width: 100%; max-width: 420px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+    overflow: hidden; animation: fadeIn 0.3s ease;
+  }
+  .modal-header {
+    background: linear-gradient(135deg, #0d4f1c, #1a7a30);
+    padding: 20px 24px; display: flex;
+    align-items: center; justify-content: space-between;
+  }
+  .modal-title {
+    color: #fff; font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+  .modal-close {
+    color: rgba(255,255,255,0.8); background: none;
+    border: none; font-size: 1.4rem; cursor: pointer;
+    line-height: 1; padding: 0;
+  }
+  .modal-body { padding: 24px; }
+  .modal-group { margin-bottom: 14px; text-align: left; }
+  .modal-group label {
+    display: block; font-size: 0.72rem; font-weight: 600;
+    color: var(--green-dark); text-transform: uppercase;
+    letter-spacing: 0.5px; margin-bottom: 4px;
+  }
+  .modal-group input {
+    width: 100%; padding: 10px 12px;
+    border: 1.5px solid #b2dfb2; border-radius: 8px;
+    font-size: 0.92rem; background: var(--green-pale);
+    color: var(--text-dark); outline: none; font-family: inherit;
+    box-sizing: border-box;
+  }
+  .modal-group input:focus {
+    border-color: var(--green-mid);
+    box-shadow: 0 0 0 3px rgba(26,122,48,0.15);
+    background: #fff;
+  }
+  .modal-divider {
+    border: none; border-top: 1.5px dashed #c8e6c9;
+    margin: 16px 0;
+  }
+  .modal-section-label {
+    font-size: 0.72rem; font-weight: 700; color: var(--gold-dark);
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+  }
+  .modal-btn {
+    width: 100%; padding: 11px;
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    color: #fff; border: none; border-radius: 50px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    cursor: pointer; margin-top: 4px;
+    box-shadow: 0 4px 18px rgba(13,79,28,0.4);
+    transition: transform 0.15s;
+  }
+  .modal-btn:hover { transform: translateY(-2px); }
+  .modal-msg {
+    font-size: 0.82rem; margin-top: 10px; font-weight: 600;
+    padding: 8px 12px; border-radius: 6px; display: none; text-align: center;
+  }
+  .modal-msg.error { color: #c0392b; background: #fdecea; display: block; }
+  .modal-msg.success { color: #1a7a30; background: #eaf5ea; display: block; }
+
 
   /* ===== AUTH PAGE ===== */
   #auth-page {
@@ -1159,6 +1235,7 @@
     </div>
     <div class="dash-actions">
       <button class="dash-btn primary" onclick="showCardForm()">&#43; Naya Card Banao</button>
+      <button class="dash-btn" style="background:linear-gradient(135deg,#1a5276,#2980b9);color:#fff;box-shadow:0 3px 12px rgba(41,128,185,0.35);" onclick="openProfileModal()">&#9881; Profile</button>
       <button class="dash-btn danger"  onclick="doLogout()">&#128682; Logout</button>
     </div>
   </div>
@@ -1179,6 +1256,29 @@
     </div>
   </div>
 </div>
+</div>
+
+<!-- ========== PROFILE MODAL ========== -->
+<div class="modal-overlay" id="profile-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">&#9881; Profile Update</div>
+      <button class="modal-close" onclick="closeProfileModal()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-group"><label>Full Name / पूरा नाम</label><input type="text" id="prof-name" placeholder="Aapka naam..."/></div>
+      <div class="modal-group"><label>Email / ईमेल</label><input type="email" id="prof-email" placeholder="Email address..."/></div>
+      <div class="modal-group"><label>Mobile No. / मोबाइल</label><input type="tel" id="prof-mobile" placeholder="10-digit number" maxlength="10"/></div>
+      <button class="modal-btn" onclick="doUpdateProfile()">&#128190; Profile Save Karein</button>
+      <hr class="modal-divider"/>
+      <div class="modal-section-label">&#128274; Password Change Karein</div>
+      <div class="modal-group"><label>Purana Password</label><input type="password" id="prof-oldpass" placeholder="Purana password..."/></div>
+      <div class="modal-group"><label>Naya Password</label><input type="password" id="prof-newpass" placeholder="Naya password (min 6 chars)..."/></div>
+      <div class="modal-group"><label>Naya Password Confirm</label><input type="password" id="prof-newpass2" placeholder="Naya password dobara..."/></div>
+      <button class="modal-btn" style="background:linear-gradient(135deg,#7d3c98,#9b59b6);" onclick="doChangePassword()">&#128274; Password Change Karein</button>
+      <div class="modal-msg" id="profile-msg"></div>
+    </div>
+  </div>
 </div>
 
 <!-- ========== CARD FORM PAGE ========== -->
@@ -1320,7 +1420,7 @@
     </div>
   </div>
 
-  <button class="generate-btn" onclick="generateCard()">✅ Generate Farmer ID Card</button>
+  <button class="generate-btn" onclick="doGenerate()">✅ Generate Farmer ID Card</button>
 
   <!-- CARD PREVIEW -->
   <div id="card-preview-section">
@@ -1566,10 +1666,13 @@ window._fbGetCardHistory = async function(username) {
   try {
     var db = window._db;
     var fs = window._firestore;
-    var q = fs.query(fs.collection(db, 'cards'), fs.where('username', '==', username), fs.orderBy('timestamp', 'asc'));
+    var q = fs.query(fs.collection(db, 'cards'), fs.where('username', '==', username));
     var snap = await fs.getDocs(q);
-    return snap.docs.map(function(d) { return Object.assign({ _id: d.id }, d.data()); });
-  } catch(e) { console.error(e); return []; }
+    var docs = snap.docs.map(function(d) { return Object.assign({ _id: d.id }, d.data()); });
+    // Sort by timestamp client-side — asc order
+    docs.sort(function(a,b){ return new Date(a.timestamp)-new Date(b.timestamp); });
+    return docs;
+  } catch(e) { console.error('History load error:', e); return []; }
 };
 
 window._fbUpdatePassword = async function(username, newPassword) {
@@ -1589,9 +1692,9 @@ window._fbSaveCard = async function(username, card) {
   try {
     var db = window._db;
     var fs = window._firestore;
-    await fs.addDoc(fs.collection(db, 'cards'), Object.assign({ username: username }, card));
-    return true;
-  } catch(e) { console.error(e); return false; }
+    var ref = await fs.addDoc(fs.collection(db, 'cards'), Object.assign({ username: username }, card));
+    return ref.id;
+  } catch(e) { console.error(e); return null; }
 };
 
 // ====== TAB SWITCH ======
@@ -1720,12 +1823,15 @@ async function doForgotPassword() {
   msg.textContent='⏳ OTP email bheja ja raha hai...'; msg.className='auth-msg success';
 
   // Send OTP via EmailJS
-  emailjs.init('WOUFfoXIKmV4WaRBJ');
-  emailjs.send('service_jzgwcq7', 'template_ocudq3s', {
+  emailjs.init('oxyRIaQ-IoizhZPAG');
+  emailjs.send('service_3gdopdh', 'template_ohms6f9', {
     to_name:    foundUser.name,
+    email:      foundUser.email,
     to_email:   foundUser.email,
     username:   foundKey,
-    password:   'Aapka OTP Code: ' + _resetOTP + ' (10 minute mein use karein)',
+    otp_code:   _resetOTP,
+    password:   'OTP: ' + _resetOTP,
+    message:    'Aapka Password Reset OTP: ' + _resetOTP + ' (10 minute mein use karein)',
     reset_link: window.location.href
   }).then(function(){
     msg.textContent='✅ OTP aapke email par bhej diya gaya! (' + foundUser.email + ')';
@@ -1816,6 +1922,7 @@ function showDashboard() {
 
 async function renderDashboard(username) {
   var history = await window._fbGetCardHistory(username);
+  window._cachedHistory = history;
   var today=new Date().toDateString();
   document.getElementById('stat-total').textContent=history.length;
   document.getElementById('stat-today').textContent=history.filter(function(c){return new Date(c.timestamp).toDateString()===today;}).length;
@@ -1831,6 +1938,7 @@ async function renderDashboard(username) {
     document.getElementById('history-table-wrap').style.display='block';
     var rev=[].concat(history).reverse();
     rev.forEach(function(card,i){
+      var origIdx=history.length-1-i;
       var gBadge=card.gender==='Male'?'badge-m':card.gender==='Female'?'badge-f':'badge-o';
       var dt=new Date(card.timestamp);
       var dtStr=dt.toLocaleDateString('en-IN')+' '+dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
@@ -1843,15 +1951,34 @@ async function renderDashboard(username) {
         +'<td><span class="badge '+gBadge+'">'+card.gender+'</span></td>'
         +'<td><small>'+card.farmerId+'</small></td>'
         +'<td><small>'+dtStr+'</small></td>'
-        +'<td><button class="dash-btn primary" style="padding:5px 12px;font-size:0.7rem;" onclick="viewCard('+(history.length-1-i)+')">&#128065; View</button></td>';
+        +'<td style="white-space:nowrap;">'
+          +'<button class="dash-btn primary" style="padding:4px 10px;font-size:0.68rem;margin:2px;" onclick="viewCard('+origIdx+')">&#128065; View</button>'
+          +'<button class="dash-btn" style="padding:4px 10px;font-size:0.68rem;margin:2px;background:linear-gradient(135deg,#1a5276,#2980b9);color:#fff;" onclick="editCard('+origIdx+')">&#9998; Edit</button>'
+          +'<button class="dash-btn" style="padding:4px 10px;font-size:0.68rem;margin:2px;background:linear-gradient(135deg,#c8840b,#f0b429);color:#fff;" onclick="quickDownload('+origIdx+')">&#11015; PDF</button>'
+        +'</td>';
       tbody.appendChild(tr);
     });
-    // Cache history for viewCard
-    window._cachedHistory = history;
   }
 }
 
 function showCardForm() {
+  // Form reset
+  window._editingCardId = null;
+  window._editingCardIndex = null;
+  var fields=['name-en','name-hi','mobile','aadhar','farmer-id','enrollment-id',
+    'village','sub-district','district','pin','land-sno','land-owner-hi',
+    'land-id-type','land-share','land-area','land-survey'];
+  fields.forEach(function(f){var el=document.getElementById(f);if(el)el.value='';});
+  document.getElementById('dob').value='';
+  document.getElementById('gender').value='Male';
+  document.getElementById('caste').value='General';
+  document.getElementById('state').value='';
+  document.getElementById('land-owner-type').value='Joint';
+  photoDataUrl=null;
+  document.getElementById('photo-preview').style.display='none';
+  document.getElementById('card-preview-section').style.display='none';
+  var errBox=document.getElementById('gen-error-box');
+  if(errBox) errBox.style.display='none';
   document.getElementById('dashboard-page').style.display='none';
   document.getElementById('main-page').style.display='block';
   window.scrollTo(0,0);
@@ -1860,36 +1987,15 @@ function showCardForm() {
 function backToDashboard() {
   document.getElementById('main-page').style.display='none';
   document.getElementById('dashboard-page').style.display='block';
-  var username=getCurrentUser();
-  if (username) renderDashboard(username);
-}
-
-function viewCard(index) {
-  var history = window._cachedHistory || [];
-  var card=history[index]; if(!card) return;
-  document.getElementById('name-en').value=card.nameEn||'';
-  document.getElementById('name-hi').value=card.nameHi||'';
-  document.getElementById('dob').value=card.dob||'';
-  document.getElementById('gender').value=card.gender||'Male';
-  document.getElementById('caste').value=card.caste||'General';
-  document.getElementById('mobile').value=card.mobile||'';
-  document.getElementById('aadhar').value=card.aadhar||'';
-  document.getElementById('farmer-id').value=card.farmerId||'';
-  document.getElementById('enrollment-id').value=card.enrollmentId||'';
-  document.getElementById('village').value=card.village||'';
-  document.getElementById('sub-district').value=card.subDistrict||'';
-  document.getElementById('district').value=card.district||'';
-  document.getElementById('state').value=card.state||'';
-  document.getElementById('pin').value=card.pin||'';
-  document.getElementById('land-sno').value=card.landSno||'';
-  document.getElementById('land-owner-hi').value=card.landOwnerHi||'';
-  document.getElementById('land-id-type').value=card.landIdType||'';
-  document.getElementById('land-owner-type').value=card.landOwnerType||'Single';
-  document.getElementById('land-share').value=card.landShare||'';
-  document.getElementById('land-area').value=card.landArea||'';
-  document.getElementById('land-survey').value=card.landSurvey||'';
-  showCardForm();
-  setTimeout(function(){generateCard();},300);
+  // renderDashboard mat bulao — cache se hi dikhao
+  // Agar cache empty hai (pehli baar) tab hi Firebase se load karo
+  if (!window._cachedHistory) {
+    var username=getCurrentUser();
+    if (username) renderDashboard(username);
+  } else {
+    updateDashboardStats(window._cachedHistory);
+  }
+  window.scrollTo(0,0);
 }
 
 // ====== PAGE LOAD — handled by Firebase module script above ======
@@ -2079,45 +2185,302 @@ function previewPhoto(e) {
 
   // Save card to Firebase after generate
   var _origGen=generateCard;
-  generateCard=function(){
-    _origGen();
-    var username=getCurrentUser(); if(!username) return;
-    var card={
-      nameEn:document.getElementById('name-en').value||'—',
-      nameHi:document.getElementById('name-hi').value||'—',
-      dob:document.getElementById('dob').value,
-      gender:document.getElementById('gender').value,
-      caste:document.getElementById('caste').value,
-      mobile:document.getElementById('mobile').value||'—',
-      aadhar:document.getElementById('aadhar').value||'—',
-      farmerId:document.getElementById('farmer-id').value||'—',
-      enrollmentId:document.getElementById('enrollment-id').value||'—',
-      village:document.getElementById('village').value||'',
-      subDistrict:document.getElementById('sub-district').value||'',
-      district:document.getElementById('district').value||'',
-      state:document.getElementById('state').value||'',
-      pin:document.getElementById('pin').value||'',
-      landSno:document.getElementById('land-sno').value||'',
-      landOwnerHi:document.getElementById('land-owner-hi').value||'',
-      landIdType:document.getElementById('land-id-type').value||'',
-      landOwnerType:document.getElementById('land-owner-type').value,
-      landShare:document.getElementById('land-share').value||'',
-      landArea:document.getElementById('land-area').value||'',
-      landSurvey:document.getElementById('land-survey').value||'',
-      timestamp:new Date().toISOString()
-    };
-    // Duplicate check (same farmerId today) using cached history
-    var history = window._cachedHistory || [];
-    var today=new Date().toDateString();
-    var isDup=history.some(function(c){return c.farmerId===card.farmerId&&new Date(c.timestamp).toDateString()===today&&card.farmerId!=='—';});
-    if(!isDup){
-      window._fbSaveCard(username, card).then(function() {
-        // Update cache
-        if (!window._cachedHistory) window._cachedHistory = [];
-        window._cachedHistory.push(card);
-      });
+  generateCard=function(){_origGen();};
+
+// ======================================================
+//  CLEAN NEW CODE — validation + generate + history
+// ======================================================
+
+function doGenerate() {
+  // --- 1. Validation ---
+  var required = [
+    {id:'name-en',       label:'Full Name (English)'},
+    {id:'name-hi',       label:'पूरा नाम (हिंदी)'},
+    {id:'dob',           label:'Date of Birth'},
+    {id:'mobile',        label:'Mobile No.'},
+    {id:'aadhar',        label:'Aadhar No.'},
+    {id:'farmer-id',     label:'Farmer ID'},
+    {id:'enrollment-id', label:'Enrollment ID'},
+    {id:'village',       label:'Ward / Village'},
+    {id:'sub-district',  label:'Sub District'},
+    {id:'district',      label:'District'},
+    {id:'state',         label:'State'},
+    {id:'pin',           label:'PIN Code'},
+    {id:'land-sno',      label:'S.No.'},
+    {id:'land-owner-hi', label:'Owner Name (Hindi)'},
+    {id:'land-id-type',  label:'Identifier Type'},
+    {id:'land-share',    label:'Owner Share'},
+    {id:'land-area',     label:'Khasra Total Area'},
+    {id:'land-survey',   label:'Survey Area'}
+  ];
+
+  // Reset borders
+  required.forEach(function(f){
+    var el=document.getElementById(f.id);
+    if(el){el.style.border='1.5px solid #b2dfb2'; el.style.boxShadow='';}
+  });
+
+  var missing=[];
+  required.forEach(function(f){
+    var el=document.getElementById(f.id);
+    if(!el||!el.value.trim()){
+      missing.push(f.label);
+      if(el){el.style.border='2px solid #e74c3c'; el.style.boxShadow='0 0 0 3px rgba(231,76,60,0.18)';}
     }
+  });
+
+  // Show/hide error box
+  var box=document.getElementById('gen-error-box');
+  if(!box){
+    box=document.createElement('div');
+    box.id='gen-error-box';
+    box.style.cssText='background:#fdecea;border:2px solid #e74c3c;border-radius:10px;padding:14px 18px;margin:16px 0;color:#c0392b;font-size:0.88rem;font-weight:600;line-height:1.8;';
+    var btn=document.querySelector('.generate-btn');
+    btn.parentNode.insertBefore(box, btn);
+  }
+  if(missing.length){
+    box.innerHTML='❌ <strong>Yeh fields zaroori hain — pehle bharein:</strong><br>' + missing.map(function(m){return '• '+m;}).join('<br>');
+    box.style.display='block';
+    box.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  box.style.display='none';
+
+  // --- 2. Generate card visuals ---
+  generateCard();
+
+  // --- 3. Save + history ---
+  var username=getCurrentUser(); if(!username) return;
+  if(window._editingCardId) return; // edit mode — skip save
+
+  var card={
+    nameEn:      document.getElementById('name-en').value,
+    nameHi:      document.getElementById('name-hi').value,
+    dob:         document.getElementById('dob').value,
+    gender:      document.getElementById('gender').value,
+    caste:       document.getElementById('caste').value,
+    mobile:      document.getElementById('mobile').value,
+    aadhar:      document.getElementById('aadhar').value,
+    farmerId:    document.getElementById('farmer-id').value,
+    enrollmentId:document.getElementById('enrollment-id').value,
+    village:     document.getElementById('village').value,
+    subDistrict: document.getElementById('sub-district').value,
+    district:    document.getElementById('district').value,
+    state:       document.getElementById('state').value,
+    pin:         document.getElementById('pin').value,
+    landSno:     document.getElementById('land-sno').value,
+    landOwnerHi: document.getElementById('land-owner-hi').value,
+    landIdType:  document.getElementById('land-id-type').value,
+    landOwnerType:document.getElementById('land-owner-type').value,
+    landShare:   document.getElementById('land-share').value,
+    landArea:    document.getElementById('land-area').value,
+    landSurvey:  document.getElementById('land-survey').value,
+    timestamp:   new Date().toISOString()
   };
+
+  // Duplicate check (same farmerId aaj ka)
+  if(!window._cachedHistory) window._cachedHistory=[];
+  var today=new Date().toDateString();
+  var isDup=window._cachedHistory.some(function(c){
+    return c.farmerId===card.farmerId && new Date(c.timestamp).toDateString()===today && card.farmerId!=='—';
+  });
+  if(isDup) {
+    // Sirf dashboard pe le jao, save mat karo
+    _goToDashboard();
+    return;
+  }
+
+  // Turant cache mein daalo aur dashboard mein dikhao
+  var tempCard=Object.assign({_id:'temp_'+Date.now()}, card);
+  window._cachedHistory.push(tempCard);
+  var newIdx=window._cachedHistory.length-1;
+
+  _goToDashboard();
+  _addHistoryRow(tempCard, newIdx);
+
+  // Background Firebase save
+  window._fbSaveCard(username, card).then(function(ref){
+    if(ref && window._cachedHistory[newIdx]){
+      window._cachedHistory[newIdx]._id = (typeof ref==='string') ? ref : (ref.id||('local_'+Date.now()));
+    }
+  });
+}
+
+function _goToDashboard() {
+  document.getElementById('main-page').style.display='none';
+  document.getElementById('dashboard-page').style.display='block';
+  updateDashboardStats(window._cachedHistory||[]);
+  window.scrollTo(0,0);
+}
+
+function _addHistoryRow(card, idx) {
+  var tbody=document.getElementById('history-tbody');
+  var emptyDiv=document.getElementById('history-empty');
+  var tableWrap=document.getElementById('history-table-wrap');
+  if(!tbody) return;
+  if(emptyDiv)  emptyDiv.style.display='none';
+  if(tableWrap) tableWrap.style.display='block';
+  var badge=card.gender==='Male'?'badge-m':card.gender==='Female'?'badge-f':'badge-o';
+  var dt=new Date(card.timestamp);
+  var dStr=dt.toLocaleDateString('en-IN')+' '+dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  var total=(window._cachedHistory||[]).length;
+  var tr=document.createElement('tr');
+  tr.id='hrow-'+idx;
+  tr.style.background='#eafbea'; // highlight naya row
+  setTimeout(function(){if(tr)tr.style.background='';},2000);
+  tr.innerHTML=
+    '<td><strong>'+total+'</strong></td>'
+    +'<td><strong>'+card.nameEn+'</strong><br><small style="color:#666;font-family:Noto Sans Devanagari,sans-serif">'+card.nameHi+'</small></td>'
+    +'<td>'+card.mobile+'</td>'
+    +'<td>'+(card.district||'—')+'</td>'
+    +'<td>'+(card.state||'—')+'</td>'
+    +'<td><span class="badge '+badge+'">'+card.gender+'</span></td>'
+    +'<td><small>'+card.farmerId+'</small></td>'
+    +'<td><small>'+dStr+'</small></td>'
+    +'<td style="white-space:nowrap;">'
+      +'<button class="dash-btn primary" style="padding:4px 10px;font-size:0.68rem;margin:2px;" onclick="viewCard('+idx+')">&#128065; View</button> '
+      +'<button class="dash-btn" style="padding:4px 10px;font-size:0.68rem;margin:2px;background:linear-gradient(135deg,#1a5276,#2980b9);color:#fff;" onclick="editCard('+idx+')">&#9998; Edit</button> '
+      +'<button class="dash-btn" style="padding:4px 10px;font-size:0.68rem;margin:2px;background:linear-gradient(135deg,#c8840b,#f0b429);color:#fff;" onclick="quickDownload('+idx+')">&#11015; PDF</button>'
+    +'</td>';
+  tbody.insertBefore(tr, tbody.firstChild);
+}
+
+function viewCard(index) {
+  var card=(window._cachedHistory||[])[index]; if(!card) return;
+  window._editingCardId=null;
+  _fillForm(card);
+  document.getElementById('dashboard-page').style.display='none';
+  document.getElementById('main-page').style.display='block';
+  setTimeout(function(){generateCard();},200);
+}
+
+function editCard(index) {
+  var card=(window._cachedHistory||[])[index]; if(!card) return;
+  window._editingCardId=card._id||null;
+  window._editingCardIndex=index;
+  _fillForm(card);
+  document.getElementById('dashboard-page').style.display='none';
+  document.getElementById('main-page').style.display='block';
+  setTimeout(function(){generateCard();},200);
+}
+
+function quickDownload(index) {
+  var card=(window._cachedHistory||[])[index]; if(!card) return;
+  _fillForm(card);
+  document.getElementById('main-page').style.display='block';
+  setTimeout(function(){ generateCard(); setTimeout(downloadCard,600); },200);
+}
+
+function _fillForm(card) {
+  var m={
+    'name-en':card.nameEn,'name-hi':card.nameHi,'dob':card.dob,
+    'mobile':card.mobile,'aadhar':card.aadhar,'farmer-id':card.farmerId,
+    'enrollment-id':card.enrollmentId,'village':card.village,
+    'sub-district':card.subDistrict,'district':card.district,
+    'state':card.state,'pin':card.pin,'land-sno':card.landSno,
+    'land-owner-hi':card.landOwnerHi,'land-id-type':card.landIdType,
+    'land-share':card.landShare,'land-area':card.landArea,'land-survey':card.landSurvey
+  };
+  Object.keys(m).forEach(function(k){var el=document.getElementById(k);if(el)el.value=m[k]||'';});
+  var g=document.getElementById('gender'); if(g)g.value=card.gender||'Male';
+  var c=document.getElementById('caste'); if(c)c.value=card.caste||'General';
+  var ot=document.getElementById('land-owner-type'); if(ot)ot.value=card.landOwnerType||'Single';
+}
+
+// ====== LIVE DASHBOARD STATS UPDATE ======
+function updateDashboardStats(history) {
+  if (!history) return;
+  var today = new Date().toDateString();
+  document.getElementById('stat-total').textContent = history.length;
+  document.getElementById('stat-today').textContent = history.filter(function(c){ return new Date(c.timestamp).toDateString()===today; }).length;
+  document.getElementById('stat-male').textContent = history.filter(function(c){ return c.gender==='Male'; }).length;
+  document.getElementById('stat-female').textContent = history.filter(function(c){ return c.gender==='Female'; }).length;
+}
+
+// ====== PROFILE MODAL ======
+function openProfileModal() {
+  var userData = window._currentUserData || {};
+  document.getElementById('prof-name').value   = userData.name   || '';
+  document.getElementById('prof-email').value  = userData.email  || '';
+  document.getElementById('prof-mobile').value = userData.mobile || '';
+  document.getElementById('prof-oldpass').value  = '';
+  document.getElementById('prof-newpass').value  = '';
+  document.getElementById('prof-newpass2').value = '';
+  var m = document.getElementById('profile-msg');
+  m.className='modal-msg'; m.textContent='';
+  document.getElementById('profile-modal').classList.add('active');
+}
+
+function closeProfileModal() {
+  document.getElementById('profile-modal').classList.remove('active');
+}
+
+async function doUpdateProfile() {
+  var name   = document.getElementById('prof-name').value.trim();
+  var email  = document.getElementById('prof-email').value.trim();
+  var mobile = document.getElementById('prof-mobile').value.trim();
+  var msg    = document.getElementById('profile-msg');
+  msg.className='modal-msg'; msg.textContent='';
+
+  if (!name||!email||!mobile) {
+    msg.textContent='❌ Sabhi fields bharna zaroori hai!'; msg.className='modal-msg error'; return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    msg.textContent='❌ Sahi email address dalein!'; msg.className='modal-msg error'; return;
+  }
+  if (!/^[0-9]{10}$/.test(mobile)) {
+    msg.textContent='❌ Mobile 10 digit ka hona chahiye!'; msg.className='modal-msg error'; return;
+  }
+  msg.textContent='⏳ Saving...'; msg.className='modal-msg success';
+
+  var username = getCurrentUser();
+  var userData = window._currentUserData || {};
+  userData.name   = name;
+  userData.email  = email;
+  userData.mobile = mobile;
+
+  var saved = await window._fbSaveUser(username, userData);
+  if (!saved) { msg.textContent='❌ Server error! Dobara try karein.'; msg.className='modal-msg error'; return; }
+
+  window._currentUserData = userData;
+  // Update dashboard display
+  document.getElementById('dash-username').textContent = name;
+  document.getElementById('dash-avatar-text').textContent = name.charAt(0).toUpperCase();
+  msg.textContent='✅ Profile update ho gaya!'; msg.className='modal-msg success';
+}
+
+async function doChangePassword() {
+  var oldpass  = document.getElementById('prof-oldpass').value;
+  var newpass  = document.getElementById('prof-newpass').value;
+  var newpass2 = document.getElementById('prof-newpass2').value;
+  var msg      = document.getElementById('profile-msg');
+  msg.className='modal-msg'; msg.textContent='';
+
+  if (!oldpass||!newpass||!newpass2) {
+    msg.textContent='❌ Sabhi password fields bharen!'; msg.className='modal-msg error'; return;
+  }
+  var userData = window._currentUserData || {};
+  if (userData.password !== oldpass) {
+    msg.textContent='❌ Purana password galat hai!'; msg.className='modal-msg error'; return;
+  }
+  if (newpass !== newpass2) {
+    msg.textContent='❌ Dono naye password match nahi kar rahe!'; msg.className='modal-msg error'; return;
+  }
+  if (newpass.length < 6) {
+    msg.textContent='❌ Password kam se kam 6 characters ka hona chahiye!'; msg.className='modal-msg error'; return;
+  }
+  msg.textContent='⏳ Password update ho raha hai...'; msg.className='modal-msg success';
+
+  var username = getCurrentUser();
+  var updated = await window._fbUpdatePassword(username, newpass);
+  if (!updated) { msg.textContent='❌ Server error! Dobara try karein.'; msg.className='modal-msg error'; return; }
+
+  window._currentUserData.password = newpass;
+  document.getElementById('prof-oldpass').value  = '';
+  document.getElementById('prof-newpass').value  = '';
+  document.getElementById('prof-newpass2').value = '';
+  msg.textContent='✅ Password successfully change ho gaya!'; msg.className='modal-msg success';
+}
 </script>
 </body>
 </html>

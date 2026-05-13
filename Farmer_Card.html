@@ -1569,32 +1569,133 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<!-- Firebase -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBexpZGTfu4tNg72CG__EWyRbyoOa-UmGU",
-    authDomain: "card-pvc-print.firebaseapp.com",
-    projectId: "card-pvc-print",
-    storageBucket: "card-pvc-print.firebasestorage.app",
-    messagingSenderId: "957829374901",
-    appId: "1:957829374901:web:e9c424b55125a492e0effc"
+<!-- Firebase Compat (no ES module — works everywhere) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+  // ====== ERROR DISPLAY (screen pe dikhega) ======
+  window.onerror = function(msg, src, line) {
+    var d = document.getElementById('_err_overlay');
+    if (!d) {
+      d = document.createElement('div');
+      d.id = '_err_overlay';
+      d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#c0392b;color:#fff;padding:14px 16px;font-size:0.85rem;font-family:monospace;word-break:break-all;';
+      document.body.appendChild(d);
+    }
+    d.innerHTML += '<b>ERROR:</b> ' + msg + '<br><small>' + src + ':' + line + '</small><br>';
   };
 
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
+  // ====== FIREBASE INIT ======
+  try {
+    var _firebaseConfig = {
+      apiKey: "AIzaSyBexpZGTfu4tNg72CG__EWyRbyoOa-UmGU",
+      authDomain: "card-pvc-print.firebaseapp.com",
+      projectId: "card-pvc-print",
+      storageBucket: "card-pvc-print.firebasestorage.app",
+      messagingSenderId: "957829374901",
+      appId: "1:957829374901:web:e9c424b55125a492e0effc"
+    };
 
-  // Expose db and Firestore functions to global scope for use in non-module scripts
-  window._db = db;
-  window._firestore = { doc, getDoc, setDoc, collection, getDocs, addDoc, query, where, orderBy };
+    if (!firebase.apps.length) firebase.initializeApp(_firebaseConfig);
+    var _db = firebase.firestore();
+    window._db = _db;
 
-  // ====== Check login on load ======
-  window.addEventListener('DOMContentLoaded', function() {
+    // ====== FIREBASE HELPERS ======
+    window._fbGetUserData = async function(username) {
+      try {
+        var snap = await _db.collection('users').doc(username).get();
+        return snap.exists ? snap.data() : null;
+      } catch(e) { console.error(e); return null; }
+    };
+
+    window._fbSaveUser = async function(username, data) {
+      try {
+        await _db.collection('users').doc(username).set(data);
+        return true;
+      } catch(e) { console.error(e); return false; }
+    };
+
+    window._fbCheckEmailExists = async function(email) {
+      try {
+        var snap = await _db.collection('users').where('email','==',email).get();
+        return !snap.empty;
+      } catch(e) { return false; }
+    };
+
+    window._fbFindUserByUsernameOrEmail = async function(input) {
+      try {
+        var snap = await _db.collection('users').doc(input).get();
+        if (snap.exists) return { key: input, data: snap.data() };
+        var qsnap = await _db.collection('users').where('email','==',input).get();
+        if (!qsnap.empty) { var d=qsnap.docs[0]; return { key:d.id, data:d.data() }; }
+        return null;
+      } catch(e) { return null; }
+    };
+
+    window._fbGetCardHistory = async function(username) {
+      try {
+        var snap = await _db.collection('cards').where('username','==',username).get();
+        var docs = snap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
+        docs.sort(function(a,b){ return new Date(a.timestamp)-new Date(b.timestamp); });
+        return docs;
+      } catch(e) { console.error('History load error:',e); return []; }
+    };
+
+    window._fbUpdatePassword = async function(username, newPassword) {
+      try {
+        var snap = await _db.collection('users').doc(username).get();
+        if (!snap.exists) return false;
+        var data = snap.data();
+        data.password = newPassword;
+        await _db.collection('users').doc(username).set(data);
+        return true;
+      } catch(e) { console.error(e); return false; }
+    };
+
+    window._fbSaveCard = async function(username, card) {
+      try {
+        var ref = await _db.collection('cards').add(Object.assign({username:username}, card));
+        return ref.id;
+      } catch(e) { console.error(e); return null; }
+    };
+
+    window._fbDeleteCard = async function(cardId) {
+      try {
+        await _db.collection('cards').doc(cardId).delete();
+        return true;
+      } catch(e) { console.error(e); return false; }
+    };
+
+    window._fbUpdateCard = async function(cardId, username, data) {
+      try {
+        await _db.collection('cards').doc(cardId).set(Object.assign({username:username}, data));
+        return true;
+      } catch(e) { console.error(e); return false; }
+    };
+
+  } catch(e) {
+    console.error('Firebase init failed:', e);
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('auth-page').style.display = 'flex';
+    });
+  }
+
+  // ====== AUTO LOGIN CHECK ======
+  document.addEventListener('DOMContentLoaded', function() {
+    // Safety fallback — agar 3 sec mein kuch na dikhe toh auth page show karo
+    var shown = false;
+    var fallback = setTimeout(function() {
+      if (!shown) {
+        console.warn('Fallback: showing auth page');
+        document.getElementById('auth-page').style.display = 'flex';
+      }
+    }, 3000);
+
     var current = localStorage.getItem('awo_current') || null;
     if (current) {
       window._fbGetUserData(current).then(function(userData) {
+        shown = true;
+        clearTimeout(fallback);
         if (userData) {
           window._currentUserData = userData;
           showDashboard();
@@ -1602,8 +1703,15 @@
           localStorage.removeItem('awo_current');
           document.getElementById('auth-page').style.display = 'flex';
         }
+      }).catch(function(e) {
+        shown = true;
+        clearTimeout(fallback);
+        console.error(e);
+        document.getElementById('auth-page').style.display = 'flex';
       });
     } else {
+      shown = true;
+      clearTimeout(fallback);
       document.getElementById('auth-page').style.display = 'flex';
     }
   });
@@ -1614,88 +1722,6 @@
 function getCurrentUser()   { return localStorage.getItem('awo_current') || null; }
 function setCurrentUser(u)  { localStorage.setItem('awo_current', u); }
 function clearCurrentUser() { localStorage.removeItem('awo_current'); }
-
-// ====== FIREBASE HELPERS (async) ======
-window._fbGetUserData = async function(username) {
-  try {
-    var db = window._db;
-    var fs = window._firestore;
-    var snap = await fs.getDoc(fs.doc(db, 'users', username));
-    return snap.exists() ? snap.data() : null;
-  } catch(e) { console.error(e); return null; }
-};
-
-window._fbSaveUser = async function(username, data) {
-  try {
-    var db = window._db;
-    var fs = window._firestore;
-    await fs.setDoc(fs.doc(db, 'users', username), data);
-    return true;
-  } catch(e) { console.error(e); return false; }
-};
-
-window._fbCheckEmailExists = async function(email) {
-  try {
-    var db = window._db;
-    var fs = window._firestore;
-    var q = fs.query(fs.collection(db, 'users'), fs.where('email', '==', email));
-    var snap = await fs.getDocs(q);
-    return !snap.empty;
-  } catch(e) { return false; }
-};
-
-window._fbFindUserByUsernameOrEmail = async function(input) {
-  try {
-    var db = window._db;
-    var fs = window._firestore;
-    // Try username first
-    var snap = await fs.getDoc(fs.doc(db, 'users', input));
-    if (snap.exists()) return { key: input, data: snap.data() };
-    // Try email
-    var q = fs.query(fs.collection(db, 'users'), fs.where('email', '==', input));
-    var qsnap = await fs.getDocs(q);
-    if (!qsnap.empty) {
-      var d = qsnap.docs[0];
-      return { key: d.id, data: d.data() };
-    }
-    return null;
-  } catch(e) { return null; }
-};
-
-window._fbGetCardHistory = async function(username) {
-  try {
-    var db = window._db;
-    var fs = window._firestore;
-    var q = fs.query(fs.collection(db, 'cards'), fs.where('username', '==', username));
-    var snap = await fs.getDocs(q);
-    var docs = snap.docs.map(function(d) { return Object.assign({ _id: d.id }, d.data()); });
-    // Sort by timestamp client-side — asc order
-    docs.sort(function(a,b){ return new Date(a.timestamp)-new Date(b.timestamp); });
-    return docs;
-  } catch(e) { console.error('History load error:', e); return []; }
-};
-
-window._fbUpdatePassword = async function(username, newPassword) {
-  try {
-    var db = window._db;
-    var fs = window._firestore;
-    var snap = await fs.getDoc(fs.doc(db, 'users', username));
-    if (!snap.exists()) return false;
-    var data = snap.data();
-    data.password = newPassword;
-    await fs.setDoc(fs.doc(db, 'users', username), data);
-    return true;
-  } catch(e) { console.error(e); return false; }
-};
-
-window._fbSaveCard = async function(username, card) {
-  try {
-    var db = window._db;
-    var fs = window._firestore;
-    var ref = await fs.addDoc(fs.collection(db, 'cards'), Object.assign({ username: username }, card));
-    return ref.id;
-  } catch(e) { console.error(e); return null; }
-};
 
 // ====== TAB SWITCH ======
 function switchTab(tab) {
@@ -1943,7 +1969,8 @@ async function renderDashboard(username) {
       var dt=new Date(card.timestamp);
       var dtStr=dt.toLocaleDateString('en-IN')+' '+dt.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
       var tr=document.createElement('tr');
-      tr.innerHTML='<td><strong>'+(history.length-i)+'</strong></td>'
+      tr.id='hrow-'+origIdx;
+      tr.innerHTML='<td><strong>'+(i+1)+'</strong></td>'
         +'<td><strong>'+card.nameEn+'</strong><br><small style="color:#666;font-family:Noto Sans Devanagari,sans-serif">'+card.nameHi+'</small></td>'
         +'<td>'+card.mobile+'</td>'
         +'<td>'+(card.district||'—')+'</td>'
@@ -1955,6 +1982,7 @@ async function renderDashboard(username) {
           +'<button class="dash-btn primary" style="padding:4px 10px;font-size:0.68rem;margin:2px;" onclick="viewCard('+origIdx+')">&#128065; View</button>'
           +'<button class="dash-btn" style="padding:4px 10px;font-size:0.68rem;margin:2px;background:linear-gradient(135deg,#1a5276,#2980b9);color:#fff;" onclick="editCard('+origIdx+')">&#9998; Edit</button>'
           +'<button class="dash-btn" style="padding:4px 10px;font-size:0.68rem;margin:2px;background:linear-gradient(135deg,#c8840b,#f0b429);color:#fff;" onclick="quickDownload('+origIdx+')">&#11015; PDF</button>'
+          +'<button class="dash-btn danger" style="padding:4px 10px;font-size:0.68rem;margin:2px;" onclick="deleteCard('+origIdx+')">&#128465; Delete</button>'
         +'</td>';
       tbody.appendChild(tr);
     });
@@ -1979,6 +2007,8 @@ function showCardForm() {
   document.getElementById('card-preview-section').style.display='none';
   var errBox=document.getElementById('gen-error-box');
   if(errBox) errBox.style.display='none';
+  var btn=document.querySelector('.generate-btn');
+  if(btn) btn.textContent='✅ Generate Farmer ID Card';
   document.getElementById('dashboard-page').style.display='none';
   document.getElementById('main-page').style.display='block';
   window.scrollTo(0,0);
@@ -2249,9 +2279,51 @@ function doGenerate() {
   // --- 2. Generate card visuals ---
   generateCard();
 
-  // --- 3. Save + history ---
+  // --- 3. Edit mode — Firebase update + cache update + dashboard ---
   var username=getCurrentUser(); if(!username) return;
-  if(window._editingCardId) return; // edit mode — skip save
+
+  if(window._editingCardId) {
+    var idx=window._editingCardIndex;
+    var updatedCard={
+      nameEn:      document.getElementById('name-en').value,
+      nameHi:      document.getElementById('name-hi').value,
+      dob:         document.getElementById('dob').value,
+      gender:      document.getElementById('gender').value,
+      caste:       document.getElementById('caste').value,
+      mobile:      document.getElementById('mobile').value,
+      aadhar:      document.getElementById('aadhar').value,
+      farmerId:    document.getElementById('farmer-id').value,
+      enrollmentId:document.getElementById('enrollment-id').value,
+      village:     document.getElementById('village').value,
+      subDistrict: document.getElementById('sub-district').value,
+      district:    document.getElementById('district').value,
+      state:       document.getElementById('state').value,
+      pin:         document.getElementById('pin').value,
+      landSno:     document.getElementById('land-sno').value,
+      landOwnerHi: document.getElementById('land-owner-hi').value,
+      landIdType:  document.getElementById('land-id-type').value,
+      landOwnerType:document.getElementById('land-owner-type').value,
+      landShare:   document.getElementById('land-share').value,
+      landArea:    document.getElementById('land-area').value,
+      landSurvey:  document.getElementById('land-survey').value,
+      timestamp:   (window._cachedHistory[idx]||{}).timestamp||new Date().toISOString()
+    };
+    // Cache update
+    window._cachedHistory[idx]=Object.assign({_id:window._editingCardId}, updatedCard);
+    // Row update in table
+    var oldRow=document.getElementById('hrow-'+idx);
+    if(oldRow) oldRow.remove();
+    _addHistoryRow(window._cachedHistory[idx], idx);
+    // Firebase update
+    window._fbUpdateCard(window._editingCardId, username, updatedCard);
+    // Reset edit mode
+    window._editingCardId=null;
+    window._editingCardIndex=null;
+    var btn=document.querySelector('.generate-btn');
+    if(btn) btn.textContent='✅ Generate Farmer ID Card';
+    _goToDashboard();
+    return;
+  }
 
   var card={
     nameEn:      document.getElementById('name-en').value,
@@ -2340,7 +2412,8 @@ function _addHistoryRow(card, idx) {
     +'<td style="white-space:nowrap;">'
       +'<button class="dash-btn primary" style="padding:4px 10px;font-size:0.68rem;margin:2px;" onclick="viewCard('+idx+')">&#128065; View</button> '
       +'<button class="dash-btn" style="padding:4px 10px;font-size:0.68rem;margin:2px;background:linear-gradient(135deg,#1a5276,#2980b9);color:#fff;" onclick="editCard('+idx+')">&#9998; Edit</button> '
-      +'<button class="dash-btn" style="padding:4px 10px;font-size:0.68rem;margin:2px;background:linear-gradient(135deg,#c8840b,#f0b429);color:#fff;" onclick="quickDownload('+idx+')">&#11015; PDF</button>'
+      +'<button class="dash-btn" style="padding:4px 10px;font-size:0.68rem;margin:2px;background:linear-gradient(135deg,#c8840b,#f0b429);color:#fff;" onclick="quickDownload('+idx+')">&#11015; PDF</button> '
+      +'<button class="dash-btn danger" style="padding:4px 10px;font-size:0.68rem;margin:2px;" onclick="deleteCard('+idx+')">&#128465; Delete</button>'
     +'</td>';
   tbody.insertBefore(tr, tbody.firstChild);
 }
@@ -2361,6 +2434,9 @@ function editCard(index) {
   _fillForm(card);
   document.getElementById('dashboard-page').style.display='none';
   document.getElementById('main-page').style.display='block';
+  // Button label badlo
+  var btn=document.querySelector('.generate-btn');
+  if(btn) btn.textContent='💾 Update Farmer ID Card';
   setTimeout(function(){generateCard();},200);
 }
 
@@ -2369,6 +2445,53 @@ function quickDownload(index) {
   _fillForm(card);
   document.getElementById('main-page').style.display='block';
   setTimeout(function(){ generateCard(); setTimeout(downloadCard,600); },200);
+}
+
+async function deleteCard(index) {
+  var cache = window._cachedHistory || [];
+  var card = cache[index];
+  if(!card) { alert('Card nahi mila!'); return; }
+
+  if(!confirm('⚠️ "'+ card.nameEn +'" ka card delete karna chahte hain?\nYeh action undo nahi hogi!')) return;
+
+  // 1. Row DOM se hatao — ID se ya manual search se
+  var tr = document.getElementById('hrow-'+index);
+  if(!tr) {
+    // Fallback: tbody mein se farmer ID se dhundho
+    var rows = document.querySelectorAll('#history-tbody tr');
+    rows.forEach(function(r){
+      if(r.textContent.indexOf(card.farmerId) !== -1) tr = r;
+    });
+  }
+  if(tr) {
+    tr.style.transition='opacity 0.3s';
+    tr.style.opacity='0';
+    setTimeout(function(){ if(tr.parentNode) tr.parentNode.removeChild(tr); }, 350);
+  }
+
+  // 2. Cache se hatao
+  window._cachedHistory.splice(index, 1);
+  updateDashboardStats(window._cachedHistory);
+
+  // 3. Khali ho gayi check
+  if(window._cachedHistory.length === 0){
+    document.getElementById('history-empty').style.display='block';
+    document.getElementById('history-table-wrap').style.display='none';
+  }
+
+  // 4. Firebase se delete — _id chahiye
+  var cardId = card._id;
+  if(cardId && cardId !== '' && !String(cardId).startsWith('temp_')){
+    try {
+      await window._db.collection('cards').doc(cardId).delete();
+      console.log('Firebase delete success:', cardId);
+    } catch(e) {
+      console.error('Firebase delete error:', e);
+      alert('Firebase se delete nahi hua: ' + e.message);
+    }
+  } else {
+    console.warn('No valid _id for Firebase delete:', cardId);
+  }
 }
 
 function _fillForm(card) {

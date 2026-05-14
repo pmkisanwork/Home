@@ -1228,8 +1228,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
       <!-- Welcome Message Strip -->
       <div id="admin-welcome-strip" style="margin-top:14px;background:linear-gradient(90deg,rgba(37,168,74,.12),rgba(240,165,0,.08),rgba(37,168,74,.12));border:1px solid rgba(78,203,110,.18);border-radius:12px;padding:8px 16px;display:flex;align-items:center;gap:10px;animation:welcomeSlide .8s ease both">
-        <span style="font-size:1rem">👋</span>
-        <span style="font-size:.8rem;color:rgba(255,255,255,.7)">Swagat hai! <strong style="color:#4ecb6e" id="admin-welcome-name">Admin</strong> — Aaj ka din productive rahe!</span>
+        <span style="font-size:1.3rem" id="admin-greet-icon">🌅</span>
+        <span style="font-size:.8rem;color:rgba(255,255,255,.7)" id="admin-greet-text">Good Morning! <strong style="color:#4ecb6e" id="admin-welcome-name">Admin</strong> — Aaj ka din productive rahe!</span>
         <div style="margin-left:auto;font-size:.68rem;color:rgba(255,255,255,.35)" id="admin-login-time">Login: --:--</div>
       </div>
     </div>
@@ -2350,10 +2350,20 @@ function exportAdminCSV(){
 // ══════════════════════════════════════
 function getAdminGreeting(){
   const h = new Date().getHours();
-  if(h < 12) return '🌅 Subah ka Swagat!';
-  if(h < 17) return '☀️ Dopahar Mubarak!';
-  if(h < 20) return '🌇 Shaam Mubarak!';
-  return '🌙 Raat Mubarak!';
+  if(h >= 5 && h < 12)  return { icon:'🌅', text:'Good Morning!',  sub:'Subah ka swagat — energy se bhara din aaye!' };
+  if(h >= 12 && h < 17) return { icon:'☀️', text:'Good Afternoon!', sub:'Dopahar mubarak — kaam mein mazaa aaye!' };
+  if(h >= 17 && h < 21) return { icon:'🌇', text:'Good Evening!',  sub:'Shaam sundar ho — safalta miley!' };
+  return { icon:'🌙', text:'Good Night!', sub:'Raat ko aaram karein — kal phir milenge!' };
+}
+
+function applyAdminGreeting(){
+  const g = getAdminGreeting();
+  const iconEl = document.getElementById('admin-greet-icon');
+  const textEl = document.getElementById('admin-greet-text');
+  const nameEl = document.getElementById('admin-welcome-name');
+  const name   = (nameEl ? nameEl.textContent : null) || 'Admin';
+  if(iconEl) iconEl.textContent = g.icon;
+  if(textEl) textEl.innerHTML = g.text + ' <strong style="color:#4ecb6e" id="admin-welcome-name">' + name + '</strong> — ' + g.sub;
 }
 
 // ── INIT ──
@@ -7396,11 +7406,7 @@ setInterval(syncAdminHeroStats, 2000);
       syncAdminHeroStats();
       showAdminFab();
       // Smart greeting in welcome strip
-      const strip = document.getElementById('admin-welcome-strip');
-      const greetSpan = strip && strip.querySelector('span:first-of-type');
-      if(greetSpan) greetSpan.textContent = getAdminGreeting().split(' ').slice(1).join(' ');
-      const greetIcon = strip && strip.querySelector('span[style*="font-size:1rem"]');
-      if(greetIcon) greetIcon.textContent = getAdminGreeting().split(' ')[0];
+      applyAdminGreeting();
     }, 600);
   };
   // Also hide FAB on logout

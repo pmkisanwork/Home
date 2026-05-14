@@ -499,6 +499,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 /* ══ PRO ADMIN ENHANCEMENTS ══ */
 @keyframes welcomeSlide{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes tickerScroll{0%{transform:translateY(-50%) translateX(100vw)}100%{transform:translateY(-50%) translateX(-100%)}}
 @keyframes clockPulse{0%,100%{text-shadow:0 0 20px rgba(78,203,110,.5)}50%{text-shadow:0 0 35px rgba(78,203,110,.9),0 0 60px rgba(78,203,110,.3)}}
 #live-clock{animation:clockPulse 2s ease-in-out infinite}
 
@@ -957,6 +958,16 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
   </div>
 
+  <!-- ANNOUNCEMENT TICKER -->
+  <div id="admin-ticker-wrap" style="display:none;background:#f0a500;overflow:hidden;height:34px;position:relative;border-bottom:2px solid #c47c00">
+    <div style="display:flex;align-items:center;height:100%">
+      <div style="background:#c47c00;color:#fff;font-size:.65rem;font-weight:800;letter-spacing:.1em;padding:0 12px;height:100%;display:flex;align-items:center;white-space:nowrap;flex-shrink:0;z-index:2">📢 NOTICE</div>
+      <div style="flex:1;overflow:hidden;position:relative;height:100%">
+        <div id="admin-ticker-text" style="display:inline-block;white-space:nowrap;position:absolute;top:50%;transform:translateY(-50%);font-size:.78rem;font-weight:700;color:#3a1a00;animation:tickerScroll 18s linear infinite"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- PRO HERO SECTION -->
   <div class="udash-hero">
     <div class="udash-hero-inner">
@@ -1228,8 +1239,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
       <!-- Welcome Message Strip -->
       <div id="admin-welcome-strip" style="margin-top:14px;background:linear-gradient(90deg,rgba(37,168,74,.12),rgba(240,165,0,.08),rgba(37,168,74,.12));border:1px solid rgba(78,203,110,.18);border-radius:12px;padding:8px 16px;display:flex;align-items:center;gap:10px;animation:welcomeSlide .8s ease both">
-        <span style="font-size:1.3rem" id="admin-greet-icon">🌅</span>
-        <span style="font-size:.8rem;color:rgba(255,255,255,.7)" id="admin-greet-text">Good Morning! <strong style="color:#4ecb6e" id="admin-welcome-name">Admin</strong> — Aaj ka din productive rahe!</span>
+        <span style="font-size:1rem">👋</span>
+        <span style="font-size:.8rem;color:rgba(255,255,255,.7)">Swagat hai! <strong style="color:#4ecb6e" id="admin-welcome-name">Admin</strong> — Aaj ka din productive rahe!</span>
         <div style="margin-left:auto;font-size:.68rem;color:rgba(255,255,255,.35)" id="admin-login-time">Login: --:--</div>
       </div>
     </div>
@@ -2350,20 +2361,10 @@ function exportAdminCSV(){
 // ══════════════════════════════════════
 function getAdminGreeting(){
   const h = new Date().getHours();
-  if(h >= 5 && h < 12)  return { icon:'🌅', text:'Good Morning!',  sub:'Subah ka swagat — energy se bhara din aaye!' };
-  if(h >= 12 && h < 17) return { icon:'☀️', text:'Good Afternoon!', sub:'Dopahar mubarak — kaam mein mazaa aaye!' };
-  if(h >= 17 && h < 21) return { icon:'🌇', text:'Good Evening!',  sub:'Shaam sundar ho — safalta miley!' };
-  return { icon:'🌙', text:'Good Night!', sub:'Raat ko aaram karein — kal phir milenge!' };
-}
-
-function applyAdminGreeting(){
-  const g = getAdminGreeting();
-  const iconEl = document.getElementById('admin-greet-icon');
-  const textEl = document.getElementById('admin-greet-text');
-  const nameEl = document.getElementById('admin-welcome-name');
-  const name   = (nameEl ? nameEl.textContent : null) || 'Admin';
-  if(iconEl) iconEl.textContent = g.icon;
-  if(textEl) textEl.innerHTML = g.text + ' <strong style="color:#4ecb6e" id="admin-welcome-name">' + name + '</strong> — ' + g.sub;
+  if(h < 12) return '🌅 Subah ka Swagat!';
+  if(h < 17) return '☀️ Dopahar Mubarak!';
+  if(h < 20) return '🌇 Shaam Mubarak!';
+  return '🌙 Raat Mubarak!';
 }
 
 // ── INIT ──
@@ -3149,7 +3150,8 @@ async function doRegister(){
 
 // ── SHOW USER APP ──
 async function showUserApp(user){
-  showPage('form-page');
+  showPage('user-dash-page');
+  renderUserDash();
   loadFormQR();
   // First apply with localStorage DP (fast)
   const localDp = localStorage.getItem('user_dp_'+user.mobile);
@@ -3178,6 +3180,33 @@ async function showUserApp(user){
   _notifCheckInterval = setInterval(()=>checkApprovalNotifications(user.mobile), 60000);
   // Check once immediately after 3s
   setTimeout(()=>checkApprovalNotifications(user.mobile), 3000);
+  // Load admin announcement ticker
+  loadAdminNoticeForUser();
+}
+
+function loadAdminNoticeForUser(){
+  db.ref('admin_config/notice').once('value').then(snap=>{
+    const notice = snap.val();
+    const wrap   = document.getElementById('admin-ticker-wrap');
+    const textEl = document.getElementById('admin-ticker-text');
+    if(!wrap || !textEl) return;
+    if(notice && notice.trim()){
+      // Repeat text so it scrolls continuously without gap
+      const repeated = notice.trim() + '     ✦     ' + notice.trim() + '     ✦     ' + notice.trim();
+      textEl.textContent = repeated;
+      // Reset animation
+      textEl.style.animation = 'none';
+      textEl.offsetHeight; // reflow
+      const dur = Math.max(12, notice.trim().length * 0.22) + 's';
+      textEl.style.animation = 'tickerScroll ' + dur + ' linear infinite';
+      wrap.style.display = 'block';
+    } else {
+      wrap.style.display = 'none';
+    }
+  }).catch(()=>{ 
+    const wrap = document.getElementById('admin-ticker-wrap');
+    if(wrap) wrap.style.display = 'none';
+  });
 }
 
 // ── SHOW ADMIN DASH ──
@@ -4853,12 +4882,19 @@ function adminSaveNote(){
   const ta = document.getElementById('admin-note-area');
   const st = document.getElementById('admin-note-status');
   if(!ta) return;
-  localStorage.setItem('awo_admin_note', ta.value);
-  if(st){
-    st.textContent='✅ Note saved — '+new Date().toLocaleTimeString('hi-IN',{hour:'2-digit',minute:'2-digit'});
-    st.style.color='#1a7a35';
-  }
-  toast('📝 Note save ho gaya!','ok');
+  const noteVal = ta.value.trim();
+  localStorage.setItem('awo_admin_note', noteVal);
+  // Save to Firebase so all users see the ticker
+  db.ref('admin_config/notice').set(noteVal || null).then(()=>{
+    if(st){
+      st.textContent='✅ Saved — '+new Date().toLocaleTimeString('hi-IN',{hour:'2-digit',minute:'2-digit'});
+      st.style.color='#1a7a35';
+    }
+    toast('📢 Announcement sabhi users ko ticker mein dikhega!','ok');
+  }).catch(()=>{
+    if(st){ st.textContent='⚠️ Local save hua, Firebase error'; st.style.color='#c07800'; }
+    toast('📝 Note local save ho gaya','ok');
+  });
 }
 
 function adminClearNote(){
@@ -4866,6 +4902,8 @@ function adminClearNote(){
   const st = document.getElementById('admin-note-status');
   if(ta){ ta.value=''; localStorage.removeItem('awo_admin_note'); }
   if(st){ st.textContent='🗑️ Note clear ho gaya'; st.style.color='#c0392b'; }
+  db.ref('admin_config/notice').remove().catch(()=>{});
+  toast('🗑️ Announcement hata diya gaya','ok');
 }
 
 function adminLoadNote(){
@@ -7406,7 +7444,11 @@ setInterval(syncAdminHeroStats, 2000);
       syncAdminHeroStats();
       showAdminFab();
       // Smart greeting in welcome strip
-      applyAdminGreeting();
+      const strip = document.getElementById('admin-welcome-strip');
+      const greetSpan = strip && strip.querySelector('span:first-of-type');
+      if(greetSpan) greetSpan.textContent = getAdminGreeting().split(' ').slice(1).join(' ');
+      const greetIcon = strip && strip.querySelector('span[style*="font-size:1rem"]');
+      if(greetIcon) greetIcon.textContent = getAdminGreeting().split(' ')[0];
     }, 600);
   };
   // Also hide FAB on logout

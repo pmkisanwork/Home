@@ -3424,10 +3424,13 @@ async function fpSendOtp(){
     if(mobile !== _ADMIN_MOBILE_FIXED){
       errEl.textContent='❌ Admin mobile number galat hai'; errEl.style.display='block'; return;
     }
-    // Email blank hai to hardcoded email use karo
-    if(!email) email = _adminEmail || 'shivamgupta18@zohomail.in';
-    // Agar email dala hai to validate karo
-    if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ errEl.textContent='❌ Sahi email ID daalen ya blank chhod dein'; errEl.style.display='block'; return; }
+    // Email compulsory — blank nahi hona chahiye
+    if(!email){ errEl.textContent='❌ Admin email ID daalna zaroori hai'; errEl.style.display='block'; return; }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ errEl.textContent='❌ Sahi email ID daalen'; errEl.style.display='block'; return; }
+    // Email Firebase se match karein
+    if(_adminEmail && email.toLowerCase() !== _adminEmail.toLowerCase()){
+      errEl.textContent='❌ Yeh email admin account se match nahi karti'; errEl.style.display='block'; return;
+    }
   }
 
   _fpOtpMobile = mobile;
@@ -7245,8 +7248,8 @@ async function pmkCheckStatus(){
             onblur="this.style.borderColor='rgba(37,168,74,.28)';this.style.boxShadow='none'"/>
         </div>
         <div style="margin-bottom:18px">
-          <label style="display:block;font-size:.75rem;font-weight:700;color:#2a5c2a;margin-bottom:6px">📧 Admin Email ID <span style="color:#9abf9a;font-weight:400">(optional)</span></label>
-          <input id="fp-admin-email" type="email" placeholder="Admin ki email ID (ya blank chhod dein)"
+          <label style="display:block;font-size:.75rem;font-weight:700;color:#2a5c2a;margin-bottom:6px">📧 Admin Email ID <span style="color:#e53935;font-weight:600">*</span></label>
+          <input id="fp-admin-email" type="email" placeholder="Admin ki registered email ID daalen"
             style="width:100%;background:#f4fbf5;border:1.5px solid rgba(37,168,74,.28);border-radius:11px;padding:11px 14px;color:#1a2e1a;font-family:'Poppins',sans-serif;font-size:.87rem;outline:none;transition:all .2s"
             onfocus="this.style.borderColor='#25a84a';this.style.boxShadow='0 0 0 3px rgba(37,168,74,.12)'"
             onblur="this.style.borderColor='rgba(37,168,74,.28)';this.style.boxShadow='none'"/>

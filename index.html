@@ -151,40 +151,116 @@
 
     /* ── HERO ── */
     .hero {
-      background: linear-gradient(145deg, #060f20 0%, #0d1e40 40%, #0a1830 70%, #040c1a 100%);
       position: relative; overflow: hidden;
       padding: 90px 20px 100px;
       text-align: center;
+      background: #060f20;
+    }
+
+    /* ── HERO SLIDESHOW ── */
+    .hero-slideshow {
+      position: absolute; inset: 0;
+      z-index: 0;
+    }
+    .hero-slide {
+      position: absolute; inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 1.4s ease-in-out;
+    }
+    .hero-slide.active { opacity: 1; }
+
+    /* Beautiful India-themed gradient slides */
+    .hero-slide:nth-child(1) {
+      background-image:
+        linear-gradient(145deg, rgba(4,8,20,0.82) 0%, rgba(10,18,40,0.75) 40%, rgba(4,12,28,0.85) 100%),
+        url('https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1600&q=80');
+    }
+    .hero-slide:nth-child(2) {
+      background-image:
+        linear-gradient(145deg, rgba(4,8,20,0.80) 0%, rgba(8,20,35,0.72) 50%, rgba(2,10,22,0.85) 100%),
+        url('https://images.unsplash.com/photo-1587474260584-136574528ed5?w=1600&q=80');
+    }
+    .hero-slide:nth-child(3) {
+      background-image:
+        linear-gradient(145deg, rgba(4,8,20,0.78) 0%, rgba(6,16,32,0.70) 50%, rgba(4,10,24,0.88) 100%),
+        url('https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1600&q=80');
+    }
+    .hero-slide:nth-child(4) {
+      background-image:
+        linear-gradient(145deg, rgba(4,8,20,0.82) 0%, rgba(12,22,42,0.75) 50%, rgba(4,8,20,0.85) 100%),
+        url('https://images.unsplash.com/photo-1609763986661-9b3d3c7f3b10?w=1600&q=80');
+    }
+
+    /* Ken-Burns zoom animation */
+    @keyframes kenBurns1 {
+      0%   { transform: scale(1.0) translateX(0%); }
+      100% { transform: scale(1.12) translateX(-2%); }
+    }
+    @keyframes kenBurns2 {
+      0%   { transform: scale(1.0) translateX(0%); }
+      100% { transform: scale(1.1) translateX(2%); }
+    }
+    @keyframes kenBurns3 {
+      0%   { transform: scale(1.05); }
+      100% { transform: scale(1.15) translateY(-2%); }
+    }
+    @keyframes kenBurns4 {
+      0%   { transform: scale(1.0) translateX(2%); }
+      100% { transform: scale(1.12) translateX(0%); }
+    }
+    .hero-slide:nth-child(1).active { animation: kenBurns1 8s ease-in-out forwards; }
+    .hero-slide:nth-child(2).active { animation: kenBurns2 8s ease-in-out forwards; }
+    .hero-slide:nth-child(3).active { animation: kenBurns3 8s ease-in-out forwards; }
+    .hero-slide:nth-child(4).active { animation: kenBurns4 8s ease-in-out forwards; }
+
+    /* Slide indicator dots */
+    .hero-slide-dots {
+      position: absolute; bottom: 28px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; gap: 8px; z-index: 5;
+    }
+    .hero-dot {
+      width: 8px; height: 8px; border-radius: 99px;
+      background: rgba(255,255,255,0.3);
+      border: 1px solid rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition: all 0.4s ease;
+    }
+    .hero-dot.active {
+      width: 28px;
+      background: var(--saffron);
+      border-color: var(--saffron);
+      box-shadow: 0 0 10px rgba(255,107,0,0.6);
     }
 
     /* Ambient glow effects */
-    .hero::before {
-      content: '';
+    .hero-glow-top {
       position: absolute;
       width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(255,107,0,0.12) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(255,107,0,0.10) 0%, transparent 70%);
       top: -100px; left: 50%;
       transform: translateX(-50%);
-      pointer-events: none;
+      pointer-events: none; z-index: 2;
     }
-    .hero::after {
-      content: '';
+    .hero-glow-bottom {
       position: absolute;
       width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(19,136,8,0.08) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(19,136,8,0.07) 0%, transparent 70%);
       bottom: -50px; right: -100px;
-      pointer-events: none;
+      pointer-events: none; z-index: 2;
     }
 
     /* Dot grid bg */
     .hero-bg-dots {
       position: absolute; inset: 0;
-      background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-image: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
       background-size: 28px 28px;
-      pointer-events: none;
+      pointer-events: none; z-index: 2;
     }
 
-    .hero-content { position: relative; z-index: 2; }
+    .hero-content { position: relative; z-index: 3; }
 
     .hero-tricolor {
       display: flex; justify-content: center; gap: 3px; margin-bottom: 32px;
@@ -989,6 +1065,19 @@
 
 <!-- HERO -->
 <section class="hero">
+
+  <!-- Slideshow Background -->
+  <div class="hero-slideshow">
+    <div class="hero-slide active"></div>
+    <div class="hero-slide"></div>
+    <div class="hero-slide"></div>
+    <div class="hero-slide"></div>
+  </div>
+
+  <!-- Glow overlays -->
+  <div class="hero-glow-top"></div>
+  <div class="hero-glow-bottom"></div>
+
   <div class="hero-bg-dots"></div>
   <div class="hero-content">
     <div class="hero-tricolor">
@@ -1022,6 +1111,15 @@
       <a href="Contact.html" class="btn-secondary">📞 Sampark Karein</a>
     </div>
   </div>
+
+  <!-- Slide Indicator Dots -->
+  <div class="hero-slide-dots">
+    <div class="hero-dot active" onclick="goToSlide(0)"></div>
+    <div class="hero-dot" onclick="goToSlide(1)"></div>
+    <div class="hero-dot" onclick="goToSlide(2)"></div>
+    <div class="hero-dot" onclick="goToSlide(3)"></div>
+  </div>
+
 </section>
 
 <!-- TRUSTED BY -->
@@ -1627,6 +1725,28 @@
 </footer>
 
 <script>
+  // ── HERO SLIDESHOW ──
+  const slides = document.querySelectorAll('.hero-slide');
+  const dots = document.querySelectorAll('.hero-dot');
+  let currentSlide = 0;
+  let slideshowTimer;
+
+  function goToSlide(n) {
+    slides[currentSlide].classList.remove('active');
+    dots[currentSlide].classList.remove('active');
+    currentSlide = n;
+    slides[currentSlide].classList.add('active');
+    dots[currentSlide].classList.add('active');
+    clearInterval(slideshowTimer);
+    slideshowTimer = setInterval(nextSlide, 5000);
+  }
+
+  function nextSlide() {
+    goToSlide((currentSlide + 1) % slides.length);
+  }
+
+  slideshowTimer = setInterval(nextSlide, 5000);
+
   // Mobile menu
   function toggleMenu() {
     const menu = document.getElementById('mobileMenu');

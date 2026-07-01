@@ -1245,28 +1245,6 @@ body::before{content:'';position:fixed;inset:0;
             <div id="pks-result" style="margin-top:14px"></div>
           </div>
 
-          <!-- ── ALL RECORDS TABLE (update ke liye) ── -->
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
-            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-              <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);display:flex;align-items:center;gap:8px">📋 Saare Status Records <span class="count-badge" id="pks-recCount">0</span></h3>
-              <input type="text" id="pks-recSearch" placeholder="🔍 Naam, Reg No, Village..." oninput="pksRenderRecords()"
-                style="padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.78rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:230px"/>
-            </div>
-            <div style="overflow-x:auto">
-              <table style="width:100%;border-collapse:collapse;font-size:.75rem">
-                <thead><tr style="border-bottom:1px solid var(--border)">
-                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700;white-space:nowrap">🆔 Reg No</th>
-                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">👨‍🌾 Name</th>
-                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">📱 Mobile</th>
-                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">🏘️ Village</th>
-                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">📊 Status</th>
-                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">⚙️ Action</th>
-                </tr></thead>
-                <tbody id="pks-recordsBody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text2)">🔄 Loading...</td></tr></tbody>
-              </table>
-            </div>
-          </div>
-
           <!-- ── ADD / UPDATE ENTRY CARD ── -->
           <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px" id="pks-formCard">
             <h3 id="pks-formTitle" style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);padding-bottom:10px">📝 Naya Status Entry Add Karein</h3>
@@ -1289,6 +1267,29 @@ body::before{content:'';position:fixed;inset:0;
             </div>
             <div id="pks-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:11px 14px;margin-top:12px;font-size:.8rem;color:var(--g4);font-weight:600"></div>
           </div>
+
+          <!-- ── ALL RECORDS TABLE (update ke liye) ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+              <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);display:flex;align-items:center;gap:8px">📋 Saare Status Records <span class="count-badge" id="pks-recCount">0</span></h3>
+              <input type="text" id="pks-recSearch" placeholder="🔍 Naam, Reg No, Village..." oninput="pksRenderRecords()"
+                style="padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.78rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:230px"/>
+            </div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:.75rem">
+                <thead><tr style="border-bottom:1px solid var(--border)">
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700;white-space:nowrap">🆔 Reg No</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">👨‍🌾 Name</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">📱 Mobile</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">🏘️ Village</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">📊 Status</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">⚙️ Action</th>
+                </tr></thead>
+                <tbody id="pks-recordsBody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text2)">🔄 Loading...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
 
         <!-- ═══ USERS ═══ -->

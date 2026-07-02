@@ -1396,535 +1396,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   </div>
 </div>
 
-<div id="admin-dash-page" class="page" style="display:none">
-  <div class="header">
-    <div class="header-inner">
-      <a href="#" class="logo"><div class="logo-icon">🌾</div><span class="logo-text" style="background:linear-gradient(90deg,#0d4a1f,#1a7a35);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">All Work Online</span></a>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="admin-badge">🛡️ Admin</div>
 
-        <!-- 🔧 FIX 8: Admin Real-time Notification Bell -->
-        <div style="position:relative" id="admin-notif-wrap">
-          <button onclick="toggleAdminNotifPanel()" style="position:relative;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .2s" title="Admin Notifications">
-            🔔
-            <span id="admin-notif-dot" style="position:absolute;top:4px;right:4px;width:9px;height:9px;background:#ff5252;border-radius:50%;border:2px solid #0a1e10;display:none"></span>
-          </button>
-          <div id="admin-notif-panel" style="position:absolute;top:calc(100%+8px);right:0;background:#0d2e15;border:1px solid rgba(37,168,74,.25);border-radius:16px;width:300px;max-height:360px;overflow-y:auto;box-shadow:0 16px 40px rgba(0,0,0,.5);opacity:0;transform:translateY(-8px) scale(.96);pointer-events:none;transition:all .2s;z-index:201">
-            <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between">
-              <div style="font-weight:700;font-size:.82rem;color:#fff">🆕 New Submissions</div>
-              <button onclick="markAllAdminRead()" style="font-size:.68rem;color:var(--g4);cursor:pointer;border:none;background:none;font-family:'Poppins',sans-serif;padding:0">Mark All Read</button>
-            </div>
-            <div id="admin-notif-list"><div style="padding:20px;text-align:center;color:rgba(15,50,15,.4);font-size:.78rem">🔕 Koi notification nahi</div></div>
-          </div>
-        </div>
-
-        <!-- Admin Profile Dropdown -->
-        <div class="user-menu">
-          <button class="user-btn" onclick="toggleAdminMenu()">
-            <div class="u-avatar" id="admin-hdr-av" style="background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;font-weight:800;overflow:hidden;padding:0">S</div>
-            <span id="admin-hdr-nm" style="color:#1a3a20">Shivam</span>
-            <span style="font-size:.65rem;margin-left:2px">▾</span>
-          </button>
-          <div class="u-dd" id="admin-dd">
-            <div class="u-dd-info">
-              <div style="display:flex;align-items:center;gap:9px;margin-bottom:6px">
-                <div id="admin-dd-dp" style="width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid rgba(240,165,0,.5);display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--gold),var(--gold2));font-size:14px;font-weight:800;color:#0d4a1f">S</div>
-                <div>
-                  <div class="u-dd-name" id="admin-dd-name">👤 Shivam Gupta</div>
-                  <div style="font-size:.62rem;color:var(--gold2);font-weight:700;margin-top:1px">🛡️ Administration</div>
-                  <div class="u-dd-mob" id="admin-dd-mob">📱 8960947991</div>
-                </div>
-              </div>
-            </div>
-            <button class="dd-btn" onclick="openAdminProfile();document.getElementById('admin-dd').classList.remove('open')">👤 Profile Update Karein</button>
-            <button class="dd-btn" onclick="openAdminIDCard();document.getElementById('admin-dd').classList.remove('open')" style="color:#1a6e2e;font-weight:700">🪪 Admin ID Card</button>
-            <button class="dd-btn" onclick="openChangePass()">🔑 Password Change Karein</button>
-            <button class="dd-btn" onclick="openQRReplace()">📷 QR Code Replace Karein</button>
-            <button class="dd-btn" onclick="openAdminAchieve()">🏆 Achievements Dekhe</button>
-            <button class="dd-btn" onclick="openPMKPortal();document.getElementById('admin-dd').classList.remove('open')" style="color:#f9a825;font-weight:700">🌾 PM KISAN Portal</button>
-            <button class="dd-btn red" onclick="doLogout()">🚪 Logout</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ PRO ADMIN TOP BAR — Session + Live Clock ══ -->
-  <div id="admin-session-bar" style="background:linear-gradient(90deg,rgba(13,74,31,.98),rgba(26,122,53,.95));border-bottom:1px solid rgba(78,203,110,.18);padding:0 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;min-height:42px;">
-
-    <!-- Left: Session Timer -->
-    <div style="display:flex;align-items:center;gap:10px">
-      <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:4px 12px;">
-        <span style="font-size:.7rem;color:rgba(255,255,255,.5)">⏱️ Session</span>
-        <span id="admin-session-time" style="color:#4ecb6e;font-weight:800;font-size:.82rem;font-family:'Baloo 2',cursive;letter-spacing:.5px">20:00</span>
-      </div>
-      <div id="admin-pro-badge" style="display:flex;align-items:center;gap:5px;background:linear-gradient(135deg,rgba(240,165,0,.2),rgba(255,208,86,.12));border:1px solid rgba(240,165,0,.4);border-radius:20px;padding:4px 11px;">
-        <span style="font-size:.62rem">⚡</span>
-        <span style="font-size:.65rem;font-weight:800;color:#ffd056;letter-spacing:1px;text-transform:uppercase">Pro Admin</span>
-      </div>
-    </div>
-
-    <!-- Center: Live Digital Clock -->
-    <div style="display:flex;align-items:center;gap:14px">
-      <div style="text-align:center;background:rgba(0,0,0,.25);border:1px solid rgba(78,203,110,.2);border-radius:14px;padding:6px 18px;display:flex;align-items:center;gap:12px">
-        <!-- Clock Face -->
-        <div>
-          <div id="live-clock" style="font-family:'Baloo 2',cursive;font-size:1.35rem;font-weight:800;color:#fff;letter-spacing:2px;line-height:1;text-shadow:0 0 20px rgba(78,203,110,.5)">00:00:00</div>
-          <div id="live-ampm" style="font-size:.58rem;font-weight:700;color:#4ecb6e;letter-spacing:2px;text-align:center;margin-top:1px">AM</div>
-        </div>
-        <div style="width:1px;height:28px;background:rgba(255,255,255,.12)"></div>
-        <!-- Date -->
-        <div>
-          <div id="live-date" style="font-size:.72rem;font-weight:700;color:rgba(255,255,255,.8);letter-spacing:.3px">Loading...</div>
-          <div id="live-day" style="font-size:.6rem;color:rgba(255,255,255,.45);font-weight:600;margin-top:1px;text-align:center">---</div>
-        </div>
-        <!-- Mini Analog Clock -->
-        <div style="width:1px;height:28px;background:rgba(255,255,255,.12)"></div>
-        <canvas id="mini-analog-clock" width="36" height="36" style="border-radius:50%;background:rgba(0,0,0,.3);border:1.5px solid rgba(78,203,110,.3)"></canvas>
-      </div>
-    </div>
-
-    <!-- Right: Quick Links -->
-    <div style="display:flex;align-items:center;gap:7px">
-      <button onclick="openPMKPortal()" style="padding:5px 12px;font-size:.72rem;background:linear-gradient(135deg,#f9a825,#e65100);border:none;border-radius:20px;color:#fff;font-family:'Poppins',sans-serif;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 3px 10px rgba(249,168,37,.35);transition:all .2s" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">🌾 KISAN</button>
-      <button onclick="openSafeClearAll()" style="padding:5px 12px;font-size:.72rem;background:rgba(229,62,62,.15);border:1px solid rgba(229,62,62,.3);color:#fc8181;font-family:'Poppins',sans-serif;font-weight:700;cursor:pointer;border-radius:20px;transition:all .2s">🗑️ Clear</button>
-    </div>
-  </div>
-
-  <!-- ══ PRO ADMIN HERO BANNER ══ -->
-  <div style="background:linear-gradient(135deg,#071510 0%,#0d2e15 40%,#1a4a25 100%);padding:28px 20px 22px;border-bottom:1px solid rgba(78,203,110,.12);position:relative;overflow:hidden;">
-    <!-- Animated background grid -->
-    <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(78,203,110,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(78,203,110,.04) 1px,transparent 1px);background-size:32px 32px;pointer-events:none"></div>
-    <!-- Glow orbs -->
-    <div style="position:absolute;top:-40px;left:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(37,168,74,.15) 0%,transparent 70%);pointer-events:none"></div>
-    <div style="position:absolute;bottom:-40px;right:10%;width:160px;height:160px;background:radial-gradient(circle,rgba(240,165,0,.08) 0%,transparent 70%);pointer-events:none"></div>
-
-    <div style="max-width:1100px;margin:0 auto;position:relative;z-index:1;">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
-
-        <!-- Left: Admin Identity -->
-        <div style="display:flex;align-items:center;gap:16px;">
-          <!-- Admin Avatar Ring -->
-          <div style="position:relative">
-            <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f0a500,#ffd056);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;color:#071510;border:3px solid rgba(240,165,0,.4);box-shadow:0 0 0 6px rgba(240,165,0,.1),0 8px 24px rgba(240,165,0,.3)" id="admin-hero-av">S</div>
-            <div style="position:absolute;bottom:2px;right:2px;width:14px;height:14px;background:#25a84a;border-radius:50%;border:2px solid #0d2e15;box-shadow:0 0 6px rgba(37,168,74,.6)"></div>
-          </div>
-          <div>
-            <div style="font-size:.65rem;font-weight:700;color:#4ecb6e;letter-spacing:2px;text-transform:uppercase;margin-bottom:3px">🛡️ Administrator</div>
-            <div id="admin-hero-name" style="font-family:'Baloo 2',cursive;font-size:1.55rem;font-weight:800;color:#fff;line-height:1.1">Shivam Gupta</div>
-            <div id="admin-hero-mob" style="font-size:.78rem;color:rgba(255,255,255,.5);margin-top:3px;display:flex;align-items:center;gap:6px">
-              <span style="background:rgba(37,168,74,.15);border:1px solid rgba(37,168,74,.25);color:#4ecb6e;padding:2px 8px;border-radius:10px;font-size:.65rem;font-weight:700">📱 Active</span>
-              <span id="admin-hero-mob-num">8960947991</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: Quick Stats Row -->
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:12px 18px;text-align:center;min-width:80px">
-            <div style="font-family:'Baloo 2',cursive;font-size:1.5rem;font-weight:800;color:#ffd056" id="hero-total">0</div>
-            <div style="font-size:.6rem;color:rgba(255,255,255,.4);margin-top:1px;font-weight:600">Total Apps</div>
-          </div>
-          <div style="background:rgba(37,168,74,.08);border:1px solid rgba(37,168,74,.2);border-radius:14px;padding:12px 18px;text-align:center;min-width:80px">
-            <div style="font-family:'Baloo 2',cursive;font-size:1.5rem;font-weight:800;color:#4ecb6e" id="hero-approved">0</div>
-            <div style="font-size:.6rem;color:rgba(37,168,74,.5);margin-top:1px;font-weight:600">Approved ✅</div>
-          </div>
-          <div style="background:rgba(240,165,0,.06);border:1px solid rgba(240,165,0,.2);border-radius:14px;padding:12px 18px;text-align:center;min-width:80px">
-            <div style="font-family:'Baloo 2',cursive;font-size:1.5rem;font-weight:800;color:#ffd056" id="hero-pending">0</div>
-            <div style="font-size:.6rem;color:rgba(240,165,0,.5);margin-top:1px;font-weight:600">Pending ⏳</div>
-          </div>
-          <div style="background:rgba(56,139,253,.06);border:1px solid rgba(56,139,253,.18);border-radius:14px;padding:12px 18px;text-align:center;min-width:80px">
-            <div style="font-family:'Baloo 2',cursive;font-size:1.5rem;font-weight:800;color:#79b8ff" id="hero-revenue">₹0</div>
-            <div style="font-size:.6rem;color:rgba(56,139,253,.4);margin-top:1px;font-weight:600">Revenue 💰</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Welcome Message Strip -->
-      <div id="admin-welcome-strip" style="margin-top:14px;background:linear-gradient(90deg,rgba(37,168,74,.12),rgba(240,165,0,.08),rgba(37,168,74,.12));border:1px solid rgba(78,203,110,.18);border-radius:12px;padding:8px 16px;display:flex;align-items:center;gap:10px;animation:welcomeSlide .8s ease both">
-        <span style="font-size:1rem">👋</span>
-        <span style="font-size:.8rem;color:rgba(255,255,255,.7)">Swagat hai! <strong style="color:#4ecb6e" id="admin-welcome-name">Admin</strong> — Aaj ka din productive rahe!</span>
-        <div style="margin-left:auto;font-size:.68rem;color:rgba(255,255,255,.35)" id="admin-login-time">Login: --:--</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="dash-content">
-    <div class="dash-stats">
-      <div class="stat-card stat-card-clickable" id="sc-btn-total" onclick="filterAdminView('total')" title="Total Applications dekhne ke liye click karein" style="cursor:pointer;transition:all .2s">
-        <div style="font-size:.55rem;font-weight:700;color:rgba(240,165,0,.8);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px">👆 Click</div>
-        <div class="stat-val" id="a-total">0</div>
-        <div class="stat-lbl">Total Applications</div>
-      </div>
-      <div class="stat-card stat-card-clickable" id="sc-btn-users" onclick="filterAdminView('users')" title="Total Users dekhne ke liye click karein" style="cursor:pointer;transition:all .2s">
-        <div style="font-size:.55rem;font-weight:700;color:rgba(240,165,0,.8);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px">👆 Click</div>
-        <div class="stat-val" id="a-users" style="color:var(--g4)">0</div>
-        <div class="stat-lbl">Total Users</div>
-      </div>
-      <div class="stat-card stat-card-clickable" id="sc-btn-pending" onclick="filterAdminView('pending')" title="Pending Applications dekhne ke liye click karein" style="cursor:pointer;transition:all .2s">
-        <div style="font-size:.55rem;font-weight:700;color:rgba(240,165,0,.8);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px">👆 Click</div>
-        <div class="stat-val" id="a-today" style="color:#ff9800">0</div>
-        <div class="stat-lbl">⏳ Pending Applications</div>
-      </div>
-      <div class="stat-card stat-card-clickable" id="sc-btn-approved" onclick="filterAdminView('approved')" title="Approved Applications dekhne ke liye click karein" style="cursor:pointer;transition:all .2s">
-        <div style="font-size:.55rem;font-weight:700;color:rgba(240,165,0,.8);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px">👆 Click</div>
-        <div class="stat-val" id="a-approved" style="color:#1a7a35">0</div>
-        <div class="stat-lbl">✅ Approved</div>
-      </div>
-      <!-- 🔧 FIX 6: Rejected stat card -->
-      <div class="stat-card stat-card-clickable" onclick="filterAdminView('rejected')" title="Rejected Applications dekhne ke liye click karein" style="cursor:pointer;transition:all .2s">
-        <div style="font-size:.55rem;font-weight:700;color:rgba(229,62,62,.8);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px">👆 Click</div>
-        <div class="stat-val" id="a-rejected" style="color:#e53935">0</div>
-        <div class="stat-lbl">❌ Rejected</div>
-      </div>
-      <!-- 🌾 FARMER REGISTRY stat card -->
-      <div class="stat-card stat-card-clickable" onclick="filterAdminView('farmer-registry')" title="Farmer Registry dekhne ke liye click karein" style="cursor:pointer;transition:all .2s;background:linear-gradient(135deg,rgba(27,94,32,.1),rgba(46,125,50,.07))!important;border-color:rgba(27,94,32,.25)!important">
-        <div style="font-size:.55rem;font-weight:700;color:rgba(27,94,32,.8);letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px">👆 Click</div>
-        <div class="stat-val" id="a-farmer-reg" style="color:#1B5E20">0</div>
-        <div class="stat-lbl">🌾 Farmer Reg</div>
-      </div>
-        <div class="stat-lbl">Total Approved ✅</div>
-      </div>
-    </div>
-    <!-- ══ STATISTICS CIRCLE WIDGET ══ -->
-    <div id="stats-circle-widget" style="background:rgba(255,255,255,.97);border:1.5px solid rgba(37,168,74,.22);border-radius:20px;padding:20px 20px 16px;margin-bottom:22px;box-shadow:0 4px 18px rgba(37,168,74,.1)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
-        <div style="font-family:'Baloo 2',cursive;font-size:1.05rem;font-weight:800;color:#0d4a1f;display:flex;align-items:center;gap:8px">
-          <span style="font-size:1.1rem">📊</span> Statistics Overview
-        </div>
-        <div style="font-size:.68rem;color:rgba(15,50,25,.4);font-weight:600">Live Data</div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap">
-        <!-- Donut Chart SVG -->
-        <div style="position:relative;width:140px;height:140px;flex-shrink:0">
-          <svg viewBox="0 0 36 36" width="140" height="140" style="transform:rotate(-90deg)">
-            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e8f5e9" stroke-width="3.5"/>
-            <circle id="sc-approved-arc" cx="18" cy="18" r="15.9" fill="none" stroke="#25a84a" stroke-width="3.5"
-              stroke-dasharray="0 100" stroke-linecap="round" style="transition:stroke-dasharray 1.2s ease"/>
-            <circle id="sc-pending-arc" cx="18" cy="18" r="15.9" fill="none" stroke="#f0a500" stroke-width="3.5"
-              stroke-dasharray="0 100" stroke-linecap="round" style="transition:stroke-dasharray 1.2s ease;transition-delay:.2s"/>
-          </svg>
-          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
-            <div id="sc-center-num" style="font-family:'Baloo 2',cursive;font-size:1.6rem;font-weight:800;color:#0d4a1f;line-height:1">0</div>
-            <div style="font-size:.58rem;color:rgba(15,50,25,.5);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Total</div>
-          </div>
-        </div>
-        <!-- Legend + Stats -->
-        <div style="display:flex;flex-direction:column;gap:10px;min-width:160px">
-          <div style="display:flex;align-items:center;gap:10px;background:rgba(37,168,74,.06);border:1px solid rgba(37,168,74,.15);border-radius:11px;padding:9px 12px">
-            <div style="width:10px;height:10px;border-radius:50%;background:#25a84a;flex-shrink:0"></div>
-            <div>
-              <div style="font-size:.62rem;color:rgba(15,50,25,.45);text-transform:uppercase;letter-spacing:.05em">Total Applications</div>
-              <div id="sc-total" style="font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800;color:#0d4a1f">0</div>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;background:rgba(37,168,74,.06);border:1px solid rgba(37,168,74,.15);border-radius:11px;padding:9px 12px">
-            <div style="width:10px;height:10px;border-radius:50%;background:#4ecb6e;flex-shrink:0"></div>
-            <div>
-              <div style="font-size:.62rem;color:rgba(15,50,25,.45);text-transform:uppercase;letter-spacing:.05em">Approved ✅</div>
-              <div id="sc-approved" style="font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800;color:#1a7a35">0</div>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;background:rgba(240,165,0,.06);border:1px solid rgba(240,165,0,.2);border-radius:11px;padding:9px 12px">
-            <div style="width:10px;height:10px;border-radius:50%;background:#f0a500;flex-shrink:0"></div>
-            <div>
-              <div style="font-size:.62rem;color:rgba(100,60,0,.5);text-transform:uppercase;letter-spacing:.05em">Pending ⏳</div>
-              <div id="sc-pending" style="font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800;color:#c07800">0</div>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;background:rgba(56,139,253,.06);border:1px solid rgba(56,139,253,.15);border-radius:11px;padding:9px 12px">
-            <div style="width:10px;height:10px;border-radius:50%;background:#3a8bfd;flex-shrink:0"></div>
-            <div>
-              <div style="font-size:.62rem;color:rgba(15,25,80,.45);text-transform:uppercase;letter-spacing:.05em">Total Users 👥</div>
-              <div id="sc-users" style="font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800;color:#1a3a8f">0</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- ══ END STATISTICS CIRCLE WIDGET ══ -->
-
-    <!-- ══ REVENUE HIGHLIGHT CARD ══ -->
-    <div class="revenue-highlight" id="revenue-card" style="animation:welcomeSlide .7s ease .3s both">
-      <div style="display:flex;align-items:center;gap:14px">
-        <div style="width:48px;height:48px;background:linear-gradient(135deg,rgba(56,139,253,.2),rgba(56,139,253,.1));border:1px solid rgba(56,139,253,.3);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0">💰</div>
-        <div>
-          <div style="font-size:.68rem;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">Estimated Revenue</div>
-          <div style="font-family:'Baloo 2',cursive;font-size:1.6rem;font-weight:800;color:#79b8ff;line-height:1" id="revenue-display">₹0</div>
-          <div style="font-size:.65rem;color:rgba(56,139,253,.5);margin-top:2px">Approved Apps × ₹400</div>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-        <div style="display:flex;align-items:center;gap:6px;background:rgba(37,168,74,.1);border:1px solid rgba(37,168,74,.2);border-radius:10px;padding:6px 12px">
-          <div style="width:7px;height:7px;border-radius:50%;background:#4ecb6e;animation:bellPulse 1.5s infinite"></div>
-          <span style="font-size:.7rem;font-weight:700;color:#4ecb6e">Live Tracking</span>
-        </div>
-        <div style="font-size:.65rem;color:rgba(255,255,255,.25)">Auto-updates every 2 seconds</div>
-      </div>
-    </div>
-
-    <!-- ══════════════════════════════════════════════════ -->
-    <!-- 🚀 ADMIN CONTROL CENTER — PRO SECTION            -->
-    <!-- ══════════════════════════════════════════════════ -->
-    <div id="admin-pro-panel" style="margin-bottom:32px">
-
-      <!-- Section Header -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:38px;height:38px;background:linear-gradient(135deg,#f0a500,#ffd056);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 4px 14px rgba(240,165,0,.35)">⚡</div>
-          <div>
-            <div style="font-family:'Baloo 2',cursive;font-size:1.15rem;font-weight:800;color:#0d3a18">Admin Control Center</div>
-            <div style="font-size:.7rem;color:rgba(15,50,25,.5);margin-top:1px">Quick actions, insights & live overview</div>
-          </div>
-        </div>
-        <div id="pro-live-dot" style="display:flex;align-items:center;gap:6px;background:rgba(37,168,74,.1);border:1px solid rgba(37,168,74,.25);padding:5px 12px;border-radius:20px">
-          <span style="width:7px;height:7px;background:#25a84a;border-radius:50%;display:inline-block;animation:blink 1.5s infinite"></span>
-          <span style="font-size:.7rem;font-weight:700;color:#1a6e2e">LIVE</span>
-        </div>
-      </div>
-
-      <!-- ── QUICK ACTION BUTTONS ── -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:20px">
-
-        <!-- Export CSV -->
-        <button onclick="adminExportCSV()" style="display:flex;flex-direction:column;align-items:center;gap:8px;background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border:1.5px solid rgba(37,168,74,.3);border-radius:16px;padding:16px 10px;cursor:pointer;transition:all .2s;font-family:'Poppins',sans-serif;box-shadow:0 2px 10px rgba(37,168,74,.1)"
-          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 22px rgba(37,168,74,.2)'"
-          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 10px rgba(37,168,74,.1)'">
-          <div style="width:40px;height:40px;background:linear-gradient(135deg,#1a7a35,#25a84a);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 4px 12px rgba(37,168,74,.35)">📊</div>
-          <span style="font-size:.72rem;font-weight:700;color:#0d4a1f;text-align:center">Export CSV</span>
-        </button>
-
-        <!-- Refresh Data -->
-        <button onclick="adminRefreshData()" id="refresh-btn" style="display:flex;flex-direction:column;align-items:center;gap:8px;background:linear-gradient(135deg,#e3f2fd,#e8f5ff);border:1.5px solid rgba(56,139,253,.3);border-radius:16px;padding:16px 10px;cursor:pointer;transition:all .2s;font-family:'Poppins',sans-serif;box-shadow:0 2px 10px rgba(56,139,253,.1)"
-          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 22px rgba(56,139,253,.2)'"
-          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 10px rgba(56,139,253,.1)'">
-          <div style="width:40px;height:40px;background:linear-gradient(135deg,#1565c0,#2196f3);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 4px 12px rgba(33,150,243,.35)">🔄</div>
-          <span style="font-size:.72rem;font-weight:700;color:#0d3a8a;text-align:center">Refresh Data</span>
-        </button>
-
-        <!-- Approve All Pending -->
-        <button onclick="adminApproveAllPending()" style="display:flex;flex-direction:column;align-items:center;gap:8px;background:linear-gradient(135deg,#fff8e1,#fffde7);border:1.5px solid rgba(240,165,0,.35);border-radius:16px;padding:16px 10px;cursor:pointer;transition:all .2s;font-family:'Poppins',sans-serif;box-shadow:0 2px 10px rgba(240,165,0,.1)"
-          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 22px rgba(240,165,0,.22)'"
-          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 10px rgba(240,165,0,.1)'">
-          <div style="width:40px;height:40px;background:linear-gradient(135deg,#e65100,#ff9800);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 4px 12px rgba(255,152,0,.4)">✅</div>
-          <span style="font-size:.72rem;font-weight:700;color:#7a3800;text-align:center">Approve All</span>
-        </button>
-
-        <!-- Print Report -->
-        <button onclick="window.print()" style="display:flex;flex-direction:column;align-items:center;gap:8px;background:linear-gradient(135deg,#fce4ec,#fff0f3);border:1.5px solid rgba(229,62,62,.3);border-radius:16px;padding:16px 10px;cursor:pointer;transition:all .2s;font-family:'Poppins',sans-serif;box-shadow:0 2px 10px rgba(229,62,62,.08)"
-          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 22px rgba(229,62,62,.18)'"
-          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 10px rgba(229,62,62,.08)'">
-          <div style="width:40px;height:40px;background:linear-gradient(135deg,#b71c1c,#e53935);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 4px 12px rgba(229,62,62,.4)">🖨️</div>
-          <span style="font-size:.72rem;font-weight:700;color:#7a1a1a;text-align:center">Print Report</span>
-        </button>
-
-        <!-- Farmer ID Card -->
-        <button onclick="window.open('Farmer_Card.html','_blank')" style="display:flex;flex-direction:column;align-items:center;gap:8px;background:linear-gradient(135deg,#e8f5e9,#f0fdf0);border:1.5px solid rgba(13,79,28,.4);border-radius:16px;padding:16px 10px;cursor:pointer;transition:all .2s;font-family:'Poppins',sans-serif;box-shadow:0 2px 10px rgba(13,79,28,.15)"
-          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 22px rgba(13,79,28,.28)'"
-          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 10px rgba(13,79,28,.15)'">
-          <div style="width:40px;height:40px;background:linear-gradient(135deg,#0d4f1c,#1a7a30);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 4px 12px rgba(13,79,28,.45)">🪪</div>
-          <span style="font-size:.72rem;font-weight:700;color:#0d4a1f;text-align:center">Farmer ID Card</span>
-        </button>
-
-      </div>
-
-      <!-- ── ANALYTICS INSIGHT ROW ── -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:20px">
-
-        <!-- Conversion Rate -->
-        <div style="background:rgba(255,255,255,.95);border:1.5px solid rgba(37,168,74,.2);border-radius:16px;padding:16px 18px;box-shadow:0 2px 10px rgba(37,168,74,.08);position:relative;overflow:hidden">
-          <div style="position:absolute;top:-10px;right:-10px;width:60px;height:60px;background:radial-gradient(circle,rgba(37,168,74,.12),transparent 70%);border-radius:50%"></div>
-          <div style="font-size:.7rem;font-weight:700;color:rgba(15,50,25,.5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">📈 Approval Rate</div>
-          <div style="font-family:'Baloo 2',cursive;font-size:1.9rem;font-weight:800;color:#1a7a35" id="pro-approval-rate">—%</div>
-          <div style="font-size:.68rem;color:rgba(15,50,25,.45);margin-top:4px">Approved / Total</div>
-          <div style="margin-top:10px;height:5px;background:rgba(37,168,74,.12);border-radius:10px;overflow:hidden">
-            <div id="pro-approval-bar" style="height:100%;background:linear-gradient(90deg,#1a7a35,#4ecb6e);border-radius:10px;width:0%;transition:width 1s ease"></div>
-          </div>
-        </div>
-
-        <!-- Today's Activity -->
-        <div style="background:rgba(255,255,255,.95);border:1.5px solid rgba(56,139,253,.2);border-radius:16px;padding:16px 18px;box-shadow:0 2px 10px rgba(56,139,253,.08);position:relative;overflow:hidden">
-          <div style="position:absolute;top:-10px;right:-10px;width:60px;height:60px;background:radial-gradient(circle,rgba(56,139,253,.12),transparent 70%);border-radius:50%"></div>
-          <div style="font-size:.7rem;font-weight:700;color:rgba(15,25,80,.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">🗓️ Aaj Ki Activity</div>
-          <div style="font-family:'Baloo 2',cursive;font-size:1.9rem;font-weight:800;color:#1565c0" id="pro-today-pct">—</div>
-          <div style="font-size:.68rem;color:rgba(15,25,80,.4);margin-top:4px">Applications aaj</div>
-          <div style="margin-top:10px;font-size:.72rem;color:rgba(15,25,80,.5)" id="pro-last-updated">Last updated: —</div>
-        </div>
-
-        <!-- Pending Alert -->
-        <div id="pro-pending-alert" style="background:linear-gradient(135deg,#fff8e1,#fffde7);border:1.5px solid rgba(240,165,0,.4);border-radius:16px;padding:16px 18px;box-shadow:0 2px 10px rgba(240,165,0,.12);position:relative;overflow:hidden">
-          <div style="position:absolute;top:-10px;right:-10px;width:60px;height:60px;background:radial-gradient(circle,rgba(240,165,0,.15),transparent 70%);border-radius:50%"></div>
-          <div style="font-size:.7rem;font-weight:700;color:rgba(100,60,0,.55);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">⏳ Pending Alert</div>
-          <div style="font-family:'Baloo 2',cursive;font-size:1.9rem;font-weight:800;color:#c07800" id="pro-pending-count">—</div>
-          <div style="font-size:.68rem;color:rgba(100,60,0,.5);margin-top:4px">Awaiting review</div>
-          <div style="margin-top:10px;font-size:.7rem;padding:4px 10px;border-radius:20px;display:inline-block;background:rgba(240,165,0,.15);color:#7a4f00;font-weight:700" id="pro-pending-status">Loading...</div>
-        </div>
-
-      </div>
-
-      <!-- ── ADMIN QUICK NOTES ── -->
-      <div style="background:rgba(255,255,255,.95);border:1.5px solid rgba(37,168,74,.2);border-radius:16px;padding:18px 20px;box-shadow:0 2px 12px rgba(37,168,74,.08)">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-          <div style="font-size:.8rem;font-weight:800;color:#0d4a1f;display:flex;align-items:center;gap:7px">
-            <span style="font-size:1rem">📝</span> Admin Quick Notes
-          </div>
-          <div style="display:flex;gap:8px">
-            <button onclick="adminSaveNote()" style="background:linear-gradient(135deg,#1a7a35,#25a84a);border:none;border-radius:9px;color:#fff;font-family:'Poppins',sans-serif;font-size:.7rem;font-weight:700;padding:5px 13px;cursor:pointer;box-shadow:0 3px 10px rgba(37,168,74,.3)">💾 Save</button>
-            <button onclick="adminClearNote()" style="background:rgba(229,62,62,.1);border:1px solid rgba(229,62,62,.25);border-radius:9px;color:#b71c1c;font-family:'Poppins',sans-serif;font-size:.7rem;font-weight:700;padding:5px 13px;cursor:pointer">🗑️ Clear</button>
-          </div>
-        </div>
-        <textarea id="admin-note-area" placeholder="Yahan apne notes likhein — reminders, to-do, ya koi bhi important info..." style="width:100%;min-height:80px;background:#f4fbf5;border:1.5px solid rgba(37,168,74,.22);border-radius:11px;padding:11px 14px;color:#1a2e1a;font-family:'Poppins',sans-serif;font-size:.82rem;outline:none;resize:vertical;line-height:1.6;transition:all .2s"
-          onfocus="this.style.borderColor='#25a84a';this.style.boxShadow='0 0 0 3px rgba(37,168,74,.1)'"
-          onblur="this.style.borderColor='rgba(37,168,74,.22)';this.style.boxShadow='none'"></textarea>
-        <div id="admin-note-status" style="font-size:.68rem;color:rgba(15,50,25,.4);margin-top:6px;min-height:16px"></div>
-      </div>
-
-    </div>
-    <!-- ══ END ADMIN CONTROL CENTER ══ -->
-
-    <div class="section-head" id="admin-panel-title-wrap" style="display:none">
-      <h3 id="admin-panel-title">📋 Sabhi Applications</h3>
-    </div>
-
-    <!-- 🔧 FIX 10: Advanced Filter Panel -->
-    <div id="admin-search-bar" style="display:none;flex-direction:column;gap:10px;margin-bottom:16px">
-      <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.95);border:1px solid rgba(37,168,74,.22);border-radius:11px;padding:9px 14px">
-        <span>🔍</span>
-        <input type="text" id="search-inp" placeholder="Naam, Mobile, App No, Reg No se search karein..." oninput="renderAdminDash()" style="background:none;border:none;outline:none;color:#1a3a20;font-family:'Poppins',sans-serif;font-size:.85rem;flex:1"/>
-      </div>
-      <!-- Date + State + District + Status filters -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">
-        <div>
-          <label style="font-size:.65rem;font-weight:700;color:rgba(15,50,25,.55);display:block;margin-bottom:3px">📅 Date From</label>
-          <input type="date" id="filter-date-from" onchange="renderAdminDash()" style="width:100%;background:#f4fbf5;border:1.5px solid rgba(37,168,74,.28);border-radius:9px;padding:8px 10px;color:#1a2e1a;font-family:'Poppins',sans-serif;font-size:.78rem;outline:none"/>
-        </div>
-        <div>
-          <label style="font-size:.65rem;font-weight:700;color:rgba(15,50,25,.55);display:block;margin-bottom:3px">📅 Date To</label>
-          <input type="date" id="filter-date-to" onchange="renderAdminDash()" style="width:100%;background:#f4fbf5;border:1.5px solid rgba(37,168,74,.28);border-radius:9px;padding:8px 10px;color:#1a2e1a;font-family:'Poppins',sans-serif;font-size:.78rem;outline:none"/>
-        </div>
-        <div>
-          <label style="font-size:.65rem;font-weight:700;color:rgba(15,50,25,.55);display:block;margin-bottom:3px">🗺️ State</label>
-          <select id="filter-state" onchange="renderAdminDash()" style="width:100%;background:#f4fbf5;border:1.5px solid rgba(37,168,74,.28);border-radius:9px;padding:8px 10px;color:#1a2e1a;font-family:'Poppins',sans-serif;font-size:.78rem;outline:none">
-            <option value="">All States</option>
-            <option>UTTAR PRADESH</option><option>BIHAR</option><option>MADHYA PRADESH</option>
-            <option>RAJASTHAN</option><option>MAHARASHTRA</option><option>WEST BENGAL</option>
-            <option>ODISHA</option><option>HARYANA</option><option>PUNJAB</option>
-            <option>JHARKHAND</option><option>CHHATTISGARH</option><option>GUJARAT</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:.65rem;font-weight:700;color:rgba(15,50,25,.55);display:block;margin-bottom:3px">🏙️ District</label>
-          <input type="text" id="filter-dist" placeholder="District name..." oninput="renderAdminDash()" style="width:100%;background:#f4fbf5;border:1.5px solid rgba(37,168,74,.28);border-radius:9px;padding:8px 10px;color:#1a2e1a;font-family:'Poppins',sans-serif;font-size:.78rem;outline:none"/>
-        </div>
-        <div>
-          <label style="font-size:.65rem;font-weight:700;color:rgba(15,50,25,.55);display:block;margin-bottom:3px">📊 Status</label>
-          <select id="filter-status" onchange="renderAdminDash()" style="width:100%;background:#f4fbf5;border:1.5px solid rgba(37,168,74,.28);border-radius:9px;padding:8px 10px;color:#1a2e1a;font-family:'Poppins',sans-serif;font-size:.78rem;outline:none">
-            <option value="">All Status</option>
-            <option value="Pending">⏳ Pending</option>
-            <option value="Approved">✅ Approved</option>
-            <option value="Rejected">❌ Rejected</option>
-          </select>
-        </div>
-        <div style="display:flex;align-items:flex-end">
-          <button onclick="clearAllFilters()" style="width:100%;background:rgba(229,62,62,.1);border:1px solid rgba(229,62,62,.25);color:#b71c1c;font-family:'Poppins',sans-serif;font-size:.75rem;font-weight:700;padding:9px;border-radius:9px;cursor:pointer">🔄 Clear Filters</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 🔧 FIX 7: Bulk Action Bar (shown when checkboxes selected) -->
-    <div id="bulk-action-bar" style="display:none;align-items:center;gap:10px;background:linear-gradient(135deg,#0d2e15,#1a5a2a);border:1px solid rgba(37,168,74,.4);border-radius:12px;padding:10px 16px;margin-bottom:14px;flex-wrap:wrap">
-      <span id="bulk-count" style="font-size:.82rem;font-weight:700;color:var(--g4)">0 selected</span>
-      <div style="display:flex;align-items:center;gap:6px;margin-left:auto;flex-wrap:wrap">
-        <label style="display:flex;align-items:center;gap:5px;font-size:.75rem;color:rgba(255,255,255,.6);cursor:pointer">
-          <input type="checkbox" onchange="toggleAllBulk(this.checked)" style="cursor:pointer;accent-color:#25a84a"/>
-          Select All
-        </label>
-        <button onclick="bulkApprove()" style="background:rgba(37,168,74,.2);border:1px solid rgba(37,168,74,.4);color:var(--g4);font-family:'Poppins',sans-serif;font-size:.75rem;font-weight:700;padding:6px 14px;border-radius:9px;cursor:pointer">✅ Bulk Approve</button>
-        <button onclick="bulkDelete()" style="background:rgba(229,62,62,.15);border:1px solid rgba(229,62,62,.35);color:#fc8181;font-family:'Poppins',sans-serif;font-size:.75rem;font-weight:700;padding:6px 14px;border-radius:9px;cursor:pointer">🗑️ Bulk Delete</button>
-      </div>
-    </div>
-
-    <!-- Bulk Confirm Modal -->
-    <div id="bulk-confirm-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99999;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)">
-      <div style="background:linear-gradient(135deg,#071510,#0d2e15);border:1px solid rgba(255,255,255,.12);border-radius:22px;padding:28px 24px;width:100%;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:slideUp .3s ease both">
-        <div style="font-size:2rem;text-align:center;margin-bottom:10px">⚠️</div>
-        <div id="bulk-modal-msg" style="font-size:.85rem;color:rgba(255,255,255,.7);text-align:center;margin-bottom:20px;line-height:1.6"></div>
-        <div style="display:flex;gap:10px">
-          <button onclick="closeBulkModal()" style="flex:1;padding:11px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:11px;color:rgba(255,255,255,.7);font-family:'Poppins',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer">↩ Cancel</button>
-          <button id="bulk-modal-action-btn" style="flex:1;padding:11px;border:none;border-radius:11px;color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer">Confirm</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ UNIFIED FILTERED VIEW PANEL ══ -->
-    <div id="admin-filtered-panel">
-
-      <!-- ⏳ PENDING -->
-      <div id="panel-pending-wrap" style="display:none">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-          <h3 style="font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;color:#8a5c00">⏳ Pending Applications</h3>
-          <span id="pending-count-badge" style="background:rgba(240,165,0,.15);border:1px solid rgba(240,165,0,.4);color:#7a4f00;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:14px">0</span>
-        </div>
-        <div class="submissions-list" id="admin-pending-list"></div>
-      </div>
-
-      <!-- ✅ APPROVED -->
-      <div id="panel-approved-wrap" style="display:none;margin-top:24px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-          <h3 style="font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;color:#1a7a35">✅ Approved Applications</h3>
-          <span id="approved-count-badge" style="background:rgba(37,168,74,.12);border:1px solid rgba(37,168,74,.3);color:#1a5c1a;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:14px">0</span>
-        </div>
-        <div id="admin-approved-list" style="display:flex;flex-direction:column;gap:14px"></div>
-      </div>
-
-      <!-- ❌ REJECTED — 🔧 FIX 6: New section -->
-      <div id="panel-rejected-wrap" style="display:none;margin-top:24px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-          <h3 style="font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;color:#b71c1c">❌ Rejected Applications</h3>
-          <span id="rejected-count-badge" style="background:rgba(229,62,62,.12);border:1px solid rgba(229,62,62,.3);color:#b71c1c;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:14px">0</span>
-        </div>
-        <div id="admin-rejected-list" style="display:flex;flex-direction:column;gap:14px"></div>
-      </div>
-
-      <!-- 🌾 FARMER REGISTRY SUBMISSIONS -->
-      <div id="panel-farmer-registry-wrap" style="display:none;margin-top:24px">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <h3 style="font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;color:#1B5E20">🌾 Farmer Registry Applications</h3>
-            <span id="fr-admin-count-badge" style="background:rgba(27,94,32,.12);border:1px solid rgba(27,94,32,.3);color:#1B5E20;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:14px">0</span>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <input type="text" id="fr-admin-search" placeholder="🔍 Naam, Mobile, Aadhaar..." oninput="frAdminFilter()" style="padding:7px 12px;border:1.5px solid rgba(27,94,32,.3);border-radius:10px;font-size:.75rem;font-family:'Poppins',sans-serif;outline:none;background:#fff;color:#1a2e1a;min-width:200px">
-            <select id="fr-admin-status-filter" onchange="frAdminFilter()" style="padding:7px 12px;border:1.5px solid rgba(27,94,32,.3);border-radius:10px;font-size:.75rem;font-family:'Poppins',sans-serif;outline:none;background:#fff;color:#1a2e1a">
-              <option value="">Sab Status</option>
-              <option value="New">🆕 New</option>
-              <option value="Pending">⏳ Pending</option>
-              <option value="Done">✅ Done</option>
-            </select>
-          </div>
-        </div>
-        <div id="fr-admin-list" style="display:flex;flex-direction:column;gap:12px">
-          <div style="text-align:center;color:#aaa;font-size:.8rem;padding:24px 0">Loading...</div>
-        </div>
-      </div>
-
-      <!-- 👥 USERS -->
-      <div id="panel-users-wrap" style="display:none;margin-top:32px">
-        <div class="section-head" style="margin-bottom:16px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <h3>👥 Registered Users</h3>
-            <span id="users-count-badge" style="background:rgba(56,139,253,.15);border:1px solid rgba(56,139,253,.3);color:#1a3a8f;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:14px">0 Users</span>
-          </div>
-          <button onclick="toggleUsersSection()" id="users-toggle-btn" style="background:rgba(56,139,253,.1);border:1px solid rgba(56,139,253,.28);color:#1a3a8f;font-size:.75rem;font-weight:700;padding:7px 16px;border-radius:10px;cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s">
-            ▼ ID / Password Dekhe
-          </button>
-        </div>
-        <div id="admin-users-list" style="display:none;flex-direction:column;gap:10px"></div>
-      </div>
-
-    </div>
-    <!-- ══ END UNIFIED PANEL ══ -->
-  </div>
 
 </div>
 
@@ -2683,51 +2155,18 @@ function hideLoading(){
 })();
 
 // Show FAB only when admin is logged in
-function showAdminFab(){ const f=document.getElementById('admin-fab-wrap'); if(f) f.style.display='flex'; }
-function hideAdminFab(){ const f=document.getElementById('admin-fab-wrap'); if(f) f.style.display='none'; closeFab && closeFab(); }
+
+
 
 // ══════════════════════════════════════
 // 📥 NEW FEATURE: CSV EXPORT
 // ══════════════════════════════════════
-function exportAdminCSV(){
-  try{
-    const subs = window._allSubmissions || [];
-    if(!subs.length){ toast('⚠️ Koi data nahi export karne ke liye','fail'); return; }
-    const headers = ['App No','Naam','Mobile','Aadhaar','District','State','Payment','Status','Date'];
-    const rows = subs.map(s=>{
-      const f = s.data || s;
-      return [
-        f.appNo||f.reg||'',
-        (f.name||'').replace(/,/g,' '),
-        f.mobile||'',
-        f.aadhaar||'',
-        f.district||'',
-        f.state||'',
-        f.payment||'',
-        f.status||'Pending',
-        f.date||f.created||''
-      ].join(',');
-    });
-    const csv = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'Admin_Applications_'+new Date().toISOString().slice(0,10)+'.csv';
-    a.click(); URL.revokeObjectURL(url);
-    toast('✅ CSV download ho raha hai!','ok');
-  }catch(e){ toast('❌ Export nahi hua: '+e.message,'fail'); }
-}
+
 
 // ══════════════════════════════════════
 // 🔔 NEW FEATURE: SMART GREETING (Time-based)
 // ══════════════════════════════════════
-function getAdminGreeting(){
-  const h = new Date().getHours();
-  if(h < 12) return '🌅 Subah ka Swagat!';
-  if(h < 17) return '☀️ Dopahar Mubarak!';
-  if(h < 20) return '🌇 Shaam Mubarak!';
-  return '🌙 Raat Mubarak!';
-}
+
 
 
 // ══════════════════════════════════════════════════
@@ -3075,136 +2514,23 @@ function frRenderUserCard(e){
 let _frAdminAll = [];
 
 // Load all farmer registry submissions for admin
-async function frAdminLoadAll(){
-  const listEl = document.getElementById('fr-admin-list');
-  if(!listEl) return;
-  listEl.innerHTML = '<div style="text-align:center;color:#aaa;font-size:.8rem;padding:24px 0">Loading...</div>';
-  try {
-    const snap = await db.ref('farmer_registry').once('value');
-    const data = snap.val();
-    if(!data){
-      listEl.innerHTML = '<div style="text-align:center;color:#aaa;font-size:.8rem;padding:24px 0">Koi submission nahi mila</div>';
-      const badge = document.getElementById('fr-admin-count-badge');
-      if(badge) badge.textContent = '0';
-      const statEl = document.getElementById('a-farmer-reg');
-      if(statEl) statEl.textContent = '0';
-      return;
-    }
-    _frAdminAll = Object.values(data).sort((a,b)=> b.dateMs - a.dateMs);
-    frAdminRender(_frAdminAll);
-    const badge = document.getElementById('fr-admin-count-badge');
-    if(badge) badge.textContent = _frAdminAll.length;
-    const statEl = document.getElementById('a-farmer-reg');
-    if(statEl) statEl.textContent = _frAdminAll.length;
-  } catch(err) {
-    listEl.innerHTML = '<div style="text-align:center;color:#c62828;font-size:.78rem;padding:16px">Load nahi hua</div>';
-  }
-}
+
 
 // Filter admin list
-function frAdminFilter(){
-  const search = (document.getElementById('fr-admin-search').value||'').toLowerCase();
-  const status = document.getElementById('fr-admin-status-filter').value;
-  const filtered = _frAdminAll.filter(e => {
-    const matchSearch = !search ||
-      (e.farmerName||'').toLowerCase().includes(search) ||
-      (e.mobile||'').includes(search) ||
-      (e.aadhaar||'').includes(search) ||
-      (e.utr||'').toLowerCase().includes(search);
-    const matchStatus = !status || e.status === status;
-    return matchSearch && matchStatus;
-  });
-  frAdminRender(filtered);
-}
 
-function frAdminRender(list){
-  const listEl = document.getElementById('fr-admin-list');
-  if(!listEl) return;
-  if(!list.length){
-    listEl.innerHTML = '<div style="text-align:center;color:#aaa;font-size:.8rem;padding:24px 0">Koi record nahi mila</div>';
-    return;
-  }
-  listEl.innerHTML = list.map(e => frAdminCard(e)).join('');
-}
 
-function frAdminCard(e){
-  const statusColors = {New:'#3B82F6',Pending:'#F59E0B',Done:'#06D6A0'};
-  const col = statusColors[e.status] || '#888';
-  return `<div style="background:#fff;border:1.5px solid rgba(27,94,32,.2);border-radius:14px;padding:14px 16px;box-shadow:0 2px 8px rgba(27,94,32,.06)">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px">
-      <div>
-        <div style="font-weight:800;font-size:.85rem;color:#1B5E20">${e.farmerName||'—'}</div>
-        <div style="font-size:.72rem;color:#5a7a5a;margin-top:2px">🔧 ${e.service||''} &nbsp;|&nbsp; 📅 ${e.date||''}</div>
-      </div>
-      <select onchange="frAdminUpdateStatus(${e.id}, this.value)" style="padding:4px 8px;border:1.5px solid ${col};border-radius:8px;font-size:.72rem;font-family:'Poppins',sans-serif;background:#fff;color:${col};font-weight:700;outline:none;cursor:pointer">
-        <option value="New"    ${e.status==='New'    ?'selected':''}>🆕 New</option>
-        <option value="Pending"${e.status==='Pending'?'selected':''}>⏳ Pending</option>
-        <option value="Done"   ${e.status==='Done'   ?'selected':''}>✅ Done</option>
-      </select>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:.73rem;color:#5a7a5a;margin-bottom:8px">
-      <div>📱 ${e.mobile||'—'}</div>
-      <div>🪪 ${e.aadhaar||'—'}</div>
-      <div>💳 UTR: ${e.utr||'—'}</div>
-      <div>👤 By: ${e.submittedBy||e.userMobile||'—'}</div>
-      ${e.location ? `<div style="grid-column:span 2">📍 ${e.location}</div>` : ''}
-    </div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <input type="text" id="fr-remark-${e.id}" value="${(e.remark||'').replace(/"/g,'&quot;')}" placeholder="Admin remark..." style="flex:1;padding:7px 10px;border:1.5px solid #C8E6C9;border-radius:8px;font-size:.73rem;font-family:'Poppins',sans-serif;outline:none;background:#FAFFFE">
-      <button onclick="frAdminSaveRemark(${e.id})" style="padding:7px 12px;background:linear-gradient(135deg,#1B5E20,#388E3C);color:#fff;border:none;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;white-space:nowrap">💾 Save</button>
-      <button onclick="frAdminDelete(${e.id})" style="padding:7px 12px;background:linear-gradient(135deg,#c62828,#e53935);color:#fff;border:none;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;white-space:nowrap">🗑️ Delete</button>
-    </div>
-  </div>`;
-}
 
-async function frAdminUpdateStatus(id, status){
-  try {
-    await db.ref('farmer_registry/'+id).update({status});
-    // Update local array
-    const idx = _frAdminAll.findIndex(e=>e.id===id);
-    if(idx !== -1) _frAdminAll[idx].status = status;
-    toast('✅ Status update ho gaya','ok');
-  } catch(e) {
-    toast('⚠️ Status update nahi hua','fail');
-  }
-}
 
-async function frAdminSaveRemark(id){
-  const inp = document.getElementById('fr-remark-'+id);
-  if(!inp) return;
-  const remark = inp.value.trim();
-  try {
-    await db.ref('farmer_registry/'+id).update({remark});
-    const idx = _frAdminAll.findIndex(e=>e.id===id);
-    if(idx !== -1) _frAdminAll[idx].remark = remark;
-    toast('💬 Remark save ho gaya','ok');
-  } catch(e) {
-    toast('⚠️ Remark save nahi hua','fail');
-  }
-}
 
-async function frAdminDelete(id){
-  if(!confirm('⚠️ Kya aap is application ko delete karna chahte hain? Yeh undo nahi hoga!')) return;
-  try {
-    await db.ref('farmer_registry/'+id).remove();
-    _frAdminAll = _frAdminAll.filter(e=>e.id!==id);
-    toast('🗑️ Application delete ho gayi','ok');
-    frAdminRender(_frAdminAll);
-  } catch(e) {
-    toast('❌ Delete nahi hua: '+(e.message||'Error'),'fail');
-  }
-}
+
+
+
+
+
+
 
 // Load farmer reg count for admin dashboard stat
-async function frLoadAdminStatCount(){
-  try {
-    const snap = await db.ref('farmer_registry').once('value');
-    const data = snap.val();
-    const count = data ? Object.keys(data).length : 0;
-    const el = document.getElementById('a-farmer-reg');
-    if(el) el.textContent = count;
-  } catch(e){}
-}
+
 
 // ── INIT ──
 window.onload=function(){
@@ -3634,10 +2960,10 @@ function showStatusInfo(){
 }
 // ✅ Admin email hardcoded — OTP yahi pe aayega
 let _adminEmail = 'shivamgupta18@zohomail.in';
-const EJS_PUBLIC_KEY       = 'WOUFfoXIKmV4WaRBJ';
-const EJS_SERVICE_ID       = 'service_jzgwcq7';
-const EJS_ADMIN_SERVICE_ID = 'service_jzgwcq7';        // Admin Login OTP Service
-const EJS_TEMPLATE_ID      = 'template_ocudq3s';       // Password Reset (user + admin)
+const EJS_PUBLIC_KEY       = 'oxyRIaQ-IoizhZPAG';
+const EJS_SERVICE_ID       = 'service_3gdopdh';
+const EJS_ADMIN_SERVICE_ID = 'service_3gdopdh';        // Admin Login OTP Service
+const EJS_TEMPLATE_ID      = 'template_ohms6f9';       // Password Reset (user + admin)
 const EJS_ADMIN_TEMPLATE_ID= 'template_uz7y95i';       // Admin Login OTP
 const ADMIN_EMAIL          = 'shivamgupta18@zohomail.in';
 emailjs.init({publicKey: EJS_PUBLIC_KEY});
@@ -3873,48 +3199,6 @@ async function doLogin(){
     return;
   }
 
-  // ── ADMIN LOGIN ──
-  showLoading('Verify ho raha hai...');
-  let adminMobFresh = _ADMIN_MOBILE_FIXED;
-  // Firebase se email sync karo (OTP bhejne ke liye)
-  try{
-    const adminCfg = await db.ref('admin_config').once('value');
-    const cfg = adminCfg.val();
-    if(cfg && cfg.email) _adminEmail = cfg.email;
-  }catch(e){}
-
-  if(mob === adminMobFresh){
-    // Agar adminMobFresh empty hai matlab Firebase mein admin_config set nahi
-    if(!adminMobFresh){
-      hideLoading();
-      document.getElementById('e-lm').textContent='⚙️ Admin setup nahi hua. "Pehli baar Admin Setup" link click karein';
-      document.getElementById('e-lm').classList.add('show');
-      return;
-    }
-    try{
-      // Fixed hash se compare karo (ya reset ke baad naya hash)
-      const enteredHash = await hashPassword(pass);
-      let matched = (enteredHash === _currentAdminHash);
-      // Fallback: plain text compare (shivangee default)
-      if(!matched) matched = (pass === 'shivangee' && _currentAdminHash === _ADMIN_PASS_HASH_FIXED);
-      hideLoading();
-      if(!matched){
-        document.getElementById('l-mob').classList.add('err');
-        document.getElementById('l-pass').classList.add('err');
-        document.getElementById('e-lm').textContent='Mobile ya password galat hai';
-        document.getElementById('e-lm').classList.add('show');
-        generateCaptcha('login');
-        return;
-      }
-    }catch(e){ hideLoading(); toast('❌ Network error','fail'); return; }
-    _otpPending = {isAdmin:true, name:'Admin', mobile:mob};
-    await sendOtp(mob, _adminEmail || 'shivamgupta18@zohomail.in', true); // forceAdmin=true — admin login OTP template
-    showOtpModal(mob, _adminEmail || 'shivamgupta18@zohomail.in');
-    return;
-  }
-  hideLoading();
-
-  // ── USER LOGIN ──
   showLoading('Login ho raha hai...');
   try{
     const user = await getUserByMobile(mob);
@@ -4031,24 +3315,11 @@ async function showUserApp(user){
   setTimeout(()=>checkApprovalNotifications(user.mobile), 3000);
 }
 
-// ── SHOW ADMIN DASH ──
+// ── SHOW ADMIN DASH ── (admin panel ab alag file mein hai, is file mein sirf user panel hai)
 function showAdminDash(){
-  showPage('admin-dash-page');
-  renderAdminDash();
-  resetAutoLogout();
-  startAdminSessionTimer();
-  setTimeout(adminLoadNote, 300);
-  // Load saved admin profile
-  const s=getSession();
-  const dp=localStorage.getItem('admin_dp');
-  const nm=(s&&s.name||'Admin').replace('Admin (','').replace(')','');
-  const mob=(s&&s.mobile)||_adminMob||'';
-  applyAdminProfile(nm, mob, dp);
-  // 🔧 FIX 8: Start real-time listener for new submissions
-  _adminKnownSubs.clear();
-  startAdminRealtimeListener();
-  // Load Farmer Registry count
-  frLoadAdminStatCount();
+  try{ alert('Admin panel ab alag file mein hai. Yahan sirf user panel available hai.'); }catch(e){}
+  clearSession();
+  showPage('auth-page');
 }
 
 // ── DROPDOWN ──
@@ -4089,23 +3360,7 @@ function resetAutoLogout(){
   }, totalMs);
 }
 
-function startAdminSessionTimer(){
-  clearInterval(_adminSessionInterval);
-  let remaining = ADMIN_LOGOUT_MS / 1000;
-  function tick(){
-    const el = document.getElementById('admin-session-time');
-    if(!el){ clearInterval(_adminSessionInterval); return; }
-    const m = Math.floor(remaining/60);
-    const s = remaining % 60;
-    el.textContent = m+':'+(s<10?'0':'')+s;
-    if(remaining <= 60) el.style.color='#ff5252';
-    else el.style.color='var(--gold2)';
-    remaining--;
-    if(remaining < 0){ clearInterval(_adminSessionInterval); }
-  }
-  tick();
-  _adminSessionInterval = setInterval(tick, 1000);
-}
+
 
 function showLogoutWarning(isAdmin){
   document.getElementById('autologout-popup').classList.add('show');
@@ -4145,9 +3400,7 @@ function stayLoggedIn(){
 });
 
 // ── ADMIN DROPDOWN ──
-function toggleAdminMenu(){
-  document.getElementById('admin-dd').classList.toggle('open');
-}
+
 document.addEventListener('click',function(e){
   if(typeof _upCameraOpen !== 'undefined' && _upCameraOpen) return; // camera open hai to close mat karo
   ['u-dd','u-dd2','admin-dd'].forEach(id=>{
@@ -4546,32 +3799,8 @@ function applyUserProfile(name, mobile, dp){
 // ══════════════════════════════════════════
 let _apDpBase64 = null;
 
-function openAdminProfile(){
-  const s = getSession();
-  document.getElementById('ap-name').value = s ? (s.name||'').replace('Admin (','').replace(')','') : 'Shivam';
-  document.getElementById('ap-mobile').value = s ? s.mobile||'8960947991' : '8960947991';
-  document.getElementById('ap-err').style.display='none';
-  _apDpBase64 = null;
-  const savedDp = localStorage.getItem('admin_dp');
-  const prev = document.getElementById('ap-dp-preview');
-  if(savedDp){
-    prev.innerHTML='';
-    prev.style.background='none';
-    const img=document.createElement('img');
-    img.src=savedDp;
-    img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%';
-    prev.appendChild(img);
-  } else {
-    const nm = document.getElementById('ap-name').value||'S';
-    prev.innerHTML = nm[0].toUpperCase();
-    prev.style.background='linear-gradient(135deg,var(--gold),var(--gold2))';
-  }
-  document.getElementById('admin-profile-popup').style.display='flex';
-}
-function closeAdminProfile(){
-  document.getElementById('admin-profile-popup').style.display='none';
-  _apDpBase64=null;
-}
+
+
 function apDpSelected(inp){
   const file=inp.files[0];
   if(!file) return;
@@ -4589,40 +3818,8 @@ function apDpSelected(inp){
   };
   reader.readAsDataURL(file);
 }
-function saveAdminProfile(){
-  const name=document.getElementById('ap-name').value.trim();
-  const mobile=document.getElementById('ap-mobile').value.trim();
-  const errEl=document.getElementById('ap-err');
-  errEl.style.display='none';
-  if(!name){ errEl.textContent='❌ Naam daalna zaroori hai'; errEl.style.display='block'; return; }
-  if(!/^\d{10}$/.test(mobile)){ errEl.textContent='❌ Sahi 10 digit mobile daalen'; errEl.style.display='block'; return; }
-  if(_apDpBase64) localStorage.setItem('admin_dp', _apDpBase64);
-  const dp = _apDpBase64 || localStorage.getItem('admin_dp');
-  const s = getSession();
-  saveSession({...s, name:'Admin ('+name+')', mobile});
-  applyAdminProfile(name, mobile, dp);
-  closeAdminProfile();
-  toast('✅ Admin profile update ho gaya!','ok');
-}
-function applyAdminProfile(name, mobile, dp){
-  const ini=(name||'S')[0].toUpperCase();
-  const hdrAv=document.getElementById('admin-hdr-av');
-  if(hdrAv){
-    if(dp){ hdrAv.innerHTML=''; hdrAv.style.background='none'; const img=document.createElement('img'); img.src=dp; img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%'; hdrAv.appendChild(img); }
-    else { hdrAv.innerHTML=ini; hdrAv.style.background='linear-gradient(135deg,var(--gold),var(--gold2))'; hdrAv.style.color='#0d4a1f'; }
-  }
-  const hdrNm=document.getElementById('admin-hdr-nm');
-  if(hdrNm) hdrNm.textContent=name.split(' ')[0];
-  const ddDp=document.getElementById('admin-dd-dp');
-  if(ddDp){
-    if(dp){ ddDp.innerHTML=''; ddDp.style.background='none'; const img=document.createElement('img'); img.src=dp; img.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:50%'; ddDp.appendChild(img); }
-    else { ddDp.innerHTML=ini; ddDp.style.background='linear-gradient(135deg,var(--gold),var(--gold2))'; }
-  }
-  const ddNm=document.getElementById('admin-dd-name');
-  if(ddNm) ddNm.textContent='👤 '+name;
-  const ddMob=document.getElementById('admin-dd-mob');
-  if(ddMob) ddMob.textContent='📱 '+mobile;
-}
+
+
 // Load saved profiles on page load
 async function loadSavedProfiles(){
   const s=getSession();
@@ -5208,245 +4405,7 @@ async function renderUserDash(){
 
 
 // ── ADMIN DASHBOARD ──
-async function renderAdminDash(){
-  showLoading('Data load ho raha hai...');
-  const q=(document.getElementById('search-inp')||{}).value||'';
-  // 🔧 FIX 10: Date range and state/district filters
-  const dateFrom  = (document.getElementById('filter-date-from')||{}).value||'';
-  const dateTo    = (document.getElementById('filter-date-to')||{}).value||'';
-  const stateF    = ((document.getElementById('filter-state')||{}).value||'').toLowerCase();
-  const distF     = ((document.getElementById('filter-dist')||{}).value||'').toLowerCase().trim();
-  const statusF   = (document.getElementById('filter-status')||{}).value||'';
-  const allSubs = await getSubs();
-  const allUsers = await getUsers();
-  hideLoading();
 
-  let subs = allSubs;
-  if(q){
-    const ql=q.toLowerCase();
-    subs=subs.filter(s=>
-      (s.name||'').toLowerCase().includes(ql)||
-      (s.mobile||'').includes(q)||
-      (s.appNo||'').toLowerCase().includes(ql)||
-      (s.userMobile||'').includes(q)||
-      (s.regno||'').toLowerCase().includes(ql)
-    );
-  }
-  // Date filter
-  if(dateFrom || dateTo){
-    subs = subs.filter(s=>{
-      if(!s.time) return !dateFrom; // if no time stored, include unless dateFrom set
-      // Try to parse date from stored time string (hi-IN locale)
-      // time format: "DD/MM/YYYY, HH:MM:SS" or similar
-      try{
-        const parts = s.time.split(/[,\/\s]+/);
-        // Try ISO parse via Date
-        const d = new Date(s.time);
-        if(isNaN(d)){
-          // Fallback: extract date portions
-          return true;
-        }
-        const dStr = d.toISOString().slice(0,10); // YYYY-MM-DD
-        if(dateFrom && dStr < dateFrom) return false;
-        if(dateTo   && dStr > dateTo)   return false;
-        return true;
-      }catch{ return true; }
-    });
-  }
-  // State filter
-  if(stateF) subs = subs.filter(s=>(s.state||'').toLowerCase().includes(stateF));
-  // District filter
-  if(distF)  subs = subs.filter(s=>(s.district||s.dist||'').toLowerCase().includes(distF));
-  // Status filter
-  if(statusF) subs = subs.filter(s=>(s.status||'')=== statusF);
-  document.getElementById('a-total').textContent=allSubs.length;
-  document.getElementById('a-users').textContent=allUsers.length;
-  const today=new Date().toLocaleDateString('hi-IN');
-  const pendingTotal = allSubs.filter(s=>s.status==='Pending'||!s.status).length;
-  const approvedTotal = allSubs.filter(s=>s.status==='Approved').length;
-  const rejectedTotal = allSubs.filter(s=>s.status==='Rejected').length;
-  document.getElementById('a-today').textContent=pendingTotal;
-  const aRejStat = document.getElementById('a-rejected');
-  if(aRejStat) aRejStat.textContent = rejectedTotal;
-
-  // ── Update Statistics Circle Widget ──
-  const scTotal = document.getElementById('sc-total');
-  const scApproved = document.getElementById('sc-approved');
-  const scPending = document.getElementById('sc-pending');
-  const scUsers = document.getElementById('sc-users');
-  const scCenterNum = document.getElementById('sc-center-num');
-  const scApprovedArc = document.getElementById('sc-approved-arc');
-  const scPendingArc = document.getElementById('sc-pending-arc');
-  if(scTotal) scTotal.textContent = allSubs.length;
-  if(scApproved) scApproved.textContent = approvedTotal;
-  if(scPending) scPending.textContent = pendingTotal;
-  if(scUsers) scUsers.textContent = allUsers.length;
-  if(scCenterNum) scCenterNum.textContent = allSubs.length;
-  if(allSubs.length > 0 && scApprovedArc && scPendingArc){
-    const appPct = (approvedTotal/allSubs.length)*100;
-    const penPct = (pendingTotal/allSubs.length)*100;
-    scApprovedArc.setAttribute('stroke-dasharray', appPct.toFixed(1)+' '+(100-appPct).toFixed(1));
-    const offset = 100 - appPct;
-    scPendingArc.style.strokeDashoffset = -(100 - offset) + '';
-    scPendingArc.setAttribute('stroke-dasharray', penPct.toFixed(1)+' '+(100-penPct).toFixed(1));
-  }
-  // ── Update Pro Panel ──
-  const proApprRate = document.getElementById('pro-approval-rate');
-  const proApprBar  = document.getElementById('pro-approval-bar');
-  const proTodayPct = document.getElementById('pro-today-pct');
-  const proLastUpd  = document.getElementById('pro-last-updated');
-  const proPendCount= document.getElementById('pro-pending-count');
-  const proPendStatus= document.getElementById('pro-pending-status');
-  if(allSubs.length>0){
-    const rate = Math.round((approvedTotal/allSubs.length)*100);
-    if(proApprRate) proApprRate.textContent = rate+'%';
-    if(proApprBar)  proApprBar.style.width  = rate+'%';
-  } else {
-    if(proApprRate) proApprRate.textContent = '0%';
-  }
-  const todayCount = allSubs.filter(s=>s.time&&s.time.includes(new Date().toLocaleDateString('hi-IN').split('/')[0])).length;
-  if(proTodayPct) proTodayPct.textContent = todayCount;
-  if(proLastUpd)  proLastUpd.textContent  = 'Last updated: '+new Date().toLocaleTimeString('hi-IN');
-  if(proPendCount) proPendCount.textContent = pendingTotal;
-  if(proPendStatus){
-    if(pendingTotal===0) proPendStatus.textContent='✅ Sab Clear';
-    else if(pendingTotal>10) proPendStatus.textContent='🚨 Urgent — '+pendingTotal+' pending';
-    else proPendStatus.textContent='⚠️ '+pendingTotal+' pending hain';
-  }
-  // ── Admin Notes restore ──
-  const savedNote = localStorage.getItem('adminNote_ls1');
-  const noteArea  = document.getElementById('admin-note-area');
-  if(noteArea && savedNote) noteArea.value = savedNote;
-
-  const sortFn=(a,b)=>{
-    const na=parseInt((a.appNo||'').replace(/\D/g,''))||0;
-    const nb=parseInt((b.appNo||'').replace(/\D/g,''))||0;
-    return nb-na;
-  };
-  const pendingSubs  = subs.filter(s=>s.status==='Pending'||!s.status).sort(sortFn);
-  const approvedSubs = subs.filter(s=>s.status==='Approved').sort(sortFn);
-  // 🔧 FIX 6: Show Rejected applications
-  const rejectedSubs = subs.filter(s=>s.status==='Rejected').sort(sortFn);
-
-  // Update stat counts
-  const aApprStat = document.getElementById('a-approved');
-  if(aApprStat) aApprStat.textContent = allSubs.filter(s=>s.status==='Approved').length;
-  const pbadge = document.getElementById('pending-count-badge');
-  const abadge = document.getElementById('approved-count-badge');
-  const rbadge = document.getElementById('rejected-count-badge');
-  if(pbadge) pbadge.textContent = pendingSubs.length;
-  if(abadge) abadge.textContent = approvedSubs.length;
-  if(rbadge) rbadge.textContent = rejectedSubs.length;
-
-  function buildCard(s, statusType){
-    const isApproved = statusType === 'approved';
-    const isRejected = statusType === 'rejected';
-    const bgStyle = isApproved
-      ? 'background:rgba(232,245,233,.96);border:1.5px solid rgba(37,168,74,.3)'
-      : isRejected
-        ? 'background:rgba(255,235,238,.96);border:1.5px solid rgba(229,62,62,.25)'
-        : 'background:rgba(255,255,255,.93);border:1px solid rgba(37,168,74,.16)';
-    const divLine = isApproved ? 'rgba(37,168,74,.2)' : isRejected ? 'rgba(229,62,62,.15)' : 'rgba(37,168,74,.1)';
-    const badgeHtml = isApproved
-      ? '<span class="badge badge-green">✅ Approved</span>'
-      : isRejected
-        ? '<span class="badge" style="background:rgba(229,62,62,.15);border:1px solid rgba(229,62,62,.3);color:#ff5252">❌ Rejected</span>'
-        : '<span class="badge badge-gold">⏳ Pending</span>';
-    const currentStatus = isApproved ? 'Approved' : isRejected ? 'Rejected' : 'Pending';
-    // 🔧 FIX 5: Remark display
-    const remarkHtml = s.remark ? `
-      <div style="margin-top:8px;padding:8px 12px;background:rgba(240,165,0,.08);border-left:3px solid #f0a500;border-radius:0 8px 8px 0;">
-        <div style="font-size:.65rem;color:rgba(15,50,15,.5);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">📝 Admin Remark</div>
-        <div style="font-size:.78rem;font-weight:600;color:#5d4037">${s.remark}</div>
-      </div>` : '';
-    return `
-    <div class="sub-card" style="${bgStyle};border-radius:16px;padding:20px 18px;box-shadow:0 2px 10px rgba(37,168,74,.06)">
-      <div class="sub-card-top">
-        <div style="display:flex;align-items:flex-start;gap:10px">
-          <!-- 🔧 FIX 7: Bulk checkbox -->
-          <input type="checkbox" class="bulk-chk" data-appno="${s.appNo}" onchange="toggleBulkCheckbox('${s.appNo}',this.checked)"
-            style="width:17px;height:17px;margin-top:3px;cursor:pointer;accent-color:#25a84a;flex-shrink:0"/>
-          <div class="sub-card-info">
-            <div class="sub-icon" style="${isApproved?'background:linear-gradient(135deg,#1a7a35,#2ecc71)':isRejected?'background:linear-gradient(135deg,#b71c1c,#e53935)':''}">🌾</div>
-            <div>
-              <div style="font-weight:700;font-size:.92rem;color:#0d2e0d">${s.name}</div>
-              <div style="font-size:.7rem;color:rgba(15,50,15,.6);margin-top:2px">App No: <span style="color:#1a6e2e;font-weight:700">${s.appNo}</span> &nbsp;|&nbsp; User: <span style="color:#1a3a8a;font-weight:600">${s.userName||''} (${s.userMobile||''})</span></div>
-            </div>
-          </div>
-        </div>
-        <div class="badges">
-          ${badgeHtml}
-          <button onclick="toggleStatus('${s.appNo}','${currentStatus}')" style="background:rgba(56,139,253,.1);border:1px solid rgba(56,139,253,.3);color:#1a3a8a;font-size:.67rem;font-weight:700;padding:3px 10px;border-radius:14px;cursor:pointer;font-family:'Poppins',sans-serif">✏️ Status</button>
-        </div>
-      </div>
-      <div class="sub-details">
-        <div class="sub-detail"><div class="sub-detail-lbl" style="color:rgba(15,50,15,.55)">Reg. Number</div><div class="sub-detail-val" style="color:#0d2e0d">${s.regno||'—'}</div></div>
-        <div class="sub-detail"><div class="sub-detail-lbl" style="color:rgba(15,50,15,.55)">Pita Ka Naam</div><div class="sub-detail-val" style="color:#0d2e0d">${s.father||'—'}</div></div>
-        <div class="sub-detail"><div class="sub-detail-lbl" style="color:rgba(15,50,15,.55)">Mobile</div><div class="sub-detail-val" style="color:#0d2e0d">${s.mobile||'—'}</div></div>
-        <div class="sub-detail"><div class="sub-detail-lbl" style="color:rgba(15,50,15,.55)">Village</div><div class="sub-detail-val" style="color:#0d2e0d">${s.village||'—'}</div></div>
-        <div class="sub-detail"><div class="sub-detail-lbl" style="color:rgba(15,50,15,.55)">Sub District</div><div class="sub-detail-val" style="color:#0d2e0d">${s.sub||'—'}</div></div>
-        <div class="sub-detail"><div class="sub-detail-lbl" style="color:rgba(15,50,15,.55)">District</div><div class="sub-detail-val" style="color:#0d2e0d">${s.district||'—'}</div></div>
-        <div class="sub-detail"><div class="sub-detail-lbl" style="color:rgba(15,50,15,.55)">State</div><div class="sub-detail-val" style="color:#0d2e0d">${s.state||'—'}</div></div>
-        <div class="sub-detail"><div class="sub-detail-lbl" style="color:rgba(15,50,15,.55)">UTR Number</div><div class="sub-detail-val" style="color:#0d2e0d">${s.utr||'—'}</div></div>
-      </div>
-      ${remarkHtml}
-      <div style="margin-top:12px;padding-top:10px;border-top:1px solid ${divLine};display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-        <span style="font-size:.7rem;color:rgba(15,50,15,.5)">📅 ${s.time||''} &nbsp;|&nbsp; 📁 ${s.files||'—'}${s.updated?` &nbsp;|&nbsp; 🔄 ${s.updated}`:''}</span>
-        <button class="del-btn" onclick="deleteApp('${s.appNo}')">🗑️ Delete</button>
-      </div>
-      ${s.fileData && s.fileData.length > 0 ? `
-      <div style="margin-top:10px;padding-top:10px;border-top:1px solid ${divLine}">
-        <div style="font-size:.72rem;color:rgba(15,50,15,.55);margin-bottom:8px;font-weight:600">📎 Uploaded Documents:</div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px">
-          ${s.fileData.map((f,fi)=>`
-            <div style="display:flex;align-items:center;gap:6px;background:rgba(37,168,74,.08);border:1px solid rgba(37,168,74,.22);border-radius:10px;padding:6px 10px">
-              <span style="font-size:.74rem;color:#1a5c1a;font-weight:600">📄 ${f.name.substring(0,18)}${f.name.length>18?'…':''}</span>
-              <button onclick="viewFile('${s.appNo}',${fi})" style="background:rgba(37,168,74,.12);border:1px solid rgba(37,168,74,.28);color:#1a5c1a;font-size:.64rem;font-weight:700;padding:2px 8px;border-radius:8px;cursor:pointer;font-family:'Poppins',sans-serif">👁️ View</button>
-              <button onclick="downloadFile('${s.appNo}',${fi})" style="background:rgba(240,165,0,.14);border:1px solid rgba(240,165,0,.35);color:#7a4f00;font-size:.64rem;font-weight:700;padding:2px 8px;border-radius:8px;cursor:pointer;font-family:'Poppins',sans-serif">⬇️ Download</button>
-              <button onclick="toggleAchieve('${s.appNo}',${fi})" style="background:linear-gradient(135deg,#f0a500,#ffd056);border:none;color:#0d4a1f;font-size:.64rem;font-weight:800;padding:2px 8px;border-radius:8px;cursor:pointer;font-family:'Poppins',sans-serif">🏆 Achieve</button>
-            </div>`).join('')}
-        </div>
-      </div>` : `<div style="margin-top:8px;font-size:.7rem;color:rgba(15,50,15,.4)">📎 No files uploaded</div>`}
-      <!-- Achievement Section -->
-      <div class="achieve-section" id="achieve-${s.appNo}">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div style="font-size:.78rem;font-weight:800;color:#0d4a1f">🏆 Achievement — ${s.userName||s.name}</div>
-          <button onclick="toggleAchieve('${s.appNo}',-1)" style="background:none;border:none;color:#555;cursor:pointer;font-size:14px;padding:0">✕</button>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
-          <div style="background:#fff;border:1px solid #a5d6a7;border-radius:9px;padding:10px;text-align:center"><div style="font-family:'Baloo 2',cursive;font-size:1.4rem;font-weight:800;color:#1b5e20" id="ach-total-${s.appNo}">—</div><div style="font-size:.62rem;color:#388e3c;font-weight:600">Total</div></div>
-          <div style="background:#fff;border:1px solid #90caf9;border-radius:9px;padding:10px;text-align:center"><div style="font-family:'Baloo 2',cursive;font-size:1.4rem;font-weight:800;color:#0d47a1" id="ach-appr-${s.appNo}">—</div><div style="font-size:.62rem;color:#1565c0;font-weight:600">Approved</div></div>
-          <div style="background:#fff;border:1px solid #ffe082;border-radius:9px;padding:10px;text-align:center"><div style="font-family:'Baloo 2',cursive;font-size:1.4rem;font-weight:800;color:#e65100" id="ach-pend-${s.appNo}">—</div><div style="font-size:.62rem;color:#bf360c;font-weight:600">Pending</div></div>
-        </div>
-        <div style="font-size:.72rem;color:#1a7a35;font-weight:700;margin-bottom:6px">📋 Is User Ki Sabhi Applications:</div>
-        <div id="ach-list-${s.appNo}" style="display:flex;flex-direction:column;gap:5px;max-height:180px;overflow-y:auto"></div>
-      </div>
-    </div>`;
-  }
-
-  const pendingContainer  = document.getElementById('admin-pending-list');
-  const approvedContainer = document.getElementById('admin-approved-list');
-  const rejectedContainer = document.getElementById('admin-rejected-list');
-  if(pendingContainer)  pendingContainer.innerHTML  = pendingSubs.length===0  ? '<div class="empty-state" style="color:rgba(15,50,15,.45)"><div>📭</div><div>Koi pending application nahi</div></div>'  : pendingSubs.map(s=>buildCard(s,'pending')).join('');
-  if(approvedContainer) approvedContainer.innerHTML = approvedSubs.length===0 ? '<div class="empty-state" style="color:rgba(15,50,15,.45)"><div>✅</div><div>Koi approved application nahi</div></div>' : approvedSubs.map(s=>buildCard(s,'approved')).join('');
-  if(rejectedContainer) rejectedContainer.innerHTML = rejectedSubs.length===0 ? '<div class="empty-state" style="color:rgba(15,50,15,.45)"><div>🚫</div><div>Koi rejected application nahi</div></div>' : rejectedSubs.map(s=>buildCard(s,'rejected')).join('');
-
-  // Reset bulk selection on re-render
-  _bulkSelected.clear();
-  updateBulkBar();
-
-  renderAdminUsers(allUsers);
-
-  // Restore active filter if set
-  if(_currentAdminFilter){
-    const savedFilter = _currentAdminFilter;
-    _currentAdminFilter = ''; // reset pehle taaki filterAdminView toggle na kare
-    filterAdminView(savedFilter); // phir sahi section dikhao
-  } else {
-    // Default: pending section dikhao
-    filterAdminView('pending');
-  }
-}
 
 // ══ PRO PANEL — ANALYTICS UPDATE ══
 function updateProPanel(allSubs, allUsers){
@@ -5579,214 +4538,30 @@ function closeBulkModal(){
 }
 
 // Export CSV
-async function adminExportCSV(){
-  toast('📊 CSV ban rahi hai...','ok');
-  const allSubs = await getSubs();
-  if(!allSubs.length){ toast('❌ Koi data nahi hai export ke liye','fail'); return; }
 
-  const headers = ['App No','Naam','Pita','Mobile','Village','Sub District','District','State','UTR','Status','Time','User Mobile','User Name'];
-  const rows = allSubs.map(s=>[
-    s.appNo||'', s.name||'', s.father||'', s.mobile||'', s.village||'',
-    s.sub||'', s.district||'', s.state||'', s.utr||'',
-    s.status||'', s.time||'', s.userMobile||'', s.userName||''
-  ].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));
 
-  const csvContent = [headers.join(','), ...rows].join('\n');
-  const blob = new Blob(['\uFEFF'+csvContent], {type:'text/csv;charset=utf-8;'});
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = 'AWO_Applications_' + new Date().toLocaleDateString('en-IN').replace(/\//g,'-') + '.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  toast('✅ CSV download ho rahi hai!','ok');
-}
 
-// Refresh Data
-async function adminRefreshData(){
-  const btn = document.getElementById('refresh-btn');
-  if(btn){
-    btn.style.opacity='0.6';
-    btn.style.pointerEvents='none';
-  }
-  await renderAdminDash();
-  if(btn){
-    btn.style.opacity='1';
-    btn.style.pointerEvents='auto';
-  }
-  toast('🔄 Data refresh ho gaya!','ok');
-}
 
-// ══════════════════════════════════════════
-// 🔧 MISSING FEATURE FIX 8: ADMIN REAL-TIME NOTIFICATION
-// Firebase .on('child_added') — admin gets alert on new form submission
-// ══════════════════════════════════════════
-let _adminSubsListener = null;
-let _adminKnownSubs = new Set();
-let _adminNotifList = [];
 
-function startAdminRealtimeListener(){
-  // Stop any previous listener
-  if(_adminSubsListener) db.ref('submissions').off('child_added', _adminSubsListener);
-  
-  // First pass: collect existing submissions silently (don't notify)
-  db.ref('submissions').once('value').then(snap=>{
-    const data = snap.val();
-    if(data) Object.keys(data).forEach(k=>_adminKnownSubs.add(k));
-    
-    // Now start listening for NEW ones
-    _adminSubsListener = db.ref('submissions').on('child_added', (snap)=>{
-      const appNo = snap.key;
-      if(_adminKnownSubs.has(appNo)) return; // already known — skip
-      _adminKnownSubs.add(appNo);
-      const sub = snap.val();
-      if(!sub) return;
-      
-      // Add to admin notification list
-      _adminNotifList.unshift({
-        id: Date.now(),
-        title: '🆕 Naya Form Submit!',
-        body: (sub.name||'Unknown') + ' — ' + (sub.appNo||appNo) + ' | ' + (sub.userMobile||''),
-        time: new Date().toLocaleString('hi-IN'),
-        read: false
-      });
-      if(_adminNotifList.length > 30) _adminNotifList = _adminNotifList.slice(0,30);
-      
-      // Update badge
-      updateAdminNotifBell();
-      toast('🆕 Naya application aaya: ' + (sub.name||appNo), 'ok');
-    });
-  });
-}
 
-function stopAdminRealtimeListener(){
-  if(_adminSubsListener){
-    db.ref('submissions').off('child_added', _adminSubsListener);
-    _adminSubsListener = null;
-  }
-}
 
-function updateAdminNotifBell(){
-  const unread = _adminNotifList.filter(n=>!n.read).length;
-  const dot = document.getElementById('admin-notif-dot');
-  if(dot){ if(unread>0) dot.classList.add('active'); else dot.classList.remove('active'); }
-  const cnt = document.getElementById('admin-notif-count');
-  if(cnt) cnt.textContent = unread > 0 ? unread : '';
-  renderAdminNotifList();
-}
 
-function renderAdminNotifList(){
-  const list = document.getElementById('admin-notif-list');
-  if(!list) return;
-  if(_adminNotifList.length===0){
-    list.innerHTML = '<div style="padding:20px;text-align:center;color:rgba(15,50,15,.4);font-size:.78rem">🔕 Koi notification nahi</div>';
-    return;
-  }
-  list.innerHTML = _adminNotifList.map(n=>`
-    <div onclick="readAdminNotif(${n.id})" style="padding:12px 16px;border-bottom:1px solid rgba(37,168,74,.08);cursor:pointer;background:${n.read?'transparent':'rgba(37,168,74,.05)'};border-left:${n.read?'none':'3px solid #25a84a'};transition:background .15s" onmouseover="this.style.background='rgba(37,168,74,.08)'" onmouseout="this.style.background='${n.read?'transparent':'rgba(37,168,74,.05)'}'">
-      <div style="font-size:.78rem;font-weight:700;color:#0d2e0d;margin-bottom:2px">${n.title}</div>
-      <div style="font-size:.7rem;color:rgba(15,50,15,.55)">${n.body}</div>
-      <div style="font-size:.63rem;color:rgba(15,50,15,.35);margin-top:3px">🕐 ${n.time}</div>
-    </div>`).join('');
-}
 
-function readAdminNotif(id){
-  _adminNotifList = _adminNotifList.map(n=>n.id===id?{...n,read:true}:n);
-  updateAdminNotifBell();
-}
 
-function markAllAdminRead(){
-  _adminNotifList = _adminNotifList.map(n=>({...n,read:true}));
-  updateAdminNotifBell();
-  toast('✅ Sab read mark ho gayi','ok');
-}
+
 
 let _adminNotifPanelOpen = false;
-function toggleAdminNotifPanel(){
-  _adminNotifPanelOpen = !_adminNotifPanelOpen;
-  const panel = document.getElementById('admin-notif-panel');
-  if(panel){
-    if(_adminNotifPanelOpen){
-      panel.style.opacity='1';
-      panel.style.transform='translateY(0) scale(1)';
-      panel.style.pointerEvents='all';
-    } else {
-      panel.style.opacity='0';
-      panel.style.transform='translateY(-8px) scale(.96)';
-      panel.style.pointerEvents='none';
-    }
-  }
-}
+
 
 // Approve All Pending
-async function adminApproveAllPending(){
-  const allSubs = await getSubs();
-  const pending = allSubs.filter(s=>s.status!=='Approved');
-  if(!pending.length){ toast('✅ Koi pending application nahi!','ok'); return; }
-  if(!confirm('Sabhi '+pending.length+' pending applications ko approve karna chahte hain?')) return;
-  showLoading('Approve ho raha hai...');
-  try{
-    await Promise.all(pending.map(s=>updateSubStatus(s.appNo,'Approved')));
-    hideLoading();
-    toast('✅ Sabhi '+pending.length+' applications approve ho gayi!','ok');
-    await renderAdminDash();
-  } catch(e){ hideLoading(); toast('❌ Kuch error aaya','fail'); }
-}
+
 
 // Admin Notes — Firebase mein save hoti hain taaki user dashboard ticker mein dikhe
-async function adminSaveNote(){
-  const ta = document.getElementById('admin-note-area');
-  const st = document.getElementById('admin-note-status');
-  if(!ta) return;
-  const noteText = ta.value.trim();
-  try {
-    await db.ref('admin_notice').set({
-      text: noteText,
-      updatedAt: Date.now(),
-      updatedBy: 'admin'
-    });
-    // Also keep local backup
-    localStorage.setItem('awo_admin_note', ta.value);
-    if(st){
-      st.textContent = '✅ Note save ho gaya — ' + new Date().toLocaleTimeString('hi-IN',{hour:'2-digit',minute:'2-digit'});
-      st.style.color = '#1a7a35';
-    }
-    toast('📝 Note save ho gaya! Users ko ticker mein dikhega 📢','ok');
-  } catch(e){
-    // Fallback to localStorage
-    localStorage.setItem('awo_admin_note', ta.value);
-    if(st){ st.textContent = '⚠️ Local save hua (internet check karein)'; st.style.color = '#e65100'; }
-  }
-}
 
-async function adminClearNote(){
-  const ta = document.getElementById('admin-note-area');
-  const st = document.getElementById('admin-note-status');
-  if(ta) ta.value = '';
-  try {
-    await db.ref('admin_notice').set({ text: '', updatedAt: Date.now() });
-    localStorage.removeItem('awo_admin_note');
-    if(st){ st.textContent = '🗑️ Note clear ho gaya — Ticker bhi band ho jaayega'; st.style.color = '#c0392b'; }
-    toast('🗑️ Note clear ho gaya!','ok');
-  } catch(e){
-    localStorage.removeItem('awo_admin_note');
-    if(st){ st.textContent = '🗑️ Local clear hua'; st.style.color = '#c0392b'; }
-  }
-}
 
-async function adminLoadNote(){
-  const ta = document.getElementById('admin-note-area');
-  if(!ta) return;
-  try {
-    const snap = await db.ref('admin_notice').once('value');
-    const data = snap.val();
-    ta.value = (data && data.text) ? data.text : (localStorage.getItem('awo_admin_note')||'');
-  } catch(e){
-    ta.value = localStorage.getItem('awo_admin_note') || '';
-  }
-}
+
+
+
 
 // Load note when admin dash opens
 const _origShowAdminDash = showAdminDash;
@@ -6094,19 +4869,7 @@ async function doUserChangePass(){
 }
 
 // ── ADMIN: TOGGLE USER ACTIVE/DEACTIVE ──
-async function adminToggleUser(mobile, name, action){
-  if(!confirm('"' + name + '" ko ' + action + ' karna chahte hain?')) return;
-  showLoading('User ' + action + ' ho raha hai...');
-  try{
-    await setUserActive(mobile, action === 'activate' ? true : false);
-    hideLoading();
-    toast((action === 'activate' ? '✅ User activate' : '🚫 User deactivate') + ' ho gaya: ' + name, 'ok');
-    renderAdminDash();
-  } catch(e){
-    hideLoading();
-    toast('❌ Update nahi hua. Internet check karein','fail');
-  }
-}
+
 
 // ── ADMIN: REPLACE QR CODE ──
 function openQRReplace(){
@@ -6162,41 +4925,7 @@ async function loadFormQR(){
 // 🔐 SECURITY FIX 4: Use styled modal instead of browser confirm()
 let _pendingDelUserMobile = null;
 let _pendingDelUserName   = null;
-function adminDeleteUser(mobile, name){
-  _pendingDelUserMobile = mobile;
-  _pendingDelUserName   = name;
-  const label = document.getElementById('del-modal-appno-label');
-  if(label) label.textContent = '👤 ' + name + ' (' + mobile + ')';
-  const title = document.querySelector('#del-confirm-modal .del-modal-title');
-  if(title) title.textContent = 'User Delete Karein?';
-  const body = document.querySelector('#del-confirm-modal .del-modal-body');
-  if(body) body.textContent = '"' + name + '" ka account hamesha ke liye delete ho jaayega. Dobara registration karni padegi.';
-  _pendingDelCallback = async () => {
-    showLoading('User delete ho raha hai...');
-    try{
-      await deleteUser(_pendingDelUserMobile);
-      hideLoading();
-      toast('🗑️ User "' + _pendingDelUserName + '" delete ho gaya!', 'ok');
-      // Users count aur list dono refresh karo
-      const freshUsers = await getUsers();
-      const badge = document.getElementById('users-count-badge');
-      if(badge) badge.textContent = freshUsers.length + ' Users';
-      await renderAdminUsers(freshUsers);
-      // a-users stat bhi update karo
-      const aUsers = document.getElementById('a-users');
-      if(aUsers) aUsers.textContent = freshUsers.length;
-      const scUsers = document.getElementById('sc-users');
-      if(scUsers) scUsers.textContent = freshUsers.length;
-    } catch(e){
-      hideLoading();
-      toast('❌ Delete nahi hua: '+e.message,'fail');
-      console.error('User delete error:',e);
-    }
-    _pendingDelUserMobile = null;
-    _pendingDelUserName   = null;
-  };
-  document.getElementById('del-confirm-modal').classList.add('show');
-}
+
 
 function togglePwView(i, pw){
   const el = document.getElementById('pw-val-'+i);
@@ -6267,99 +4996,7 @@ function toggleApprovedPanel(){
 // ── FILTER ADMIN VIEW — TOGGLE ON/OFF ──
 let _currentAdminFilter = '';
 
-function filterAdminView(type){
-  const pendingWrap  = document.getElementById('panel-pending-wrap');
-  const approvedWrap = document.getElementById('panel-approved-wrap');
-  const rejectedWrap = document.getElementById('panel-rejected-wrap');
-  const usersWrap    = document.getElementById('panel-users-wrap');
-  const titleWrap    = document.getElementById('admin-panel-title-wrap');
-  const titleEl      = document.getElementById('admin-panel-title');
-  const searchBar    = document.getElementById('admin-search-bar');
 
-  function resetCards(){
-    ['total','users','pending','approved'].forEach(k=>{
-      const el = document.getElementById('sc-btn-'+k);
-      if(!el) return;
-      el.style.background = '';
-      el.style.border = '';
-      el.style.boxShadow = '';
-      el.style.transform = '';
-    });
-  }
-
-  function highlightCard(k, bg, border, shadow){
-    const el = document.getElementById('sc-btn-'+k);
-    if(!el) return;
-    el.style.background = bg;
-    el.style.border = border;
-    el.style.transform = 'translateY(-3px)';
-    el.style.boxShadow = shadow;
-  }
-
-  function hideAll(){
-    if(pendingWrap)  pendingWrap.style.display  = 'none';
-    if(approvedWrap) approvedWrap.style.display = 'none';
-    if(rejectedWrap) rejectedWrap.style.display = 'none';
-    if(usersWrap)    usersWrap.style.display    = 'none';
-    if(titleWrap)    titleWrap.style.display    = 'none';
-    if(searchBar)    searchBar.style.display    = 'none';
-    const frWrap = document.getElementById('panel-farmer-registry-wrap');
-    if(frWrap) frWrap.style.display = 'none';
-  }
-
-  if(_currentAdminFilter === type){
-    _currentAdminFilter = '';
-    hideAll();
-    resetCards();
-    return;
-  }
-
-  _currentAdminFilter = type;
-  hideAll();
-  resetCards();
-
-  if(titleWrap) titleWrap.style.display = 'flex';
-  if(searchBar) searchBar.style.display = 'flex';
-
-  if(type === 'total'){
-    if(pendingWrap)  pendingWrap.style.display  = 'block';
-    if(approvedWrap) approvedWrap.style.display = 'block';
-    if(rejectedWrap) rejectedWrap.style.display = 'block';
-    if(titleEl) titleEl.innerHTML = '📋 Total Applications — Sabhi';
-    highlightCard('total','rgba(240,165,0,.18)','2px solid rgba(240,165,0,.6)','0 8px 22px rgba(240,165,0,.25)');
-
-  } else if(type === 'pending'){
-    if(pendingWrap) pendingWrap.style.display = 'block';
-    if(titleEl) titleEl.innerHTML = '⏳ Pending Applications';
-    highlightCard('pending','rgba(255,152,0,.15)','2px solid rgba(255,152,0,.55)','0 8px 22px rgba(255,152,0,.22)');
-
-  } else if(type === 'approved'){
-    if(approvedWrap) approvedWrap.style.display = 'block';
-    if(titleEl) titleEl.innerHTML = '✅ Approved Applications';
-    highlightCard('approved','rgba(37,168,74,.15)','2px solid rgba(37,168,74,.5)','0 8px 22px rgba(37,168,74,.22)');
-
-  } else if(type === 'rejected'){
-    if(rejectedWrap) rejectedWrap.style.display = 'block';
-    if(titleEl) titleEl.innerHTML = '❌ Rejected Applications';
-
-  } else if(type === 'users'){
-    if(usersWrap) usersWrap.style.display = 'block';
-    const list = document.getElementById('admin-users-list');
-    const btn  = document.getElementById('users-toggle-btn');
-    if(list){ list.style.display='flex'; _usersVisible=true; }
-    if(btn){ btn.innerHTML='▲ Users Chhupao'; btn.style.background='rgba(56,139,253,.18)'; }
-    if(titleEl) titleEl.innerHTML = '👥 Registered Users';
-    if(searchBar) searchBar.style.display = 'none';
-    highlightCard('users','rgba(56,139,253,.15)','2px solid rgba(56,139,253,.5)','0 8px 22px rgba(56,139,253,.22)');
-
-  } else if(type === 'farmer-registry'){
-    const frWrap = document.getElementById('panel-farmer-registry-wrap');
-    if(frWrap) frWrap.style.display = 'block';
-    if(titleEl) titleEl.innerHTML = '🌾 Farmer Registry Applications';
-    if(searchBar) searchBar.style.display = 'none';
-    frAdminLoadAll();
-  }
-}
 
 function clearAllFilters(){
   ['filter-date-from','filter-date-to','filter-dist'].forEach(id=>{
@@ -6458,122 +5095,17 @@ async function openUserAchieve(mob,name){
 function closeUserAchieve(){document.getElementById('user-achieve-overlay').style.display='none';}
 
 // ── ADMIN ACHIEVEMENT POPUP ──
-async function openAdminAchieve(){
-  document.getElementById('admin-dd').classList.remove('open');
-  showLoading('Achievements load ho rahe hain...');
-  const allSubs=await getSubs();
-  const allUsers=await getUsers();
-  hideLoading();
-  const totalSubs=allSubs.length,totalApproved=allSubs.filter(s=>s.status==='Approved').length,totalPending=allSubs.filter(s=>s.status==='Pending').length;
-  const userRows=allUsers.map(u=>{
-    const usubs=allSubs.filter(s=>s.userMobile===u.mobile);
-    const uapp=usubs.filter(s=>s.status==='Approved').length;
-    let medal='🥉';
-    if(uapp>=10)medal='🏆';else if(uapp>=5)medal='🥇';else if(uapp>=2)medal='🥈';
-    return {name:u.name,mobile:u.mobile,total:usubs.length,approved:uapp,pending:usubs.filter(s=>s.status==='Pending').length,medal};
-  }).sort((a,b)=>b.approved-a.approved);
-  document.getElementById('admin-achieve-content').innerHTML=`
-    <div style="background:linear-gradient(135deg,#0d4a1f,#1a7a35,#25a84a);padding:28px 24px;text-align:center">
-      <div style="font-size:2.5rem;margin-bottom:6px">🏆</div>
-      <div style="font-family:'Baloo 2',cursive;font-size:1.5rem;font-weight:800;color:#ffd056">Admin Achievement Board</div>
-      <div style="font-size:.8rem;color:rgba(255,255,255,.7);margin-top:3px">👤 Shivam Gupta &nbsp;|&nbsp; 🛡️ Administrator</div>
-    </div>
-    <div style="padding:20px 22px;background:#fff">
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px">
-        <div style="background:#e8f5e9;border:1.5px solid #a5d6a7;border-radius:12px;padding:14px;text-align:center"><div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:#1b5e20">${totalSubs}</div><div style="font-size:.68rem;color:#388e3c;font-weight:600">Total Apps</div></div>
-        <div style="background:#e3f2fd;border:1.5px solid #90caf9;border-radius:12px;padding:14px;text-align:center"><div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:#0d47a1">${totalApproved}</div><div style="font-size:.68rem;color:#1565c0;font-weight:600">Approved</div></div>
-        <div style="background:#fff8e1;border:1.5px solid #ffe082;border-radius:12px;padding:14px;text-align:center"><div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:#e65100">${totalPending}</div><div style="font-size:.68rem;color:#bf360c;font-weight:600">Pending</div></div>
-      </div>
-      <div style="background:#f0faf4;border:1.5px solid #a5d6a7;border-radius:12px;padding:13px 18px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between">
-        <div><div style="font-size:.73rem;color:#1b5e20;font-weight:700">💰 Total Revenue</div><div style="font-size:.63rem;color:#555;margin-top:1px">${totalApproved} approved × ₹400</div></div>
-        <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:#0d4a1f">₹${(totalApproved*400).toLocaleString('en-IN')}</div>
-      </div>
-      <div style="font-size:.73rem;font-weight:700;color:#1a7a35;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">👥 User-wise Leaderboard</div>
-      <div style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto">
-        ${userRows.length===0?'<div style="text-align:center;padding:20px;color:#999">Koi user nahi hai</div>':userRows.map((u,i)=>`
-        <div style="display:flex;align-items:center;justify-content:space-between;background:${i===0?'linear-gradient(135deg,#fff8e1,#fff3cd)':'#f9f9f9'};border:1px solid ${i===0?'#ffd056':'#e0e0e0'};border-radius:10px;padding:10px 14px;gap:10px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <div style="font-size:1.3rem">${u.medal}</div>
-            <div><div style="font-size:.78rem;font-weight:700;color:#0d2e0d">${u.name}</div><div style="font-size:.65rem;color:#777">📱 ${u.mobile}</div></div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <span style="background:#e8f5e9;color:#2e7d32;font-size:.67rem;font-weight:700;padding:2px 8px;border-radius:6px">${u.approved} ✅</span>
-            <span style="background:#fff8e1;color:#e65100;font-size:.67rem;font-weight:700;padding:2px 8px;border-radius:6px">${u.pending} ⏳</span>
-          </div>
-        </div>`).join('')}
-      </div>
-    </div>`;
-  document.getElementById('admin-achieve-overlay').style.display='flex';
-}
-function closeAdminAchieve(){document.getElementById('admin-achieve-overlay').style.display='none';}
+
+
 
 // ══════════════════════════════════════════
 // 🪪 ADMIN ID CARD
 // ══════════════════════════════════════════
-async function openAdminIDCard(){
-  const s = getSession();
-  const name = s ? (s.name||'Shivam Gupta').replace('Admin (','').replace(')','') : 'Shivam Gupta';
-  const mobile = s ? (s.mobile||'8960947991') : '8960947991';
-  const dp = localStorage.getItem('admin_dp');
 
-  // Set name, mobile
-  document.getElementById('id-card-name').textContent = name;
-  document.getElementById('id-card-mobile').textContent = mobile;
 
-  // Set Admin ID from mobile last 4 digits
-  const adminId = 'AWO-ADM-' + mobile.slice(-4);
-  document.getElementById('id-card-adminid').textContent = adminId;
 
-  // Set issue date
-  const now = new Date();
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  document.getElementById('id-card-date').textContent = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
 
-  // Set photo
-  const photoEl = document.getElementById('id-card-photo');
-  if(dp){
-    photoEl.innerHTML = '';
-    photoEl.style.background = 'none';
-    const img = document.createElement('img');
-    img.src = dp;
-    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:7px';
-    photoEl.appendChild(img);
-  } else {
-    photoEl.innerHTML = name[0].toUpperCase();
-    photoEl.style.background = 'linear-gradient(135deg,#f0a500,#ffd056)';
-  }
 
-  // Load live stats
-  try {
-    const allSubs = await getSubs();
-    const allUsers = await getUsers();
-    document.getElementById('id-stat-total').textContent = allSubs.length;
-    document.getElementById('id-stat-approved').textContent = allSubs.filter(s=>s.status==='Approved').length;
-    document.getElementById('id-stat-users').textContent = allUsers.length;
-  } catch(e) {
-    document.getElementById('id-stat-total').textContent = '—';
-    document.getElementById('id-stat-approved').textContent = '—';
-    document.getElementById('id-stat-users').textContent = '—';
-  }
-
-  document.getElementById('admin-id-card-overlay').style.display = 'flex';
-}
-
-function closeAdminIDCard(){
-  document.getElementById('admin-id-card-overlay').style.display = 'none';
-}
-
-function printAdminIDCard(){
-  const card = document.getElementById('admin-id-card-print');
-  const w = window.open('','_blank','width=420,height=680');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Poppins',sans-serif;background:#f0f0f0;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}@media print{body{background:#fff;padding:0}}</style>
-    </head><body>${card.outerHTML}</body></html>`);
-  w.document.close();
-  w.focus();
-  setTimeout(()=>{ w.print(); }, 700);
-}
 
 // ══════════════════════════════════════════
 // 🌾 PM KISAN PORTAL — JS
@@ -7147,53 +5679,7 @@ async function pmkCheckStatus(){
 <!-- ══ FORGOT PASSWORD POPUP ══ -->
 <!-- ══ FORGOT PASSWORD POPUP (OTP Based) ══ -->
 <!-- ══ ADMIN SETUP POPUP ══ -->
-<div id="admin-setup-popup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99999;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)">
-  <div style="background:#fff;border-radius:24px;width:100%;max-width:420px;box-shadow:0 24px 80px rgba(0,0,0,.3);animation:slideUp .35s ease both;font-family:'Poppins',sans-serif;overflow:hidden">
-    <div style="background:linear-gradient(135deg,#0d4a1f,#1a7a35);padding:20px 24px 16px;position:relative">
-      <button onclick="closeAdminSetup()" style="position:absolute;top:13px;right:13px;background:rgba(255,255,255,.15);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px">✕</button>
-      <div style="font-family:'Baloo 2',cursive;font-size:1.25rem;font-weight:800;color:#fff">⚙️ Admin Setup</div>
-      <div style="font-size:.72rem;color:rgba(255,255,255,.7);margin-top:2px">Pehli baar admin credentials set karein</div>
-    </div>
-    <div style="padding:22px 24px 24px">
-      <div style="background:#fff8e1;border:1.5px solid #ffe082;border-radius:12px;padding:12px 14px;font-size:.75rem;color:#7a5500;margin-bottom:18px">
-        ⚠️ <strong>Sirf pehli baar use karein.</strong> Agar admin_config already Firebase mein set hai to yahan enter karna zaroori nahi.
-      </div>
-      <div style="margin-bottom:13px">
-        <label style="display:block;font-size:.75rem;font-weight:700;color:#2a5c2a;margin-bottom:6px">📱 Admin Mobile Number *</label>
-        <input id="as-mobile" type="tel" placeholder="10 digit mobile" maxlength="10"
-          style="width:100%;background:#f4fbf5;border:1.5px solid rgba(37,168,74,.28);border-radius:11px;padding:11px 14px;color:#1a2e1a;font-family:'Poppins',sans-serif;font-size:.87rem;outline:none"
-          onfocus="this.style.borderColor='#25a84a'" onblur="this.style.borderColor='rgba(37,168,74,.28)'"/>
-      </div>
-      <div style="margin-bottom:13px">
-        <label style="display:block;font-size:.75rem;font-weight:700;color:#2a5c2a;margin-bottom:6px">📧 Admin Email ID *</label>
-        <input id="as-email" type="email" placeholder="OTP is email pe aayega"
-          style="width:100%;background:#f4fbf5;border:1.5px solid rgba(37,168,74,.28);border-radius:11px;padding:11px 14px;color:#1a2e1a;font-family:'Poppins',sans-serif;font-size:.87rem;outline:none"
-          onfocus="this.style.borderColor='#25a84a'" onblur="this.style.borderColor='rgba(37,168,74,.28)'"/>
-      </div>
-      <div style="margin-bottom:13px">
-        <label style="display:block;font-size:.75rem;font-weight:700;color:#2a5c2a;margin-bottom:6px">🔑 Naya Password *</label>
-        <div style="position:relative">
-          <input id="as-pass" type="password" placeholder="Min 6 characters"
-            style="width:100%;background:#f4fbf5;border:1.5px solid rgba(37,168,74,.28);border-radius:11px;padding:11px 42px 11px 14px;color:#1a2e1a;font-family:'Poppins',sans-serif;font-size:.87rem;outline:none"
-            onfocus="this.style.borderColor='#25a84a'" onblur="this.style.borderColor='rgba(37,168,74,.28)'"/>
-          <button onclick="tpw('as-pass',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:14px">👁️</button>
-        </div>
-      </div>
-      <div style="margin-bottom:18px">
-        <label style="display:block;font-size:.75rem;font-weight:700;color:#2a5c2a;margin-bottom:6px">🔑 Password Confirm Karein *</label>
-        <input id="as-pass2" type="password" placeholder="Dobara same password"
-          style="width:100%;background:#f4fbf5;border:1.5px solid rgba(37,168,74,.28);border-radius:11px;padding:11px 14px;color:#1a2e1a;font-family:'Poppins',sans-serif;font-size:.87rem;outline:none"
-          onfocus="this.style.borderColor='#25a84a'" onblur="this.style.borderColor='rgba(37,168,74,.28)'"/>
-      </div>
-      <div id="as-err" style="display:none;background:#fff3f3;border:1.5px solid #ffaaaa;border-radius:10px;padding:11px 14px;font-size:.77rem;color:#c0392b;margin-bottom:14px"></div>
-      <div id="as-ok" style="display:none;background:#e8f5e9;border:1.5px solid #a5d6a7;border-radius:10px;padding:11px 14px;font-size:.77rem;color:#1a5c2a;margin-bottom:14px"></div>
-      <button onclick="doAdminSetup()"
-        style="width:100%;padding:13px;background:linear-gradient(135deg,#1a7a35,#25a84a);border:none;border-radius:11px;color:#fff;font-family:'Poppins',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(37,168,74,.35)">
-        ✅ Admin Setup Save Karein
-      </button>
-    </div>
-  </div>
-</div>
+
 
 <div id="forgot-popup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:99998;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(8px)">
   <div style="background:#fff;border-radius:24px;width:100%;max-width:420px;box-shadow:0 24px 80px rgba(0,0,0,.25);animation:slideUp .35s ease both;font-family:'Poppins',sans-serif;overflow:hidden">
@@ -7208,16 +5694,10 @@ async function pmkCheckStatus(){
     <!-- STEP 1: Role select + inputs -->
     <div id="fp-step1" style="padding:22px 24px 24px">
 
-      <!-- Role Tabs -->
-      <div style="display:flex;gap:8px;margin-bottom:20px">
-        <button id="fp-tab-user" onclick="fpSetRole('user')"
-          style="flex:1;padding:10px;border-radius:10px;font-size:.8rem;font-weight:700;cursor:pointer;border:2px solid #25a84a;background:linear-gradient(135deg,#1a7a35,#25a84a);color:#fff;font-family:'Poppins',sans-serif;transition:all .2s">
-          🌾 User
-        </button>
-        <button id="fp-tab-admin" onclick="fpSetRole('admin')"
-          style="flex:1;padding:10px;border-radius:10px;font-size:.8rem;font-weight:700;cursor:pointer;border:2px solid rgba(37,168,74,.3);background:#f4fbf5;color:#5a8a5a;font-family:'Poppins',sans-serif;transition:all .2s">
-          🛡️ Admin
-        </button>
+      <!-- Role: User only -->
+      <div style="display:none">
+        <button id="fp-tab-user" onclick="fpSetRole('user')"></button>
+        <button id="fp-tab-admin" style="display:none"></button>
       </div>
 
       <!-- User fields -->
@@ -7238,23 +5718,8 @@ async function pmkCheckStatus(){
         </div>
       </div>
 
-      <!-- Admin fields -->
-      <div id="fp-admin-fields" style="display:none">
-        <div style="margin-bottom:13px">
-          <label style="display:block;font-size:.75rem;font-weight:700;color:#2a5c2a;margin-bottom:6px">📱 Admin Mobile</label>
-          <input id="fp-admin-mobile" type="tel" placeholder="Admin mobile number" maxlength="10"
-            style="width:100%;background:#f4fbf5;border:1.5px solid rgba(37,168,74,.28);border-radius:11px;padding:11px 14px;color:#1a2e1a;font-family:'Poppins',sans-serif;font-size:.87rem;outline:none;transition:all .2s"
-            onfocus="this.style.borderColor='#25a84a';this.style.boxShadow='0 0 0 3px rgba(37,168,74,.12)'"
-            onblur="this.style.borderColor='rgba(37,168,74,.28)';this.style.boxShadow='none'"/>
-        </div>
-        <div style="margin-bottom:18px">
-          <label style="display:block;font-size:.75rem;font-weight:700;color:#2a5c2a;margin-bottom:6px">📧 Admin Email ID <span style="color:#e53935;font-weight:600">*</span></label>
-          <input id="fp-admin-email" type="email" placeholder="Admin ki registered email ID daalen"
-            style="width:100%;background:#f4fbf5;border:1.5px solid rgba(37,168,74,.28);border-radius:11px;padding:11px 14px;color:#1a2e1a;font-family:'Poppins',sans-serif;font-size:.87rem;outline:none;transition:all .2s"
-            onfocus="this.style.borderColor='#25a84a';this.style.boxShadow='0 0 0 3px rgba(37,168,74,.12)'"
-            onblur="this.style.borderColor='rgba(37,168,74,.28)';this.style.boxShadow='none'"/>
-        </div>
-      </div>
+      <!-- Admin fields removed: user-only build -->
+      <div id="fp-admin-fields" style="display:none"></div>
 
       <div id="fp-step1-err" style="display:none;background:#fff3f3;border:1.5px solid #ffaaaa;border-radius:10px;padding:11px 14px;font-size:.77rem;color:#c0392b;margin-bottom:14px"></div>
 
@@ -7396,46 +5861,7 @@ async function pmkCheckStatus(){
 </div>
 
 <!-- ══ ADMIN PROFILE UPDATE POPUP ══ -->
-<div id="admin-profile-popup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99999;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(10px)">
-  <div style="background:#0d2e15;border:1.5px solid rgba(240,165,0,.3);border-radius:24px;padding:0;width:100%;max-width:420px;box-shadow:0 24px 80px rgba(0,0,0,.5);animation:slideUp .35s ease both;font-family:'Poppins',sans-serif;overflow:hidden">
-    <!-- Header -->
-    <div style="background:linear-gradient(135deg,#1a1a0d,#3a3010);padding:22px 26px 18px;position:relative;border-bottom:1px solid rgba(240,165,0,.2)">
-      <button onclick="closeAdminProfile()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.6);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">✕</button>
-      <div style="font-family:'Baloo 2',cursive;font-size:1.3rem;font-weight:800;color:#ffd056">🛡️ Admin Profile Update</div>
-      <div style="font-size:.73rem;color:rgba(255,255,255,.5);margin-top:2px">Naam, mobile aur DP update karein</div>
-    </div>
-    <!-- DP Upload -->
-    <div style="padding:24px 26px 0;text-align:center">
-      <div style="position:relative;display:inline-block;margin-bottom:16px">
-        <div id="ap-dp-preview" onclick="document.getElementById('ap-dp-input').click()" style="width:90px;height:90px;border-radius:50%;border:3px solid #f0a500;overflow:hidden;cursor:pointer;margin:0 auto;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;color:#0d4a1f;transition:all .2s;box-shadow:0 4px 16px rgba(240,165,0,.4)" title="Gallery se DP chunein">S</div>
-        <div onclick="document.getElementById('ap-dp-input').click()" style="position:absolute;bottom:2px;right:2px;width:26px;height:26px;background:#f0a500;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4);font-size:13px;border:2px solid #0d2e15">📷</div>
-        <input id="ap-dp-input" type="file" accept="image/*" style="display:none" onchange="apDpSelected(this)">
-      </div>
-      <div style="font-size:.72rem;color:rgba(255,255,255,.4);margin-bottom:4px">Tap karein gallery se photo chunne ke liye</div>
-    </div>
-    <!-- Fields -->
-    <div style="padding:16px 26px 24px">
-      <div style="margin-bottom:14px">
-        <label style="display:block;font-size:.75rem;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:6px">👤 Poora Naam</label>
-        <input id="ap-name" type="text" placeholder="Admin naam likhein"
-          style="width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(240,165,0,.3);border-radius:11px;padding:11px 14px;color:#fff;font-family:'Poppins',sans-serif;font-size:.87rem;outline:none;transition:all .2s"
-          onfocus="this.style.borderColor='#ffd056';this.style.boxShadow='0 0 0 3px rgba(240,165,0,.15)'"
-          onblur="this.style.borderColor='rgba(240,165,0,.3)';this.style.boxShadow='none'"/>
-      </div>
-      <div style="margin-bottom:18px">
-        <label style="display:block;font-size:.75rem;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:6px">📱 Mobile Number</label>
-        <input id="ap-mobile" type="tel" placeholder="10 digit mobile" maxlength="10"
-          style="width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(240,165,0,.3);border-radius:11px;padding:11px 14px;color:#fff;font-family:'Poppins',sans-serif;font-size:.87rem;outline:none;transition:all .2s"
-          onfocus="this.style.borderColor='#ffd056';this.style.boxShadow='0 0 0 3px rgba(240,165,0,.15)'"
-          onblur="this.style.borderColor='rgba(240,165,0,.3)';this.style.boxShadow='none'"/>
-      </div>
-      <div id="ap-err" style="display:none;background:rgba(255,82,82,.1);border:1px solid rgba(255,82,82,.3);border-radius:9px;padding:10px 14px;font-size:.76rem;color:#ff7070;margin-bottom:14px"></div>
-      <button onclick="saveAdminProfile()" style="width:100%;padding:13px;background:linear-gradient(135deg,#f0a500,#ffd056);border:none;border-radius:11px;color:#0d4a1f;font-family:'Poppins',sans-serif;font-size:.92rem;font-weight:800;cursor:pointer;box-shadow:0 6px 20px rgba(240,165,0,.35);margin-bottom:10px">✅ Profile Save Karein</button>
-      <button onclick="closeAdminProfile()" style="width:100%;padding:10px;backgr
-      <button onclick="closeAdminProfile()" style="width:100%;padding:10px;background:rgba(0,0,0,.08);border:1px solid rgba(0,0,0,.12);border-radius:11px;color:rgba(255,255,255,.5);font-family:'Poppins',sans-serif;font-size:.82rem;cursor:pointer">Cancel</button>
-    </div>
-  </div>
-</div>
+
 
 <!-- ══ ADMIN ID CARD POPUP ══ -->
 <div id="admin-id-card-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:99999;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(12px)">
@@ -8274,156 +6700,10 @@ window.csPrintStatus = function(data){
   setInterval(tick, 1000);
 })();
 
-// ══════════════════════════════════════
-// PRO ADMIN — HERO STATS SYNC
-// ══════════════════════════════════════
-function syncAdminHeroStats(){
-  // Mirror stat card values to hero section
-  const total    = document.getElementById('a-total');
-  const approved = document.getElementById('a-approved');
-  const pending  = document.getElementById('a-today');
-
-  const ht = document.getElementById('hero-total');
-  const ha = document.getElementById('hero-approved');
-  const hp = document.getElementById('hero-pending');
-  const hr = document.getElementById('hero-revenue');
-
-  const wt = document.getElementById('wlc-total');
-  const wa = document.getElementById('wlc-approved');
-  const wp = document.getElementById('wlc-pending');
-  const wr = document.getElementById('wlc-revenue');
-
-  if(total    && ht) ht.textContent = total.textContent;
-  if(approved && ha) ha.textContent = approved.textContent;
-  if(pending  && hp) hp.textContent = pending.textContent;
-
-  // Revenue estimate: approved * 400
-  const appCount = parseInt(approved ? approved.textContent : 0) || 0;
-  const rev = '₹' + (appCount * 400).toLocaleString('en-IN');
-  if(hr) hr.textContent = rev;
-  // Also sync revenue-display card
-  const revCard = document.getElementById('revenue-display');
-  if(revCard) revCard.textContent = rev;
-
-  // Also sync welcome popup stats
-  if(total    && wt) wt.textContent = total.textContent;
-  if(approved && wa) wa.textContent = approved.textContent;
-  if(pending  && wp) wp.textContent = pending.textContent;
-  if(wr) wr.textContent = rev;
-
-  // Also update sc-center-num based mirror
-  const scCntr = document.getElementById('sc-center-num');
-  const scTotal2 = document.getElementById('sc-total');
-  if(total && scCntr) scCntr.textContent = total.textContent;
-  if(total && scTotal2) scTotal2.textContent = total.textContent;
-}
-
-// Observe stat changes and sync hero
-setInterval(syncAdminHeroStats, 2000);
-
-// Override showAdminDash to sync hero stats on login
-(function patchAdminDash(){
-  const orig = window.showAdminDash;
-  window.showAdminDash = function(){
-    if(typeof orig==='function') orig.apply(this,arguments);
-    setTimeout(()=>{
-      syncAdminHeroStats();
-      showAdminFab();
-      // Smart greeting in welcome strip
-      const strip = document.getElementById('admin-welcome-strip');
-      const greetSpan = strip && strip.querySelector('span:first-of-type');
-      if(greetSpan) greetSpan.textContent = getAdminGreeting().split(' ').slice(1).join(' ');
-      const greetIcon = strip && strip.querySelector('span[style*="font-size:1rem"]');
-      if(greetIcon) greetIcon.textContent = getAdminGreeting().split(' ')[0];
-    }, 600);
-  };
-  // Also hide FAB on logout
-  const origLogout = window.doLogout;
-  window.doLogout = function(){
-    hideAdminFab();
-    if(typeof origLogout==='function') origLogout.apply(this,arguments);
-  };
-})();
 
 
-function openAdminSetup(){
-  document.getElementById('admin-setup-popup').style.display='flex';
-  document.getElementById('as-err').style.display='none';
-  const info = document.getElementById('as-ok');
-  info.textContent = '✅ Admin mobile fixed hai: ' + _ADMIN_MOBILE_FIXED + '. Sirf email update karne ke liye yahan use karein.';
-  info.style.display='block';
-  // Pre-fill mobile
-  const mob = document.getElementById('as-mobile');
-  if(mob) mob.value = _ADMIN_MOBILE_FIXED;
-}
 
-function closeAdminSetup(){
-  document.getElementById('admin-setup-popup').style.display='none';
-}
 
-async function doAdminSetup(){
-  const mobile = document.getElementById('as-mobile').value.trim();
-  const email  = document.getElementById('as-email').value.trim();
-  const pass   = document.getElementById('as-pass').value.trim();
-  const pass2  = document.getElementById('as-pass2').value.trim();
-  const errEl  = document.getElementById('as-err');
-  const okEl   = document.getElementById('as-ok');
-
-  errEl.style.display='none';
-  okEl.style.display='none';
-
-  // Validation
-  if(!/^\d{10}$/.test(mobile)){
-    errEl.textContent='❌ 10 digit mobile number daalen'; errEl.style.display='block'; return;
-  }
-  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-    errEl.textContent='❌ Sahi email ID daalen'; errEl.style.display='block'; return;
-  }
-  if(!pass || pass.length < 6){
-    errEl.textContent='❌ Password min 6 characters ka hona chahiye'; errEl.style.display='block'; return;
-  }
-  if(pass !== pass2){
-    errEl.textContent='❌ Dono passwords match nahi kar rahe'; errEl.style.display='block'; return;
-  }
-
-  try{
-    errEl.textContent='⏳ Firebase mein save ho raha hai...'; errEl.style.display='block';
-    errEl.style.background='#e8f5e9'; errEl.style.borderColor='#a5d6a7'; errEl.style.color='#1a5c2a';
-
-    // Hash the password
-    const hashed = await hashPassword(pass);
-
-    // Save to Firebase admin_config
-    await db.ref('admin_config').set({
-      mobile: mobile,
-      email: email,
-      password_hash: hashed
-    });
-
-    // Update local variables too
-    _adminMob   = mobile;
-    _adminEmail = email;
-    localStorage.setItem(ADMIN_MOB_KEY, mobile);
-    localStorage.setItem('awo_admin_pass_hash', hashed);
-
-    errEl.style.display='none';
-    okEl.textContent='✅ Admin setup ho gaya! Ab aap login kar sakte hain. Mobile: ' + mobile;
-    okEl.style.display='block';
-
-    // Auto-fill login form
-    setTimeout(()=>{
-      const lMob = document.getElementById('l-mob');
-      if(lMob) lMob.value = mobile;
-      closeAdminSetup();
-      toast('✅ Admin setup complete! Login karein','ok');
-    }, 2000);
-
-  }catch(e){
-    errEl.style.background='#fff3f3'; errEl.style.borderColor='#ffaaaa'; errEl.style.color='#c0392b';
-    errEl.textContent='❌ Firebase error: ' + (e.message||'Unknown error') + ' — Internet check karein aur Firebase rules check karein';
-    errEl.style.display='block';
-  }
-}
 
 </script>
 

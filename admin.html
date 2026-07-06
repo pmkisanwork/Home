@@ -1089,6 +1089,10 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
           <span class="nav-icon">🗳️</span> Voter Card Pdf (No OTP)
           <span class="nav-badge" id="nav-voterfind-badge">0</span>
         </button>
+        <button class="nav-item" onclick="showSection('aadhaarpvc')" data-sec="aadhaarpvc">
+          <span class="nav-icon">🪪</span> Aadhaar PVC Converter
+          <span class="nav-badge" id="nav-aadhaarpvc-badge">0</span>
+        </button>
         <button class="nav-item" onclick="showSection('contactmsgs')" data-sec="contactmsgs">
           <span class="nav-icon">📨</span> Contact Messages
           <span class="nav-badge" id="nav-cm-badge">0</span>
@@ -1545,41 +1549,6 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
             </div>
           </div>
 
-          <!-- ── CHARGE AMOUNT — EDIT ── -->
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
-            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:14px;display:flex;align-items:center;gap:8px">💰 Service Charge (User side amount yahan se control hota hai)</h3>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
-              <div style="display:flex;flex-direction:column;gap:4px">
-                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">₹ Amount</label>
-                <input id="vf-amount-input" type="number" min="1" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.9rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:140px;font-weight:800" placeholder="60"/>
-              </div>
-              <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none" onclick="vfSaveAmount()">💾 Amount Save Karein</button>
-              <div id="vf-amount-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
-            </div>
-          </div>
-
-          <!-- ── PAYMENT QR — REPLACE / MANAGE ── -->
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
-            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:14px;display:flex;align-items:center;gap:8px">💳 Payment QR Code (User side "Voter Card Pdf" me dikhta hai)</h3>
-            <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
-              <div style="text-align:center">
-                <img id="vf-qr-current" src="" alt="Current QR" style="width:150px;height:150px;object-fit:contain;border-radius:12px;background:#fff;padding:6px;border:1.5px solid var(--border)"/>
-                <div style="font-size:.65rem;color:var(--text2);margin-top:6px">Current QR</div>
-              </div>
-              <div style="flex:1;min-width:220px">
-                <input type="file" id="vf-qr-file-input" accept="image/*" style="display:none" onchange="vfQrFileSelected(this)">
-                <button class="tb-btn" onclick="document.getElementById('vf-qr-file-input').click()">📤 Naya QR Select Karein</button>
-                <div id="vf-qr-preview-wrap" style="display:none;margin-top:12px">
-                  <img id="vf-qr-preview-img" src="" style="width:120px;height:120px;object-fit:contain;border-radius:10px;background:#fff;padding:6px;border:1.5px solid var(--border)"/>
-                  <div style="margin-top:8px">
-                    <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none" onclick="vfSaveQR()">💾 Yeh QR Save Karein</button>
-                  </div>
-                </div>
-                <div id="vf-qr-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;margin-top:10px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
-              </div>
-            </div>
-          </div>
-
           <!-- ── ADD / EDIT REQUEST CARD ── -->
           <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px" id="vf-formCard">
             <h3 id="vf-formTitle" style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);padding-bottom:10px">📝 Nayi Request Add Karein</h3>
@@ -1643,6 +1612,191 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
                 </tr></thead>
                 <tbody id="vf-recordsBody"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text2)">🔄 Loading...</td></tr></tbody>
               </table>
+            </div>
+          </div>
+
+          <!-- ── CHARGE AMOUNT — EDIT ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:14px;display:flex;align-items:center;gap:8px">💰 Service Charge (User side amount yahan se control hota hai)</h3>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">₹ Amount</label>
+                <input id="vf-amount-input" type="number" min="1" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.9rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:140px;font-weight:800" placeholder="60"/>
+              </div>
+              <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none" onclick="vfSaveAmount()">💾 Amount Save Karein</button>
+              <div id="vf-amount-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
+            </div>
+          </div>
+
+          <!-- ── PAYMENT QR — REPLACE / MANAGE ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:14px;display:flex;align-items:center;gap:8px">💳 Payment QR Code (User side "Voter Card Pdf" me dikhta hai)</h3>
+            <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+              <div style="text-align:center">
+                <img id="vf-qr-current" src="" alt="Current QR" style="width:150px;height:150px;object-fit:contain;border-radius:12px;background:#fff;padding:6px;border:1.5px solid var(--border)"/>
+                <div style="font-size:.65rem;color:var(--text2);margin-top:6px">Current QR</div>
+              </div>
+              <div style="flex:1;min-width:220px">
+                <input type="file" id="vf-qr-file-input" accept="image/*" style="display:none" onchange="vfQrFileSelected(this)">
+                <button class="tb-btn" onclick="document.getElementById('vf-qr-file-input').click()">📤 Naya QR Select Karein</button>
+                <div id="vf-qr-preview-wrap" style="display:none;margin-top:12px">
+                  <img id="vf-qr-preview-img" src="" style="width:120px;height:120px;object-fit:contain;border-radius:10px;background:#fff;padding:6px;border:1.5px solid var(--border)"/>
+                  <div style="margin-top:8px">
+                    <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none" onclick="vfSaveQR()">💾 Yeh QR Save Karein</button>
+                  </div>
+                </div>
+                <div id="vf-qr-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;margin-top:10px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ AADHAAR PVC CONVERTER ═══ -->
+        <div class="section-page" id="sec-aadhaarpvc">
+          <div class="section-hd">
+            <h2>🪪 Aadhaar PVC Converter <span class="count-badge" id="ac-recCount">0</span></h2>
+            <div style="display:flex;gap:8px">
+              <span id="ac-fbStatus" style="font-size:.7rem;padding:5px 12px;border-radius:12px;font-weight:700;background:rgba(239,68,68,.12);color:#f87171">⚪ Connecting...</span>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:18px">
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:var(--g4)" id="ac-sTot">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">📋 Total Requests</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:#f87171" id="ac-sPayPending">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">💰 Payment Pending</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:var(--gold2)" id="ac-sPending">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">⏳ PVC Pending</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:#4ecb6e" id="ac-sFound">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">✅ PVC Taiyar</div>
+            </div>
+          </div>
+
+          <!-- ── ADD / EDIT REQUEST CARD ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px" id="ac-formCard">
+            <h3 id="ac-formTitle" style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);padding-bottom:10px">📝 Nayi Request Add Karein</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">🆔 Aadhaar Number *</label>
+                <input id="ac-fAadhaarNo" maxlength="12" inputmode="numeric" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);letter-spacing:1px" placeholder="12 digit Aadhaar number"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">👤 Naam *</label>
+                <input id="ac-fName" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="Poora naam"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">📱 Mobile No</label>
+                <input id="ac-fMobile" maxlength="10" inputmode="numeric" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="10 digit mobile (optional)"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">🔑 PDF Password</label>
+                <input id="ac-fPdfPass" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="e.g. PUNI2002"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">🎨 Background Color</label>
+                <input id="ac-fBgColor" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="e.g. Yellow"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">🖨️ Mobile Print</label>
+                <select id="ac-fMobilePrint" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)">
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">🧾 UTR / Transaction No.</label>
+                <input id="ac-fUtr" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="User dwara diya gaya UTR"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">💰 Payment Status</label>
+                <select id="ac-fPaid" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)">
+                  <option value="no">⏳ Pending — Verify nahi hui</option>
+                  <option value="yes">✅ Verified — Payment mil gayi</option>
+                </select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;grid-column:1/-1">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">📄 Final PVC Card PDF Link (jab taiyar ho jaye — user ko yehi link dikhega)</label>
+                <input id="ac-fPdfLink" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="PVC PDF ka download link (URL)"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;grid-column:1/-1">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">📝 Note</label>
+                <textarea id="ac-fRemark" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);resize:vertical;min-height:50px" placeholder="Koi note ya comment..."></textarea>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:16px">
+              <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none;flex:1;justify-content:center;padding:12px" onclick="acSaveRecord()">💾 Save Karein</button>
+              <button class="tb-btn" onclick="acClearForm()">🗑️ Clear</button>
+            </div>
+            <div id="ac-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:11px 14px;margin-top:12px;font-size:.8rem;color:var(--g4);font-weight:600"></div>
+          </div>
+
+          <!-- ── ALL REQUESTS TABLE ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+              <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);display:flex;align-items:center;gap:8px">📋 Saari Requests</h3>
+              <input type="text" id="ac-recSearch" placeholder="🔍 Naam, Aadhaar No, Mobile, UTR..." oninput="acRenderRecords()"
+                style="padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.78rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:230px"/>
+            </div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:.75rem">
+                <thead><tr style="border-bottom:1px solid var(--border)">
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700;white-space:nowrap">🆔 Aadhaar No</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">👤 Name</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">📱 Mobile</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">🔑 Password</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">🎨 BG</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">🖨️ Print</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">🧾 UTR</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">📥 Uploaded PDF</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">💰 Payment</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">📄 PVC PDF</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">⚙️ Action</th>
+                </tr></thead>
+                <tbody id="ac-recordsBody"><tr><td colspan="11" style="text-align:center;padding:24px;color:var(--text2)">🔄 Loading...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ── CHARGE AMOUNT — EDIT ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:14px;display:flex;align-items:center;gap:8px">💰 Application Fee (User side amount yahan se control hota hai)</h3>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">₹ Amount</label>
+                <input id="ac-amount-input" type="number" min="1" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.9rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:140px;font-weight:800" placeholder="10"/>
+              </div>
+              <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none" onclick="acSaveAmount()">💾 Amount Save Karein</button>
+              <div id="ac-amount-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
+            </div>
+          </div>
+
+          <!-- ── PAYMENT QR — REPLACE / MANAGE ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:14px;display:flex;align-items:center;gap:8px">💳 Payment QR Code (User side "Aadhaar PVC Converter" me dikhta hai)</h3>
+            <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+              <div style="text-align:center">
+                <img id="ac-qr-current" src="" alt="Current QR" style="width:150px;height:150px;object-fit:contain;border-radius:12px;background:#fff;padding:6px;border:1.5px solid var(--border)"/>
+                <div style="font-size:.65rem;color:var(--text2);margin-top:6px">Current QR</div>
+              </div>
+              <div style="flex:1;min-width:220px">
+                <input type="file" id="ac-qr-file-input" accept="image/*" style="display:none" onchange="acQrFileSelected(this)">
+                <button class="tb-btn" onclick="document.getElementById('ac-qr-file-input').click()">📤 Naya QR Select Karein</button>
+                <div id="ac-qr-preview-wrap" style="display:none;margin-top:12px">
+                  <img id="ac-qr-preview-img" src="" style="width:120px;height:120px;object-fit:contain;border-radius:10px;background:#fff;padding:6px;border:1.5px solid var(--border)"/>
+                  <div style="margin-top:8px">
+                    <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none" onclick="acSaveQR()">💾 Yeh QR Save Karein</button>
+                  </div>
+                </div>
+                <div id="ac-qr-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;margin-top:10px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -3526,6 +3680,7 @@ const sectionTitles={
   statuscheck:'🌾 PM Kisan – Status Check & Entry',
   panfind:'🪪 PAN No Find – Aadhaar Card',
   voterfind:'🗳️ Voter Card Pdf – Without OTP',
+  aadhaarpvc:'🪪 Aadhaar PVC Converter',
   contactmsgs:'📨 Contact Messages',
   trash:'🗑️ Trash (Deleted Applications)',
   activitylog:'🕵️ Activity Log',
@@ -3543,6 +3698,7 @@ function showSection(sec){
   if(sec==='statuscheck'){ if(!window._pmkInited){ window._pmkInited=true; pmkInitFirebase(); } pksWatchFb(); pksRenderRecords(); }
   if(sec==='panfind'){ pfWatchFb(); pfRenderRecords(); }
   if(sec==='voterfind'){ vfWatchFb(); vfRenderRecords(); }
+  if(sec==='aadhaarpvc'){ acWatchFb(); acRenderRecords(); }
   if(sec==='contactmsgs'){ cmLoadMsgs(); }
   if(sec==='trash'){ renderTrash(); }
   if(sec==='activitylog'){ renderActivityLog(); }
@@ -4492,6 +4648,208 @@ async function vfSaveAmount(){
     await db.ref('settings/voterFindAmount').set(amt);
     const t=document.getElementById('vf-amount-toast');
     if(t){ t.style.display='block'; t.textContent='✅ Amount update ho gaya! User ke Voter Card Pdf page par ab ₹'+amt+' dikhega.'; setTimeout(()=>t.style.display='none',3000); }
+  }catch(e){
+    alert('Amount save nahi hua, internet check karein.');
+  }
+}
+
+// ═══════════════ AADHAAR PVC CONVERTER ═══════════════
+let acAllData = {};
+
+function acWatchFb(){
+  acSyncFbBadge();
+  acLoadCurrentQR();
+  acLoadCurrentAmount();
+  if(window._acInited) return;
+  window._acInited = true;
+  try{
+    db.ref('aadhaar_pvc_requests').on('value', snap=>{
+      acAllData = snap.val()||{};
+      acSyncFbBadge();
+      acUpdateStats();
+      acRenderRecords();
+      const badge=document.getElementById('nav-aadhaarpvc-badge');
+      if(badge) badge.textContent = Object.values(acAllData).filter(r=>!r.pdfLink).length;
+    },()=>{
+      const el=document.getElementById('ac-fbStatus');
+      if(el){el.textContent='🔴 Error';el.style.background='rgba(239,68,68,.12)';el.style.color='#f87171';}
+    });
+  }catch(e){}
+}
+
+function acSyncFbBadge(){
+  const el=document.getElementById('ac-fbStatus');
+  if(!el) return;
+  el.textContent='🟢 Connected'; el.style.background='rgba(78,203,110,.15)'; el.style.color='#4ecb6e';
+}
+
+function acUpdateStats(){
+  const vals=Object.values(acAllData||{});
+  const tot=vals.length;
+  const found=vals.filter(r=>r.pdfLink&&r.pdfLink.trim()).length;
+  const paid=vals.filter(r=>r.paymentVerified).length;
+  const payPend=tot-paid;
+  const pvcPend=tot-found;
+  const t=document.getElementById('ac-sTot'); if(t)t.textContent=tot;
+  const pp=document.getElementById('ac-sPayPending'); if(pp)pp.textContent=payPend;
+  const p=document.getElementById('ac-sPending'); if(p)p.textContent=pvcPend;
+  const f=document.getElementById('ac-sFound'); if(f)f.textContent=found;
+  const c=document.getElementById('ac-recCount'); if(c)c.textContent=tot;
+}
+
+function acClearForm(){
+  ['ac-fAadhaarNo','ac-fName','ac-fMobile','ac-fPdfPass','ac-fBgColor','ac-fUtr','ac-fPdfLink','ac-fRemark'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  const paid=document.getElementById('ac-fPaid'); if(paid) paid.value='no';
+  const mp=document.getElementById('ac-fMobilePrint'); if(mp) mp.value='Yes';
+  document.getElementById('ac-formTitle').textContent='📝 Nayi Request Add Karein';
+  const inp=document.getElementById('ac-fAadhaarNo'); if(inp) inp.removeAttribute('readonly');
+}
+
+async function acSaveRecord(){
+  const aadhaarNo=(document.getElementById('ac-fAadhaarNo').value||'').trim().replace(/\s+/g,'');
+  const name=(document.getElementById('ac-fName').value||'').trim();
+  if(!/^[0-9]{12}$/.test(aadhaarNo)){ alert('Sahi 12 digit Aadhaar Number dalein!'); return; }
+  if(!name){ alert('Naam zaroori hai!'); return; }
+  const record={
+    aadhaarNo, name,
+    mobile:(document.getElementById('ac-fMobile').value||'').trim(),
+    pdfPassword:(document.getElementById('ac-fPdfPass').value||'').trim(),
+    bgColor:(document.getElementById('ac-fBgColor').value||'').trim(),
+    mobilePrint:(document.getElementById('ac-fMobilePrint').value||'Yes'),
+    utr:(document.getElementById('ac-fUtr').value||'').trim(),
+    paymentVerified:(document.getElementById('ac-fPaid').value==='yes'),
+    pdfLink:(document.getElementById('ac-fPdfLink').value||'').trim(),
+    remark:(document.getElementById('ac-fRemark').value||'').trim(),
+    updated:new Date().toLocaleString('en-IN')
+  };
+  try{
+    await db.ref('aadhaar_pvc_requests/'+aadhaarNo).update(record);
+    const t=document.getElementById('ac-toast');
+    if(t){ t.style.display='block'; t.textContent = record.pdfLink ? '✅ PVC PDF link save ho gaya! User ke data me dikh jayega.' : '✅ Request save ho gayi!'; setTimeout(()=>t.style.display='none',2500); }
+    acClearForm();
+  }catch(e){
+    alert('Save nahi hua, internet check karein.');
+  }
+}
+
+function acRenderRecords(){
+  const tbody=document.getElementById('ac-recordsBody');
+  if(!tbody) return;
+  const q=((document.getElementById('ac-recSearch')||{}).value||'').toLowerCase();
+  const entries=Object.entries(acAllData||{});
+  const filtered=q?entries.filter(([k,r])=>
+    (r.aadhaarNo||k||'').toLowerCase().includes(q)||(r.name||'').toLowerCase().includes(q)||
+    (r.mobile||'').toLowerCase().includes(q)||(r.utr||'').toLowerCase().includes(q)
+  ):entries;
+  if(!filtered.length){ tbody.innerHTML='<tr><td colspan="11" style="text-align:center;padding:22px;color:var(--text2)">Koi request nahi mili</td></tr>'; return; }
+  tbody.innerHTML=filtered.sort((a,b)=>(b[1].updated||'').localeCompare(a[1].updated||'')).map(([key,r])=>{
+    const found = r.pdfLink && r.pdfLink.trim();
+    const paid  = !!r.paymentVerified;
+    const hasUpload = r.pdfFile && r.pdfFile.trim();
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 10px;font-weight:700;color:var(--text);letter-spacing:.5px">${r.aadhaarNo||key}</td>
+      <td style="padding:9px 10px;color:var(--text)">${r.name||'—'}</td>
+      <td style="padding:9px 10px;color:var(--text)">${r.mobile||'—'}</td>
+      <td style="padding:9px 10px;color:var(--text)">${r.pdfPassword||'—'}</td>
+      <td style="padding:9px 10px;color:var(--text)">${r.bgColor||'—'}</td>
+      <td style="padding:9px 10px;color:var(--text)">${r.mobilePrint||'—'}</td>
+      <td style="padding:9px 10px;color:var(--text)">${r.utr||'—'}</td>
+      <td style="padding:9px 10px">${hasUpload?`<a href="${r.pdfFile}" download="${r.pdfFileName||'aadhaar.pdf'}" style="color:var(--g4);font-weight:700;text-decoration:underline">📥 Download</a>`:'<span style="color:var(--text2)">—</span>'}</td>
+      <td style="padding:9px 10px"><span style="font-size:.62rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:${paid?'#2e7d32':'#f87171'};color:#fff;border-radius:14px;padding:3px 10px">${paid?'✅ VERIFIED':'⏳ PENDING'}</span></td>
+      <td style="padding:9px 10px;color:var(--text)">${found?`<a href="${r.pdfLink}" target="_blank" rel="noopener" style="color:var(--g4);font-weight:700;text-decoration:underline">📄 Link</a>`:'<span style="color:var(--text2);font-style:italic;font-weight:400">— taiyar ho raha hai —</span>'}</td>
+      <td style="padding:9px 10px;white-space:nowrap">
+        <button onclick="acEditEntry('${key}')" style="background:rgba(78,203,110,.12);color:var(--g4);border:1px solid rgba(78,203,110,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer;margin-right:5px">✏️ Edit</button>
+        <button onclick="acDeleteEntry('${key}')" style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function acEditEntry(key){
+  const r=(acAllData||{})[key]; if(!r) return;
+  document.getElementById('ac-fAadhaarNo').value = r.aadhaarNo||key;
+  document.getElementById('ac-fName').value       = r.name||'';
+  document.getElementById('ac-fMobile').value     = r.mobile||'';
+  document.getElementById('ac-fPdfPass').value    = r.pdfPassword||'';
+  document.getElementById('ac-fBgColor').value    = r.bgColor||'';
+  document.getElementById('ac-fMobilePrint').value= r.mobilePrint||'Yes';
+  document.getElementById('ac-fUtr').value        = r.utr||'';
+  document.getElementById('ac-fPaid').value       = r.paymentVerified ? 'yes' : 'no';
+  document.getElementById('ac-fPdfLink').value    = r.pdfLink||'';
+  document.getElementById('ac-fRemark').value     = r.remark||'';
+  document.getElementById('ac-formTitle').textContent='✏️ Request Update Karein: '+(r.name||key);
+  const inp=document.getElementById('ac-fAadhaarNo'); if(inp) inp.setAttribute('readonly','readonly');
+  const card=document.getElementById('ac-formCard');
+  if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+async function acDeleteEntry(key){
+  if(!confirm('Yeh request delete karein?')) return;
+  try{
+    await db.ref('aadhaar_pvc_requests/'+key).remove();
+  }catch(e){
+    alert('Delete nahi hua, internet check karein.');
+  }
+}
+
+// ── AADHAAR PVC: PAYMENT QR REPLACE ──
+let _acNewQRData = '';
+
+function acLoadCurrentQR(){
+  const img = document.getElementById('ac-qr-current');
+  if(!img) return;
+  db.ref('settings/aadhaarPvcQrCode').once('value').then(snap=>{
+    const v = snap.val();
+    img.src = v || (typeof PF_DEFAULT_QR!=='undefined' ? PF_DEFAULT_QR : '');
+  }).catch(()=>{});
+}
+
+function acQrFileSelected(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ alert('Sirf image file select karein!'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    _acNewQRData = e.target.result;
+    document.getElementById('ac-qr-preview-img').src = _acNewQRData;
+    document.getElementById('ac-qr-preview-wrap').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function acSaveQR(){
+  if(!_acNewQRData){ alert('Pehle naya QR image select karein!'); return; }
+  try{
+    await db.ref('settings/aadhaarPvcQrCode').set(_acNewQRData);
+    const t=document.getElementById('ac-qr-toast');
+    if(t){ t.style.display='block'; t.textContent='✅ QR update ho gaya! User ke Aadhaar PVC Converter page par ab yehi naya QR dikhega.'; setTimeout(()=>t.style.display='none',3000); }
+    acLoadCurrentQR();
+    document.getElementById('ac-qr-preview-wrap').style.display='none';
+    document.getElementById('ac-qr-file-input').value='';
+    _acNewQRData='';
+  }catch(e){
+    alert('QR save nahi hua, internet check karein.');
+  }
+}
+
+// ── AADHAAR PVC: APPLICATION FEE AMOUNT — EDITABLE ──
+function acLoadCurrentAmount(){
+  const inp = document.getElementById('ac-amount-input');
+  if(!inp) return;
+  db.ref('settings/aadhaarPvcAmount').once('value').then(snap=>{
+    const v = snap.val();
+    inp.value = v || 10;
+  }).catch(()=>{ inp.value = 10; });
+}
+
+async function acSaveAmount(){
+  const inp = document.getElementById('ac-amount-input');
+  const amt = parseInt(inp.value, 10);
+  if(!amt || amt <= 0){ alert('Sahi amount dalein!'); return; }
+  try{
+    await db.ref('settings/aadhaarPvcAmount').set(amt);
+    const t=document.getElementById('ac-amount-toast');
+    if(t){ t.style.display='block'; t.textContent='✅ Amount update ho gaya! User ke Aadhaar PVC Converter page par ab ₹'+amt+' dikhega.'; setTimeout(()=>t.style.display='none',3000); }
   }catch(e){
     alert('Amount save nahi hua, internet check karein.');
   }

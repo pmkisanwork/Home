@@ -1238,6 +1238,15 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
           <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#bf360c,#e65100)"></div>
         </button>
 
+        <!-- Aadhaar PVC Converter -->
+        <button onclick="openAadhaarPvc()" style="all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;background:#fff;border:1.5px solid rgba(13,71,161,.35);border-radius:18px;padding:16px 8px;text-align:center;box-shadow:0 2px 12px rgba(13,71,161,.1);transition:all .2s;position:relative;overflow:hidden"
+          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(13,71,161,.22)';this.style.borderColor='rgba(13,71,161,.6)'"
+          onmouseout="this.style.transform='';this.style.boxShadow='0 2px 12px rgba(13,71,161,.1)';this.style.borderColor='rgba(13,71,161,.35)'">
+          <div style="width:48px;height:48px;background:linear-gradient(135deg,#0d47a1,#1565c0);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;box-shadow:0 4px 14px rgba(13,71,161,.45);flex-shrink:0">🪪</div>
+          <div style="font-size:.7rem;font-weight:700;color:#0d47a1;line-height:1.3">Aadhaar PVC Converter</div>
+          <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#0d47a1,#1565c0)"></div>
+        </button>
+
         <!-- Dynamic Custom Cards (Admin dwara banaye gaye) -->
         <div id="dynamic-cards-slot" style="display:contents"></div>
 
@@ -4441,6 +4450,210 @@ function trackVoterFindStatus(){
 }
 
 // ══════════════════════════════════════════
+// AADHAAR PVC CONVERTER — uses main Firebase `db`,
+// same 'aadhaar_pvc_requests' path as Admin Panel)
+// ══════════════════════════════════════════
+let _acPdfData = '';
+let _acPdfName = '';
+
+function openAadhaarPvc(){
+  const sess = getSession();
+  document.getElementById('aadhaarpvc-form-view').style.display = 'block';
+  document.getElementById('aadhaarpvc-success-view').style.display = 'none';
+  const btn = document.getElementById('ac-submit-btn');
+  btn.disabled = false;
+  btn.textContent = '📤 Request Bhejein';
+  document.getElementById('ac-err').style.display = 'none';
+
+  document.getElementById('ac-aadhaarno').value = '';
+  document.getElementById('ac-name').value    = sess ? (sess.name || '') : '';
+  document.getElementById('ac-mobile').value  = sess ? (sess.mobile || '') : '';
+  document.getElementById('ac-pdfpass').value = '';
+  document.getElementById('ac-bgcolor').value = 'Yellow';
+  document.getElementById('ac-mobileprint').value = 'Yes';
+  document.getElementById('ac-utr').value     = '';
+  document.getElementById('ac-pdf-filename').textContent = '';
+  _acPdfData = ''; _acPdfName = '';
+  acLoadQR();
+  acLoadAmount();
+
+  document.getElementById('ac-track-inp').value = '';
+  document.getElementById('ac-track-result').innerHTML = '<div class="ac-empty"><div class="em-ico">📭</div><div class="em-txt">Apna PVC Card status dekhne ke liye Aadhaar Number se search karein</div></div>';
+
+  acSwitchTab('new');
+  document.getElementById('aadhaarpvc-popup').classList.add('show');
+  const dd = document.getElementById('u-dd2');
+  if(dd) dd.classList.remove('open');
+}
+
+function closeAadhaarPvc(){
+  document.getElementById('aadhaarpvc-popup').classList.remove('show');
+}
+
+function acPdfFileSelected(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(file.type !== 'application/pdf'){ alert('Sirf PDF file select karein!'); return; }
+  if(file.size > 4*1024*1024){ alert('PDF ka size 4MB se kam rakhein!'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    _acPdfData = e.target.result;
+    _acPdfName = file.name;
+    document.getElementById('ac-pdf-filename').textContent = '✅ ' + file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Load payment QR — Firebase 'settings/aadhaarPvcQrCode' se
+function acLoadQR(){
+  const img = document.getElementById('ac-qr-img');
+  if(img) img.src = (typeof PF_DEFAULT_QR!=='undefined') ? PF_DEFAULT_QR : '';
+  db.ref('settings/aadhaarPvcQrCode').once('value').then(snap=>{
+    const v = snap.val();
+    if(v && img) img.src = v;
+  }).catch(()=>{ /* keep default QR */ });
+}
+
+// Load charge amount — Firebase 'settings/aadhaarPvcAmount' se (admin change kar sakta hai), default ₹10
+function acLoadAmount(){
+  const el = document.getElementById('ac-amt-display');
+  if(el) el.textContent = '10';
+  db.ref('settings/aadhaarPvcAmount').once('value').then(snap=>{
+    const v = snap.val();
+    if(v && el) el.textContent = v;
+  }).catch(()=>{ /* keep default amount */ });
+}
+
+function acSwitchTab(tab){
+  const newTab   = document.getElementById('ac-tab-new');
+  const trackTab = document.getElementById('ac-tab-track');
+  const newView   = document.getElementById('ac-view-new');
+  const trackView = document.getElementById('ac-view-track');
+  if(tab === 'track'){
+    newTab.classList.remove('active');
+    trackTab.classList.add('active');
+    newView.style.display   = 'none';
+    trackView.style.display = 'block';
+  }else{
+    trackTab.classList.remove('active');
+    newTab.classList.add('active');
+    trackView.style.display = 'none';
+    newView.style.display   = 'block';
+  }
+}
+
+function acGoTrackAfterSubmit(){
+  const aadhaarNo = document.getElementById('ac-aadhaarno').value.trim();
+  document.getElementById('ac-track-inp').value = aadhaarNo;
+  acSwitchTab('track');
+  trackAadhaarPvcStatus();
+}
+
+function submitAadhaarPvc(){
+  const errBox = document.getElementById('ac-err');
+  errBox.style.display = 'none';
+  function showErr(t){ errBox.textContent = '⚠️ ' + t; errBox.style.display = 'block'; }
+
+  const aadhaarNo = document.getElementById('ac-aadhaarno').value.trim().replace(/\s+/g,'');
+  const name      = document.getElementById('ac-name').value.trim();
+  const mobile    = document.getElementById('ac-mobile').value.trim();
+  const pdfPass   = document.getElementById('ac-pdfpass').value.trim();
+  const bgColor   = document.getElementById('ac-bgcolor').value;
+  const mobilePrint = document.getElementById('ac-mobileprint').value;
+  const utr       = document.getElementById('ac-utr').value.trim();
+
+  if(!/^[0-9]{12}$/.test(aadhaarNo)){ showErr('Sahi 12 digit Aadhaar Number dalein!'); return; }
+  if(!name){ showErr('Apna naam likhein!'); return; }
+  if(mobile && !/^[0-9]{10}$/.test(mobile)){ showErr('Sahi 10 digit mobile number dalein!'); return; }
+  if(!_acPdfData){ showErr('Aadhaar PDF file select karein!'); return; }
+  if(!pdfPass){ showErr('PDF Password dalein!'); return; }
+  if(!utr){ showErr('Payment karne ke baad UTR / Transaction No. zaroor dalein!'); return; }
+
+  const btn = document.getElementById('ac-submit-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Bheja ja raha hai...';
+
+  db.ref('aadhaar_pvc_requests/' + aadhaarNo).update({
+    aadhaarNo: aadhaarNo,
+    name: name,
+    mobile: mobile,
+    pdfPassword: pdfPass,
+    bgColor: bgColor,
+    mobilePrint: mobilePrint,
+    pdfFile: _acPdfData,
+    pdfFileName: _acPdfName,
+    utr: utr,
+    paymentVerified: false,
+    updated: new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata', hour12:true})
+  }).then(()=>{
+    document.getElementById('aadhaarpvc-form-view').style.display = 'none';
+    document.getElementById('aadhaarpvc-success-view').style.display = 'block';
+    if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
+  }).catch(()=>{
+    btn.disabled = false;
+    btn.textContent = '📤 Request Bhejein';
+    showErr('Internet check karein aur dobara try karein! (PDF chhota rakhein)');
+  });
+}
+
+function trackAadhaarPvcStatus(){
+  const aadhaarNo = document.getElementById('ac-track-inp').value.trim().replace(/\s+/g,'');
+  const resultDiv = document.getElementById('ac-track-result');
+  if(!/^[0-9]{12}$/.test(aadhaarNo)){
+    resultDiv.innerHTML = '<div class="ac-empty"><div class="em-ico">⚠️</div><div class="em-txt">Sahi 12 digit Aadhaar Number dalein</div></div>';
+    return;
+  }
+
+  resultDiv.innerHTML = '<div class="ac-loading">⏳ Search ho raha hai...</div>';
+
+  db.ref('aadhaar_pvc_requests/' + aadhaarNo).once('value')
+  .then(snap=>{
+    if(!snap.exists()){
+      resultDiv.innerHTML = '<div class="ac-empty"><div class="em-ico">❌</div><div class="em-txt">Koi request nahi mili.<br/>Sahi Aadhaar Number dalein ya pehle request bhejein.</div></div>';
+      return;
+    }
+    const r = snap.val();
+    const found = r.pdfLink && String(r.pdfLink).trim();
+    const paid  = !!r.paymentVerified;
+    const sCls = found ? 'ac-sbadge-done' : 'ac-sbadge-pending';
+    const sIco = found ? '✅' : '⏳';
+    const sTxt = found ? 'PVC PDF Taiyar Hai' : (paid ? 'PVC Banaya Ja Raha Hai' : 'Payment Verify Ho Rahi Hai');
+
+    let statusMsg;
+    if(found){
+      statusMsg = '';
+    } else if(paid){
+      statusMsg = `<div class="ac-track-msg" style="margin-top:8px;font-size:.79rem;color:#0a2f6b;line-height:1.5;background:rgba(13,71,161,.05);border-radius:10px;padding:9px 11px">✅ Payment verify ho gayi hai — Admin aapka PVC Card PDF taiyar kar raha hai, jald mil jayega</div>`;
+    } else {
+      statusMsg = `<div class="ac-track-msg" style="margin-top:8px;font-size:.79rem;color:#0a2f6b;line-height:1.5;background:rgba(13,71,161,.05);border-radius:10px;padding:9px 11px">⏳ Aapki payment abhi Admin dwara verify ki ja rahi hai — verify hone ke baad PVC Card taiyar hoga</div>`;
+    }
+
+    let html = `
+      <div class="ac-track-card">
+        <div class="ac-track-top">
+          <span class="ac-track-num">🆔 ${r.aadhaarNo || aadhaarNo}</span>
+          <span class="ac-sbadge ${sCls}">${sIco} ${sTxt}</span>
+        </div>
+        <div class="ac-track-row"><span class="k">👤 Naam</span><span class="v">${r.name || '—'}</span></div>
+        <div class="ac-track-row"><span class="k">📱 Mobile</span><span class="v">${r.mobile || '—'}</span></div>
+        <div class="ac-track-row"><span class="k">🎨 BG Color</span><span class="v">${r.bgColor || '—'}</span></div>
+        <div class="ac-track-row"><span class="k">🖨️ Mobile Print</span><span class="v">${r.mobilePrint || '—'}</span></div>
+        <div class="ac-track-row"><span class="k">🧾 UTR No.</span><span class="v">${r.utr || '—'}</span></div>
+        <div class="ac-track-row"><span class="k">💰 Payment</span><span class="v">${paid ? '✅ Verified' : '⏳ Pending'}</span></div>
+        <div class="ac-track-row"><span class="k">🕐 Last Update</span><span class="v">${r.updated || '—'}</span></div>
+        ${found
+          ? `<div class="ac-pdf-box"><div class="ac-pdf-title">🎯 Aapka Aadhaar PVC Card PDF:</div><a class="ac-pdf-link" href="${r.pdfLink}" target="_blank" rel="noopener">📄 PDF Download Karein</a></div>`
+          : statusMsg}
+        ${r.remark ? `<div class="ac-track-msg" style="margin-top:8px;font-size:.79rem;color:#0a2f6b;line-height:1.5;background:rgba(13,71,161,.05);border-radius:10px;padding:9px 11px">💬 ${r.remark}</div>` : ''}
+      </div>`;
+    resultDiv.innerHTML = html;
+  })
+  .catch(()=>{
+    resultDiv.innerHTML = '<div class="ac-empty"><div class="em-ico">❌</div><div class="em-txt">Load nahi hua. Internet check karein.</div></div>';
+  });
+}
+
+// ══════════════════════════════════════════
 // FIX 5: STYLISH DELETE CONFIRM MODAL
 // ══════════════════════════════════════════
 let _pendingDelAppNo = null;
@@ -7251,6 +7464,205 @@ function dcfCheckTrack(){
           <div class="vf-empty">
             <div class="em-ico">📭</div>
             <div class="em-txt">Apna Voter Card status dekhne ke liye Voter ID se search karein</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ AADHAAR PVC CONVERTER POPUP ══════════ -->
+<style>
+#aadhaarpvc-popup{display:none;position:fixed;inset:0;background:rgba(10,10,10,.72);z-index:99999;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(12px)}
+#aadhaarpvc-popup.show{display:flex}
+#aadhaarpvc-popup .ac-card{background:#fff;border-radius:26px;padding:0;width:100%;max-width:460px;max-height:92vh;overflow-y:auto;box-shadow:0 30px 90px rgba(0,0,0,.45);animation:cxCardIn .45s cubic-bezier(.22,1,.36,1) both;font-family:'Poppins',sans-serif}
+#aadhaarpvc-popup .ac-card::-webkit-scrollbar{width:5px}
+#aadhaarpvc-popup .ac-card::-webkit-scrollbar-thumb{background:rgba(13,71,161,.35);border-radius:4px}
+#aadhaarpvc-popup .ac-head{background:linear-gradient(135deg,#0d47a1,#1565c0 45%,#1976d2);background-size:200% 200%;animation:cxHeadGlow 6s ease infinite;padding:24px 24px 0;position:relative;overflow:hidden}
+#aadhaarpvc-popup .ac-head::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(255,255,255,.14) 0%,transparent 70%);border-radius:50%;animation:cxPulseGlow 3s ease infinite}
+#aadhaarpvc-popup .ac-head::after{content:'🪪';position:absolute;bottom:-14px;left:-6px;font-size:100px;opacity:.08;animation:cxMegaFloat 3.5s ease-in-out infinite}
+#aadhaarpvc-popup .ac-close{position:absolute;top:14px;right:16px;background:rgba(255,255,255,.18);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s;z-index:2}
+#aadhaarpvc-popup .ac-close:hover{background:rgba(255,255,255,.32);transform:rotate(90deg)}
+#aadhaarpvc-popup .ac-head-title{font-family:'Baloo 2',cursive;font-size:1.28rem;font-weight:800;color:#fff;position:relative;z-index:1;display:flex;align-items:center;gap:8px}
+#aadhaarpvc-popup .ac-head-sub{font-size:.74rem;color:rgba(255,255,255,.78);margin-top:3px;position:relative;z-index:1}
+#aadhaarpvc-popup .ac-tabs{display:flex;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);border-radius:13px;padding:4px;gap:4px;margin:16px 0 0;position:relative;z-index:1}
+#aadhaarpvc-popup .ac-tab{flex:1;text-align:center;padding:10px 6px;border-radius:10px;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .3s cubic-bezier(.22,1,.36,1);color:rgba(255,255,255,.8);font-family:'Poppins',sans-serif;background:none;border:none}
+#aadhaarpvc-popup .ac-tab.active{background:#fff;color:#0d47a1;box-shadow:0 6px 16px rgba(0,0,0,.2);transform:translateY(-1px)}
+#aadhaarpvc-popup .ac-note-wrap{position:relative;overflow:hidden;width:100%;display:flex;align-items:stretch;height:34px;margin-top:14px;z-index:1;border-radius:0}
+#aadhaarpvc-popup .ac-note-wrap::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#0d47a1,#1565c0 25%,#1e88e5 50%,#1565c0 75%,#0d47a1);background-size:200% 100%;animation:cxNoteShimmer 3.5s ease infinite}
+#aadhaarpvc-popup .ac-note-badge{flex-shrink:0;background:linear-gradient(135deg,#0d47a1,#1565c0);color:#fff;font-size:.62rem;font-weight:800;padding:0 12px;letter-spacing:.09em;white-space:nowrap;display:flex;align-items:center;gap:4px;position:relative;z-index:1;box-shadow:2px 0 10px rgba(0,0,0,.3)}
+#aadhaarpvc-popup .ac-note-badge::after{content:'';position:absolute;right:-7px;top:0;bottom:0;width:14px;background:inherit;clip-path:polygon(0 0,0 100%,100% 50%)}
+#aadhaarpvc-popup .ac-note-icon{font-size:.82rem;display:inline-block;animation:cxClockSwing 1.1s ease-in-out infinite}
+#aadhaarpvc-popup .ac-note-dots{display:flex;align-items:center;gap:3px;padding:0 8px;flex-shrink:0;position:relative;z-index:1}
+#aadhaarpvc-popup .ac-note-dots span{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.5);display:block;animation:cxDotPop .8s ease infinite}
+#aadhaarpvc-popup .ac-note-dots span:nth-child(2){animation-delay:.2s}
+#aadhaarpvc-popup .ac-note-dots span:nth-child(3){animation-delay:.4s}
+#aadhaarpvc-popup .ac-note-scroll{flex:1;overflow:hidden;position:relative;min-width:0;z-index:1}
+#aadhaarpvc-popup .ac-note-text{position:absolute;white-space:nowrap;top:50%;transform:translateY(-50%);left:100%;font-family:'Poppins',sans-serif;font-size:.73rem;font-weight:700;color:#0a2f6b;text-shadow:0 1px 2px rgba(255,255,255,.25);animation:cxTickerScroll 15s linear infinite}
+#aadhaarpvc-popup .ac-body{padding:20px 24px 24px}
+#aadhaarpvc-popup #ac-view-new .ac-fg{animation:cxFieldIn .4s ease both}
+#aadhaarpvc-popup .ac-fg{margin-bottom:14px}
+#aadhaarpvc-popup .ac-lbl{display:block;font-size:.74rem;font-weight:700;color:#0d3a7a;margin-bottom:6px;letter-spacing:.03em}
+#aadhaarpvc-popup .ac-iw{position:relative}
+#aadhaarpvc-popup .ac-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;color:#1565c0}
+#aadhaarpvc-popup .ac-field{width:100%;background:#ecf3fd;border:1.5px solid rgba(13,71,161,.28);border-radius:12px;padding:11px 14px 11px 38px;color:#0a2f6b;font-family:'Poppins',sans-serif;font-size:.87rem;outline:none;transition:all .2s;box-sizing:border-box}
+#aadhaarpvc-popup select.ac-field, #aadhaarpvc-popup .ac-filebox{padding-left:14px}
+#aadhaarpvc-popup .ac-field:focus{border-color:#1565c0;background:#dfeafc;box-shadow:0 0 0 3px rgba(13,71,161,.14)}
+#aadhaarpvc-popup .ac-filebox{width:100%;background:#ecf3fd;border:1.5px dashed rgba(13,71,161,.4);border-radius:12px;padding:14px;color:#0a2f6b;font-family:'Poppins',sans-serif;font-size:.8rem;box-sizing:border-box;text-align:center;cursor:pointer;transition:all .2s}
+#aadhaarpvc-popup .ac-filebox:hover{background:#dfeafc}
+#aadhaarpvc-popup .ac-filename{font-size:.72rem;color:#1565c0;font-weight:700;margin-top:6px}
+#aadhaarpvc-popup .ac-submit{position:relative;overflow:hidden;width:100%;padding:14px;background:linear-gradient(135deg,#0d47a1,#1565c0);border:none;border-radius:13px;color:#fff;font-family:'Poppins',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;box-shadow:0 8px 22px rgba(13,71,161,.35);margin-bottom:10px;transition:all .2s;letter-spacing:.02em}
+#aadhaarpvc-popup .ac-submit::before{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-25deg);animation:cxShine 2.6s ease-in-out infinite}
+#aadhaarpvc-popup .ac-submit:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(13,71,161,.45)}
+#aadhaarpvc-popup .ac-cancel{width:100%;padding:11px;background:rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.1);border-radius:12px;color:#555;font-family:'Poppins',sans-serif;font-size:.82rem;cursor:pointer;transition:all .2s}
+#aadhaarpvc-popup .ac-cancel:hover{background:rgba(0,0,0,.09)}
+#aadhaarpvc-popup .ac-searchrow{display:flex;gap:8px;margin-bottom:16px}
+#aadhaarpvc-popup .ac-searchrow input{flex:1}
+#aadhaarpvc-popup .ac-searchbtn{background:linear-gradient(135deg,#0d47a1,#1565c0);color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:.82rem;padding:0 18px;border:none;border-radius:12px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 16px rgba(13,71,161,.3);transition:all .2s}
+#aadhaarpvc-popup .ac-searchbtn:hover{transform:translateY(-2px) scale(1.03)}
+#aadhaarpvc-popup .ac-track-card{background:#fff;border:1.5px solid rgba(13,71,161,.22);border-radius:16px;padding:16px 18px;margin-bottom:12px;box-shadow:0 4px 18px rgba(13,71,161,.1);animation:cxFieldIn .35s ease both}
+#aadhaarpvc-popup .ac-track-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+#aadhaarpvc-popup .ac-track-num{font-size:.72rem;font-weight:800;color:#0d47a1;background:#e3edfb;padding:3px 10px;border-radius:20px}
+#aadhaarpvc-popup .ac-sbadge{display:inline-block;padding:4px 13px;border-radius:20px;font-size:.71rem;font-weight:800;letter-spacing:.02em}
+#aadhaarpvc-popup .ac-sbadge-pending{background:#fff3cd;color:#856404;animation:cxBadgePulse 1.6s ease infinite}
+#aadhaarpvc-popup .ac-sbadge-done{background:#d1e7dd;color:#0a3622}
+#aadhaarpvc-popup .ac-track-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed rgba(13,71,161,.15);font-size:.79rem}
+#aadhaarpvc-popup .ac-track-row:last-child{border-bottom:none}
+#aadhaarpvc-popup .ac-track-row .k{color:#5177ab;font-weight:600;flex-shrink:0}
+#aadhaarpvc-popup .ac-track-row .v{color:#0a2f6b;font-weight:700;text-align:right}
+#aadhaarpvc-popup .ac-pdf-box{margin-top:8px;background:linear-gradient(135deg,#e8f9ee,#f5fffa);border:1.5px solid rgba(46,125,50,.4);border-radius:12px;padding:12px 14px;animation:cxFieldIn .3s ease both;text-align:center}
+#aadhaarpvc-popup .ac-pdf-title{font-family:'Baloo 2',cursive;font-size:.78rem;font-weight:800;color:#1b5e20;margin-bottom:6px}
+#aadhaarpvc-popup .ac-pdf-link{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#2e7d32,#43a047);color:#fff;font-weight:700;font-size:.8rem;padding:8px 16px;border-radius:10px;text-decoration:none;box-shadow:0 4px 12px rgba(46,125,50,.35)}
+#aadhaarpvc-popup .ac-empty{text-align:center;padding:34px 10px;color:#8fa9cc}
+#aadhaarpvc-popup .ac-empty .em-ico{font-size:2.4rem;margin-bottom:8px;display:inline-block;animation:cxMegaFloat 3s ease-in-out infinite}
+#aadhaarpvc-popup .ac-empty .em-txt{font-size:.85rem;font-weight:600}
+#aadhaarpvc-popup .ac-loading{text-align:center;padding:30px 10px;color:#888;font-size:.85rem}
+#aadhaarpvc-popup .ac-err{display:none;background:#fdecea;border:1px solid rgba(211,47,47,.35);color:#b71c1c;font-size:.78rem;font-weight:600;padding:9px 12px;border-radius:10px;margin-bottom:12px}
+#aadhaarpvc-popup .ac-payhead{font-size:.78rem;font-weight:800;color:#0d47a1;margin:18px 0 10px;display:flex;align-items:center;gap:6px;border-top:1px dashed rgba(13,71,161,.25);padding-top:16px}
+#aadhaarpvc-popup .ac-qrbox{background:linear-gradient(135deg,#ecf3fd,#f5f9ff);border:1.5px solid rgba(13,71,161,.28);border-radius:14px;padding:16px;text-align:center;margin-bottom:16px}
+#aadhaarpvc-popup .ac-qrbox img{width:180px;height:180px;max-width:100%;object-fit:contain;border-radius:10px;background:#fff;padding:8px;box-shadow:0 4px 14px rgba(13,71,161,.18)}
+#aadhaarpvc-popup .ac-qr-sub{font-size:.7rem;color:#3a68ab;margin-top:10px;line-height:1.5;font-weight:600}
+#aadhaarpvc-popup .ac-amt-badge{display:inline-block;background:linear-gradient(135deg,#0d47a1,#1565c0);color:#fff;font-weight:800;font-size:.85rem;padding:4px 14px;border-radius:20px;margin-top:8px;letter-spacing:.3px}
+</style>
+<div id="aadhaarpvc-popup">
+  <div class="ac-card">
+    <div class="ac-head">
+      <button class="ac-close" onclick="closeAadhaarPvc()">✕</button>
+      <div class="ac-head-title"><span>🪪</span> Aadhaar PVC Converter</div>
+      <div class="ac-head-sub">Aadhaar PDF se PVC Card ke liye request bhejein</div>
+      <div class="ac-tabs">
+        <button class="ac-tab active" id="ac-tab-new" onclick="acSwitchTab('new')">📤 Nayi Request</button>
+        <button class="ac-tab" id="ac-tab-track" onclick="acSwitchTab('track')">🔍 Status Check</button>
+      </div>
+    </div>
+
+    <div class="ac-note-wrap">
+      <div class="ac-note-badge"><span class="ac-note-icon">⏰</span>NOTE</div>
+      <div class="ac-note-dots"><span></span><span></span><span></span></div>
+      <div class="ac-note-scroll">
+        <div class="ac-note-text">⏰ Aapka Aadhaar PVC Card PDF Admin dwara 24–48 ghanton me taiyar karke bhej diya jayega. "Status Check" tab se track karte rahein. 🙏 Dhanyavaad!</div>
+      </div>
+    </div>
+
+    <div class="ac-body">
+
+      <!-- ══ NEW REQUEST VIEW ══ -->
+      <div id="ac-view-new">
+
+        <div id="aadhaarpvc-form-view">
+          <div class="ac-err" id="ac-err"></div>
+
+          <div class="ac-fg">
+            <label class="ac-lbl">🆔 Aadhaar Number</label>
+            <div class="ac-iw"><span class="ac-ico">🆔</span><input id="ac-aadhaarno" class="ac-field" type="text" placeholder="12 digit Aadhaar number" maxlength="12" inputmode="numeric"/></div>
+          </div>
+
+          <div class="ac-fg">
+            <label class="ac-lbl">👤 Aapka Naam</label>
+            <div class="ac-iw"><span class="ac-ico">👤</span><input id="ac-name" class="ac-field" type="text" placeholder="Poora naam"/></div>
+          </div>
+
+          <div class="ac-fg">
+            <label class="ac-lbl">📱 Mobile Number</label>
+            <div class="ac-iw"><span class="ac-ico">📱</span><input id="ac-mobile" class="ac-field" type="tel" placeholder="10 digit mobile" maxlength="10"/></div>
+          </div>
+
+          <div class="ac-fg">
+            <label class="ac-lbl">📄 Aadhaar PDF (UIDAI official website se downloaded)</label>
+            <input type="file" id="ac-pdf-file-input" accept="application/pdf" style="display:none" onchange="acPdfFileSelected(this)">
+            <div class="ac-filebox" onclick="document.getElementById('ac-pdf-file-input').click()">
+              📤 Aadhaar PDF Select Karein
+              <div class="ac-filename" id="ac-pdf-filename"></div>
+            </div>
+          </div>
+
+          <div class="ac-fg">
+            <label class="ac-lbl">🔑 PDF Password</label>
+            <div class="ac-iw"><span class="ac-ico">🔑</span><input id="ac-pdfpass" class="ac-field" type="text" placeholder="e.g. PUNI2002"/></div>
+          </div>
+
+          <div class="ac-fg">
+            <label class="ac-lbl">🎨 Background Color</label>
+            <div class="ac-iw"><span class="ac-ico">🎨</span>
+              <select id="ac-bgcolor" class="ac-field">
+                <option value="Yellow">Yellow</option>
+                <option value="White">White</option>
+                <option value="Sky Blue">Sky Blue</option>
+                <option value="Green">Green</option>
+                <option value="Pink">Pink</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="ac-fg">
+            <label class="ac-lbl">🖨️ Mobile Print</label>
+            <div class="ac-iw"><span class="ac-ico">🖨️</span>
+              <select id="ac-mobileprint" class="ac-field">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- ── PAYMENT (QR) ── -->
+          <div class="ac-payhead">💳 Payment Karein</div>
+          <div class="ac-qrbox">
+            <img id="ac-qr-img" src="" alt="Scan to Pay QR"/>
+            <div class="ac-qr-sub">Scan karke payment karein, uske baad neeche UTR / Transaction No. dalein</div>
+            <div class="ac-amt-badge">💰 Application Fee: ₹<span id="ac-amt-display">10</span></div>
+          </div>
+
+          <div class="ac-fg">
+            <label class="ac-lbl">🧾 UTR / Transaction No. (Payment ke baad)</label>
+            <div class="ac-iw"><span class="ac-ico">🧾</span><input id="ac-utr" class="ac-field" type="text" placeholder="Payment app se UTR number copy karein"/></div>
+          </div>
+
+          <button class="ac-submit" id="ac-submit-btn" onclick="submitAadhaarPvc()">📤 Request Bhejein</button>
+          <button class="ac-cancel" onclick="closeAadhaarPvc()">Band Karein</button>
+        </div>
+
+        <!-- SUCCESS VIEW -->
+        <div id="aadhaarpvc-success-view" style="display:none;text-align:center;padding:20px 4px">
+          <div style="font-size:3rem;margin-bottom:10px">✅</div>
+          <div style="font-family:'Baloo 2',cursive;font-size:1.05rem;font-weight:800;color:#0d47a1;margin-bottom:6px">Request Bhej Di Gayi!</div>
+          <div style="font-size:.82rem;color:#4a4a4a;line-height:1.6;margin-bottom:18px">Aapka Aadhaar PVC Card taiyar kiya ja raha hai. Status check tab se track karein.</div>
+          <button class="ac-submit" style="margin-bottom:8px" onclick="acGoTrackAfterSubmit()">🔍 Status Check Karein</button>
+          <button class="ac-cancel" onclick="closeAadhaarPvc()">Band Karein</button>
+        </div>
+      </div>
+
+      <!-- ══ STATUS CHECK VIEW ══ -->
+      <div id="ac-view-track" style="display:none">
+        <div class="ac-searchrow">
+          <input id="ac-track-inp" class="ac-field" type="text" placeholder="Aadhaar Number dalein" maxlength="12" inputmode="numeric" onkeydown="if(event.key==='Enter') trackAadhaarPvcStatus()"/>
+          <button class="ac-searchbtn" onclick="trackAadhaarPvcStatus()">🔍 Check</button>
+        </div>
+        <div id="ac-track-result">
+          <div class="ac-empty">
+            <div class="em-ico">📭</div>
+            <div class="em-txt">Apna PVC Card status dekhne ke liye Aadhaar Number se search karein</div>
           </div>
         </div>
       </div>

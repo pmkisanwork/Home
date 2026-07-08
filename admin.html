@@ -1211,11 +1211,29 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
               <div class="stat-label">Farmer Registry</div>
               <div class="stat-change up">Active</div>
             </div>
+            <div class="stat-card blue" onclick="showSection('panfind')">
+              <div class="stat-icon">🪪</div>
+              <div class="stat-val" id="ov-panfind" style="color:#93c5fd">0</div>
+              <div class="stat-label">PAN Find Requests</div>
+              <div class="stat-change" style="background:rgba(59,130,246,.12);color:#93c5fd" id="ov-panfind-chg">0 pending</div>
+            </div>
+            <div class="stat-card blue" onclick="showSection('voterfind')">
+              <div class="stat-icon">🗳️</div>
+              <div class="stat-val" id="ov-voterfind" style="color:#93c5fd">0</div>
+              <div class="stat-label">Voter Card Requests</div>
+              <div class="stat-change" style="background:rgba(59,130,246,.12);color:#93c5fd" id="ov-voterfind-chg">0 pending</div>
+            </div>
+            <div class="stat-card blue" onclick="showSection('aadhaarpvc')">
+              <div class="stat-icon">🆔</div>
+              <div class="stat-val" id="ov-aadhaarpvc" style="color:#93c5fd">0</div>
+              <div class="stat-label">Aadhaar PVC Requests</div>
+              <div class="stat-change" style="background:rgba(59,130,246,.12);color:#93c5fd" id="ov-aadhaarpvc-chg">0 pending</div>
+            </div>
             <div class="stat-card amber">
               <div class="stat-icon">💰</div>
               <div class="stat-val" id="ov-revenue" style="color:var(--gold2)">₹0</div>
-              <div class="stat-label">Est. Revenue</div>
-              <div class="stat-change warn">@₹40/app</div>
+              <div class="stat-label">Est. Revenue (Sab Services)</div>
+              <div class="stat-change warn" id="ov-rev-chg">Land + PAN + Voter + PVC</div>
             </div>
           </div>
 
@@ -1223,6 +1241,9 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
           <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;margin-bottom:20px">
             <h3 style="font-family:'Baloo 2',cursive;font-weight:700;font-size:.95rem;color:#fff;margin-bottom:14px;display:flex;align-items:center;gap:7px">⚡ Quick Actions</h3>
             <div style="display:flex;flex-wrap:wrap;gap:10px">
+              <button class="tb-btn" onclick="showSection('panfind')" style="font-size:.78rem">🪪 PAN Find Dekhein</button>
+              <button class="tb-btn" onclick="showSection('voterfind')" style="font-size:.78rem">🗳️ Voter Card Dekhein</button>
+              <button class="tb-btn" onclick="showSection('aadhaarpvc')" style="font-size:.78rem">🆔 Aadhaar PVC Dekhein</button>
               <button class="tb-btn" onclick="showSection('pending')" style="font-size:.78rem">⏳ Pending Dekhein</button>
               <button class="tb-btn" onclick="exportCSV()" style="font-size:.78rem">📊 CSV Export</button>
               <button class="tb-btn" onclick="showSection('settings')" style="font-size:.78rem">🔑 Password Change</button>
@@ -1431,28 +1452,6 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
             </div>
           </div>
 
-          <!-- ── PAYMENT QR — REPLACE / MANAGE ── -->
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
-            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:14px;display:flex;align-items:center;gap:8px">💳 Payment QR Code (User side "PAN Find" me dikhta hai)</h3>
-            <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
-              <div style="text-align:center">
-                <img id="pf-qr-current" src="" alt="Current QR" style="width:150px;height:150px;object-fit:contain;border-radius:12px;background:#fff;padding:6px;border:1.5px solid var(--border)"/>
-                <div style="font-size:.65rem;color:var(--text2);margin-top:6px">Current QR</div>
-              </div>
-              <div style="flex:1;min-width:220px">
-                <input type="file" id="pf-qr-file-input" accept="image/*" style="display:none" onchange="pfQrFileSelected(this)">
-                <button class="tb-btn" onclick="document.getElementById('pf-qr-file-input').click()">📤 Naya QR Select Karein</button>
-                <div id="pf-qr-preview-wrap" style="display:none;margin-top:12px">
-                  <img id="pf-qr-preview-img" src="" style="width:120px;height:120px;object-fit:contain;border-radius:10px;background:#fff;padding:6px;border:1.5px solid var(--border)"/>
-                  <div style="margin-top:8px">
-                    <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none" onclick="pfSaveQR()">💾 Yeh QR Save Karein</button>
-                  </div>
-                </div>
-                <div id="pf-qr-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;margin-top:10px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
-              </div>
-            </div>
-          </div>
-
           <!-- ── ADD / EDIT REQUEST CARD ── -->
           <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px" id="pf-formCard">
             <h3 id="pf-formTitle" style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);padding-bottom:10px">📝 Nayi Request Add Karein</h3>
@@ -1500,8 +1499,11 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
           <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
               <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);display:flex;align-items:center;gap:8px">📋 Saari Requests</h3>
-              <input type="text" id="pf-recSearch" placeholder="🔍 Naam, Aadhaar, Mobile, PAN, UTR..." oninput="pfRenderRecords()"
-                style="padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.78rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:230px"/>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="tb-btn" style="font-size:.75rem" onclick="pfExportCsv()">⬇️ CSV Export</button>
+                <input type="text" id="pf-recSearch" placeholder="🔍 Naam, Aadhaar, Mobile, PAN, UTR..." oninput="pfRenderRecords()"
+                  style="padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.78rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:230px"/>
+              </div>
             </div>
             <div style="overflow-x:auto">
               <table style="width:100%;border-collapse:collapse;font-size:.75rem">
@@ -1517,6 +1519,48 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
                 <tbody id="pf-recordsBody"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text2)">🔄 Loading...</td></tr></tbody>
               </table>
             </div>
+          </div>
+
+          <!-- ── CHARGE AMOUNT — EDIT ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:14px;display:flex;align-items:center;gap:8px">💰 Service Charge (User side amount yahan se control hota hai)</h3>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">₹ Amount</label>
+                <input id="pf-amount-input" type="number" min="1" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.9rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:140px;font-weight:800" placeholder="50"/>
+              </div>
+              <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none" onclick="pfSaveAmount()">💾 Amount Save Karein</button>
+              <div id="pf-amount-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
+            </div>
+          </div>
+
+          <!-- ── PAYMENT QR — REPLACE / MANAGE ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:14px;display:flex;align-items:center;gap:8px">💳 Payment QR Code (User side "PAN Find" me dikhta hai)</h3>
+            <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+              <div style="text-align:center">
+                <img id="pf-qr-current" src="" alt="Current QR" style="width:150px;height:150px;object-fit:contain;border-radius:12px;background:#fff;padding:6px;border:1.5px solid var(--border)"/>
+                <div style="font-size:.65rem;color:var(--text2);margin-top:6px">Current QR</div>
+              </div>
+              <div style="flex:1;min-width:220px">
+                <input type="file" id="pf-qr-file-input" accept="image/*" style="display:none" onchange="pfQrFileSelected(this)">
+                <button class="tb-btn" onclick="document.getElementById('pf-qr-file-input').click()">📤 Naya QR Select Karein</button>
+                <div id="pf-qr-preview-wrap" style="display:none;margin-top:12px">
+                  <img id="pf-qr-preview-img" src="" style="width:120px;height:120px;object-fit:contain;border-radius:10px;background:#fff;padding:6px;border:1.5px solid var(--border)"/>
+                  <div style="margin-top:8px">
+                    <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none" onclick="pfSaveQR()">💾 Yeh QR Save Karein</button>
+                  </div>
+                </div>
+                <div id="pf-qr-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;margin-top:10px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── TRASH / RESTORE ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:8px;display:flex;align-items:center;gap:8px">🗑️ Trash <span class="count-badge red" id="pf-trash-count">0</span></h3>
+            <p style="font-size:.7rem;color:var(--text2);margin-bottom:10px">Delete ki gayi requests yahan safe rehti hain — chahein to restore kar sakte hain.</p>
+            <div id="pf-trash-list" style="border-top:1px solid var(--border)"><div style="text-align:center;padding:16px;color:var(--text2);font-size:.78rem">🗑️ Trash khaali hai</div></div>
           </div>
         </div>
 
@@ -1596,8 +1640,11 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
           <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
               <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);display:flex;align-items:center;gap:8px">📋 Saari Requests</h3>
-              <input type="text" id="vf-recSearch" placeholder="🔍 Naam, Voter ID, Mobile, UTR..." oninput="vfRenderRecords()"
-                style="padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.78rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:230px"/>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="tb-btn" style="font-size:.75rem" onclick="vfExportCsv()">⬇️ CSV Export</button>
+                <input type="text" id="vf-recSearch" placeholder="🔍 Naam, Voter ID, Mobile, UTR..." oninput="vfRenderRecords()"
+                  style="padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.78rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:230px"/>
+              </div>
             </div>
             <div style="overflow-x:auto">
               <table style="width:100%;border-collapse:collapse;font-size:.75rem">
@@ -1648,6 +1695,13 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
                 <div id="vf-qr-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;margin-top:10px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
               </div>
             </div>
+          </div>
+
+          <!-- ── TRASH / RESTORE ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:8px;display:flex;align-items:center;gap:8px">🗑️ Trash <span class="count-badge red" id="vf-trash-count">0</span></h3>
+            <p style="font-size:.7rem;color:var(--text2);margin-bottom:10px">Delete ki gayi requests yahan safe rehti hain — chahein to restore kar sakte hain.</p>
+            <div id="vf-trash-list" style="border-top:1px solid var(--border)"><div style="text-align:center;padding:16px;color:var(--text2);font-size:.78rem">🗑️ Trash khaali hai</div></div>
           </div>
         </div>
 
@@ -1742,8 +1796,11 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
           <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
               <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);display:flex;align-items:center;gap:8px">📋 Saari Requests</h3>
-              <input type="text" id="ac-recSearch" placeholder="🔍 Naam, Aadhaar No, Mobile, UTR..." oninput="acRenderRecords()"
-                style="padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.78rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:230px"/>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="tb-btn" style="font-size:.75rem" onclick="acExportCsv()">⬇️ CSV Export</button>
+                <input type="text" id="ac-recSearch" placeholder="🔍 Naam, Aadhaar No, Mobile, UTR..." oninput="acRenderRecords()"
+                  style="padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.78rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:230px"/>
+              </div>
             </div>
             <div style="overflow-x:auto">
               <table style="width:100%;border-collapse:collapse;font-size:.75rem">
@@ -1798,6 +1855,13 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
                 <div id="ac-qr-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;margin-top:10px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
               </div>
             </div>
+          </div>
+
+          <!-- ── TRASH / RESTORE ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:8px;display:flex;align-items:center;gap:8px">🗑️ Trash <span class="count-badge red" id="ac-trash-count">0</span></h3>
+            <p style="font-size:.7rem;color:var(--text2);margin-bottom:10px">Delete ki gayi requests yahan safe rehti hain — chahein to restore kar sakte hain.</p>
+            <div id="ac-trash-list" style="border-top:1px solid var(--border)"><div style="text-align:center;padding:16px;color:var(--text2);font-size:.78rem">🗑️ Trash khaali hai</div></div>
           </div>
         </div>
 
@@ -1881,7 +1945,7 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
             <div class="a-card">
               <h4>💰 Revenue Estimate</h4>
               <div style="font-family:'Baloo 2',cursive;font-size:2rem;font-weight:800;color:var(--gold2)" id="an-rev">₹0</div>
-              <div style="font-size:.7rem;color:var(--text2);margin-top:8px">Based on ₹40 per application</div>
+              <div style="font-size:.7rem;color:var(--text2);margin-top:8px" id="an-rev-sub">Land + PAN + Voter + PVC</div>
               <div style="margin-top:6px;font-size:.75rem;color:var(--g4);font-weight:700" id="an-today">Today: 0 Applications</div>
             </div>
             <div class="a-card">
@@ -2733,16 +2797,28 @@ async function initDashboard(){
 async function loadAll(){
   showLoader('Data load ho raha hai...');
   try{
-    const [subSnap, userSnap, frSnap] = await Promise.all([
+    const [subSnap, userSnap, frSnap, pfSnap, vfSnap, acSnap, pfAmtSnap, vfAmtSnap, acAmtSnap] = await Promise.all([
       db.ref('submissions').once('value'),
       db.ref('users').once('value'),
       db.ref('farmer_registry').once('value'),
+      db.ref('pan_find_requests').once('value'),
+      db.ref('voter_find_requests').once('value'),
+      db.ref('aadhaar_pvc_requests').once('value'),
+      db.ref('settings/panFindAmount').once('value'),
+      db.ref('settings/voterFindAmount').once('value'),
+      db.ref('settings/aadhaarPvcAmount').once('value'),
     ]);
     _allSubs   = subSnap.val()  ? Object.values(subSnap.val()).filter(Boolean)  : [];
     _allUsers  = userSnap.val() ? Object.values(userSnap.val()).filter(u=>u&&u.mobile&&u.mobile!=='undefined') : [];
     _allFarmer = frSnap.val()   ? Object.values(frSnap.val()).filter(Boolean)   : [];
     _allSubs.sort((a,b)=>new Date(b.time||0)-new Date(a.time||0));
     _allFarmer.sort((a,b)=>b.dateMs-a.dateMs);
+    pfAllData = pfSnap.val() || {};
+    vfAllData = vfSnap.val() || {};
+    acAllData = acSnap.val() || {};
+    window._panFindAmt     = pfAmtSnap.val() || 50;
+    window._voterFindAmt   = vfAmtSnap.val() || 60;
+    window._aadhaarPvcAmt  = acAmtSnap.val() || 10;
   }catch(e){ toast('⚠️ Load error: '+e.message,'fail'); }
   hideLoader();
   renderAll();
@@ -2759,6 +2835,9 @@ function renderAll(){
   renderUsers(_allUsers);
   renderAnalytics();
   updateNavBadges();
+  if(typeof pfRenderRecords==='function'){ pfRenderRecords(); }
+  if(typeof vfRenderRecords==='function'){ vfRenderRecords(); }
+  if(typeof acRenderRecords==='function'){ acRenderRecords(); }
 }
 
 // ── OVERVIEW ──
@@ -2766,8 +2845,25 @@ function renderOverview(){
   const total    = _allSubs.length;
   const pending  = _allSubs.filter(s=>!s.status||s.status==='Pending').length;
   const approved = _allSubs.filter(s=>s.status==='Approved').length;
-  const revenue  = approved * 40;
+  const landRevenue = approved * 40;
   const rate     = total>0 ? Math.round(approved/total*100) : 0;
+
+  const pfVals = Object.values(pfAllData||{});
+  const vfVals = Object.values(vfAllData||{});
+  const acVals = Object.values(acAllData||{});
+  const pfTotal = pfVals.length, vfTotal = vfVals.length, acTotal = acVals.length;
+  const pfDone  = pfVals.filter(r=>r.panNo&&String(r.panNo).trim()).length;
+  const vfDone  = vfVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
+  const acDone  = acVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
+  const pfPend  = pfTotal - pfDone;
+  const vfPend  = vfTotal - vfDone;
+  const acPend  = acTotal - acDone;
+
+  const panFindAmt    = window._panFindAmt    || 50;
+  const voterFindAmt  = window._voterFindAmt  || 60;
+  const aadhaarPvcAmt = window._aadhaarPvcAmt || 10;
+  const servicesRevenue = (pfDone*panFindAmt) + (vfDone*voterFindAmt) + (acDone*aadhaarPvcAmt);
+  const revenue = landRevenue + servicesRevenue;
 
   setText('ov-total',    total);
   setText('ov-pending',  pending);
@@ -2777,6 +2873,13 @@ function renderOverview(){
   setText('ov-revenue',  '₹'+revenue);
   setText('ov-pend-chg', pending===0?'✅ Sab clear!':pending+' Pending!');
   setText('ov-apr-rate', rate+'% Approval');
+  setText('ov-panfind',      pfTotal);
+  setText('ov-panfind-chg',  pfPend+' pending');
+  setText('ov-voterfind',     vfTotal);
+  setText('ov-voterfind-chg', vfPend+' pending');
+  setText('ov-aadhaarpvc',     acTotal);
+  setText('ov-aadhaarpvc-chg', acPend+' pending');
+  setText('ov-rev-chg', `Land ₹${landRevenue} + Services ₹${servicesRevenue}`);
 
   // Recent list (last 5)
   const recent = _allSubs.slice(0,5);
@@ -3367,13 +3470,26 @@ function renderAnalytics(){
   const pending  = _allSubs.filter(s=>!s.status||s.status==='Pending').length;
   const rejected = _allSubs.filter(s=>s.status==='Rejected').length;
   const rate     = total>0 ? Math.round(approved/total*100) : 0;
-  const revenue  = approved*40;
+  const landRevenue = approved*40;
   const avgApps  = _allUsers.length>0 ? (total/_allUsers.length).toFixed(1) : 0;
+
+  const pfVals = Object.values(pfAllData||{});
+  const vfVals = Object.values(vfAllData||{});
+  const acVals = Object.values(acAllData||{});
+  const pfDone = pfVals.filter(r=>r.panNo&&String(r.panNo).trim()).length;
+  const vfDone = vfVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
+  const acDone = acVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
+  const panFindAmt    = window._panFindAmt    || 50;
+  const voterFindAmt  = window._voterFindAmt  || 60;
+  const aadhaarPvcAmt = window._aadhaarPvcAmt || 10;
+  const servicesRevenue = (pfDone*panFindAmt) + (vfDone*voterFindAmt) + (acDone*aadhaarPvcAmt);
+  const revenue = landRevenue + servicesRevenue;
 
   setText('an-apr-rate', rate+'%');
   setText('an-apr-total', '/ '+total+' Total');
   setText('an-pend', pending);
   setText('an-rev', '₹'+revenue);
+  setText('an-rev-sub', `Land ₹${landRevenue} + Services ₹${servicesRevenue}`);
   setText('an-users', _allUsers.length);
   setText('an-avg', 'Avg apps/user: '+avgApps);
 
@@ -4302,6 +4418,8 @@ let pfAllData = {};
 function pfWatchFb(){
   pfSyncFbBadge();
   pfLoadCurrentQR();
+  pfLoadCurrentAmount();
+  pfLoadTrash();
   if(window._pfInited) return;
   window._pfInited = true;
   try{
@@ -4364,6 +4482,7 @@ async function pfSaveRecord(){
     await db.ref('pan_find_requests/'+aadhaar).update(record);
     const t=document.getElementById('pf-toast');
     if(t){ t.style.display='block'; t.textContent = record.panNo ? '✅ PAN No save ho gaya! User ke data me dikh jayega.' : '✅ Request save ho gayi!'; setTimeout(()=>t.style.display='none',2500); }
+    logActivity(record.panNo?'PAN Find (PAN Diya)':'PAN Find (Save)', `Aadhaar ${aadhaar} (${name}) — ${record.panNo?'PAN No: '+record.panNo:'Request save/update ki gayi'}`);
     pfClearForm();
   }catch(e){
     alert('Save nahi hua, internet check karein.');
@@ -4415,12 +4534,78 @@ function pfEditEntry(key){
 }
 
 async function pfDeleteEntry(key){
-  if(!confirm('Yeh request delete karein?')) return;
+  if(!confirm('Yeh request Trash mein bhejein? (Trash se restore ho sakta hai)')) return;
   try{
+    const rec = (pfAllData||{})[key] || {};
+    await db.ref('pan_find_trash/'+key).set({...rec, deletedAt: new Date().toLocaleString('en-IN')});
     await db.ref('pan_find_requests/'+key).remove();
+    logActivity('PAN Find (Delete)', `Aadhaar ${key} (${rec.name||''}) Trash mein bheja gaya`);
+    pfLoadTrash();
   }catch(e){
     alert('Delete nahi hua, internet check karein.');
   }
+}
+
+// ── PAN FIND: TRASH / RESTORE ──
+function pfLoadTrash(){
+  db.ref('pan_find_trash').once('value').then(snap=>{
+    window._pfTrash = snap.val() || {};
+    pfRenderTrash();
+  }).catch(()=>{});
+}
+
+function pfRenderTrash(){
+  const wrap = document.getElementById('pf-trash-list');
+  const cnt  = document.getElementById('pf-trash-count');
+  if(!wrap) return;
+  const entries = Object.entries(window._pfTrash||{});
+  if(cnt) cnt.textContent = entries.length;
+  if(!entries.length){ wrap.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text2);font-size:.78rem">🗑️ Trash khaali hai</div>'; return; }
+  wrap.innerHTML = entries.map(([key,r])=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid var(--border)">
+      <div style="font-size:.78rem;color:var(--text)"><b>${r.aadhaar||key}</b> — ${r.name||'—'} <span style="color:var(--text2)">(${r.deletedAt||''})</span></div>
+      <div style="display:flex;gap:6px">
+        <button onclick="pfRestoreEntry('${key}')" style="background:rgba(78,203,110,.12);color:var(--g4);border:1px solid rgba(78,203,110,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer">♻️ Restore</button>
+        <button onclick="pfPermanentDelete('${key}')" style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer">🔥 Hamesha Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+async function pfRestoreEntry(key){
+  try{
+    const rec = (window._pfTrash||{})[key]; if(!rec) return;
+    const { deletedAt, ...clean } = rec;
+    await db.ref('pan_find_requests/'+key).set(clean);
+    await db.ref('pan_find_trash/'+key).remove();
+    logActivity('PAN Find (Restore)', `Aadhaar ${key} (${rec.name||''}) Trash se restore kiya gaya`);
+    pfLoadTrash();
+  }catch(e){ alert('Restore nahi hua, internet check karein.'); }
+}
+
+async function pfPermanentDelete(key){
+  if(!confirm('⚠️ Yeh hamesha ke liye delete ho jayega, wapas nahi aayega. Pakka?')) return;
+  try{
+    const rec = (window._pfTrash||{})[key] || {};
+    await db.ref('pan_find_trash/'+key).remove();
+    logActivity('PAN Find (Permanent Delete)', `Aadhaar ${key} (${rec.name||''}) hamesha ke liye delete kiya gaya`);
+    pfLoadTrash();
+  }catch(e){ alert('Delete nahi hua, internet check karein.'); }
+}
+
+function pfExportCsv(){
+  const entries = Object.entries(pfAllData||{});
+  if(!entries.length){ toast('❌ Koi data nahi','fail'); return; }
+  const headers = ['Aadhaar No','Naam','Mobile','UTR','Payment Status','PAN No','Note','Last Update'];
+  const rows = entries.map(([key,r])=>[
+    r.aadhaar||key, r.name||'', r.mobile||'', r.utr||'',
+    r.paymentVerified?'Verified':'Pending', r.panNo||'', r.remark||'', r.updated||''
+  ].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download='PAN_Find_Requests_'+new Date().toLocaleDateString('en-IN').replace(/\//g,'-')+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast('✅ CSV download ho rahi hai!','ok');
 }
 
 // ── PAN FIND: PAYMENT QR REPLACE ──
@@ -4454,12 +4639,39 @@ async function pfSaveQR(){
     await db.ref('settings/panFindQrCode').set(_pfNewQRData);
     const t=document.getElementById('pf-qr-toast');
     if(t){ t.style.display='block'; t.textContent='✅ QR update ho gaya! User ke PAN Find page par ab yehi naya QR dikhega.'; setTimeout(()=>t.style.display='none',3000); }
+    logActivity('PAN Find (QR Update)', 'Payment QR code update kiya gaya');
     pfLoadCurrentQR();
     document.getElementById('pf-qr-preview-wrap').style.display='none';
     document.getElementById('pf-qr-file-input').value='';
     _pfNewQRData='';
   }catch(e){
     alert('QR save nahi hua, internet check karein.');
+  }
+}
+
+// ── PAN FIND: SERVICE CHARGE AMOUNT — EDITABLE ──
+function pfLoadCurrentAmount(){
+  const inp = document.getElementById('pf-amount-input');
+  if(!inp) return;
+  db.ref('settings/panFindAmount').once('value').then(snap=>{
+    const v = snap.val();
+    inp.value = v || 50;
+  }).catch(()=>{ inp.value = 50; });
+}
+
+async function pfSaveAmount(){
+  const inp = document.getElementById('pf-amount-input');
+  const amt = parseInt(inp.value, 10);
+  if(!amt || amt <= 0){ alert('Sahi amount dalein!'); return; }
+  try{
+    await db.ref('settings/panFindAmount').set(amt);
+    window._panFindAmt = amt;
+    const t=document.getElementById('pf-amount-toast');
+    if(t){ t.style.display='block'; t.textContent='✅ Amount update ho gaya! User ke PAN Find page par ab ₹'+amt+' dikhega.'; setTimeout(()=>t.style.display='none',3000); }
+    logActivity('PAN Find (Amount Update)', `Service charge ₹${amt} set kiya gaya`);
+    if(typeof renderOverview==='function') renderOverview();
+  }catch(e){
+    alert('Amount save nahi hua, internet check karein.');
   }
 }
 
@@ -4470,6 +4682,7 @@ function vfWatchFb(){
   vfSyncFbBadge();
   vfLoadCurrentQR();
   vfLoadCurrentAmount();
+  vfLoadTrash();
   if(window._vfInited) return;
   window._vfInited = true;
   try{
@@ -4532,6 +4745,7 @@ async function vfSaveRecord(){
     await db.ref('voter_find_requests/'+voterNo).update(record);
     const t=document.getElementById('vf-toast');
     if(t){ t.style.display='block'; t.textContent = record.pdfLink ? '✅ PDF link save ho gaya! User ke data me dikh jayega.' : '✅ Request save ho gayi!'; setTimeout(()=>t.style.display='none',2500); }
+    logActivity(record.pdfLink?'Voter Card (PDF Diya)':'Voter Card (Save)', `Voter ID ${voterNo} (${name}) — ${record.pdfLink?'PDF link diya gaya':'Request save/update ki gayi'}`);
     vfClearForm();
   }catch(e){
     alert('Save nahi hua, internet check karein.');
@@ -4582,12 +4796,78 @@ function vfEditEntry(key){
 }
 
 async function vfDeleteEntry(key){
-  if(!confirm('Yeh request delete karein?')) return;
+  if(!confirm('Yeh request Trash mein bhejein? (Trash se restore ho sakta hai)')) return;
   try{
+    const rec = (vfAllData||{})[key] || {};
+    await db.ref('voter_find_trash/'+key).set({...rec, deletedAt: new Date().toLocaleString('en-IN')});
     await db.ref('voter_find_requests/'+key).remove();
+    logActivity('Voter Card (Delete)', `Voter ID ${key} (${rec.name||''}) Trash mein bheja gaya`);
+    vfLoadTrash();
   }catch(e){
     alert('Delete nahi hua, internet check karein.');
   }
+}
+
+// ── VOTER FIND: TRASH / RESTORE ──
+function vfLoadTrash(){
+  db.ref('voter_find_trash').once('value').then(snap=>{
+    window._vfTrash = snap.val() || {};
+    vfRenderTrash();
+  }).catch(()=>{});
+}
+
+function vfRenderTrash(){
+  const wrap = document.getElementById('vf-trash-list');
+  const cnt  = document.getElementById('vf-trash-count');
+  if(!wrap) return;
+  const entries = Object.entries(window._vfTrash||{});
+  if(cnt) cnt.textContent = entries.length;
+  if(!entries.length){ wrap.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text2);font-size:.78rem">🗑️ Trash khaali hai</div>'; return; }
+  wrap.innerHTML = entries.map(([key,r])=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid var(--border)">
+      <div style="font-size:.78rem;color:var(--text)"><b>${r.voterNo||key}</b> — ${r.name||'—'} <span style="color:var(--text2)">(${r.deletedAt||''})</span></div>
+      <div style="display:flex;gap:6px">
+        <button onclick="vfRestoreEntry('${key}')" style="background:rgba(78,203,110,.12);color:var(--g4);border:1px solid rgba(78,203,110,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer">♻️ Restore</button>
+        <button onclick="vfPermanentDelete('${key}')" style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer">🔥 Hamesha Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+async function vfRestoreEntry(key){
+  try{
+    const rec = (window._vfTrash||{})[key]; if(!rec) return;
+    const { deletedAt, ...clean } = rec;
+    await db.ref('voter_find_requests/'+key).set(clean);
+    await db.ref('voter_find_trash/'+key).remove();
+    logActivity('Voter Card (Restore)', `Voter ID ${key} (${rec.name||''}) Trash se restore kiya gaya`);
+    vfLoadTrash();
+  }catch(e){ alert('Restore nahi hua, internet check karein.'); }
+}
+
+async function vfPermanentDelete(key){
+  if(!confirm('⚠️ Yeh hamesha ke liye delete ho jayega, wapas nahi aayega. Pakka?')) return;
+  try{
+    const rec = (window._vfTrash||{})[key] || {};
+    await db.ref('voter_find_trash/'+key).remove();
+    logActivity('Voter Card (Permanent Delete)', `Voter ID ${key} (${rec.name||''}) hamesha ke liye delete kiya gaya`);
+    vfLoadTrash();
+  }catch(e){ alert('Delete nahi hua, internet check karein.'); }
+}
+
+function vfExportCsv(){
+  const entries = Object.entries(vfAllData||{});
+  if(!entries.length){ toast('❌ Koi data nahi','fail'); return; }
+  const headers = ['Voter ID','Naam','Mobile','UTR','Payment Status','PDF Link','Note','Last Update'];
+  const rows = entries.map(([key,r])=>[
+    r.voterNo||key, r.name||'', r.mobile||'', r.utr||'',
+    r.paymentVerified?'Verified':'Pending', r.pdfLink||'', r.remark||'', r.updated||''
+  ].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download='Voter_Card_Requests_'+new Date().toLocaleDateString('en-IN').replace(/\//g,'-')+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast('✅ CSV download ho rahi hai!','ok');
 }
 
 // ── VOTER FIND: PAYMENT QR REPLACE ──
@@ -4621,6 +4901,7 @@ async function vfSaveQR(){
     await db.ref('settings/voterFindQrCode').set(_vfNewQRData);
     const t=document.getElementById('vf-qr-toast');
     if(t){ t.style.display='block'; t.textContent='✅ QR update ho gaya! User ke Voter Card Pdf page par ab yehi naya QR dikhega.'; setTimeout(()=>t.style.display='none',3000); }
+    logActivity('Voter Card (QR Update)', 'Payment QR code update kiya gaya');
     vfLoadCurrentQR();
     document.getElementById('vf-qr-preview-wrap').style.display='none';
     document.getElementById('vf-qr-file-input').value='';
@@ -4646,8 +4927,11 @@ async function vfSaveAmount(){
   if(!amt || amt <= 0){ alert('Sahi amount dalein!'); return; }
   try{
     await db.ref('settings/voterFindAmount').set(amt);
+    window._voterFindAmt = amt;
     const t=document.getElementById('vf-amount-toast');
     if(t){ t.style.display='block'; t.textContent='✅ Amount update ho gaya! User ke Voter Card Pdf page par ab ₹'+amt+' dikhega.'; setTimeout(()=>t.style.display='none',3000); }
+    logActivity('Voter Card (Amount Update)', `Service charge ₹${amt} set kiya gaya`);
+    if(typeof renderOverview==='function') renderOverview();
   }catch(e){
     alert('Amount save nahi hua, internet check karein.');
   }
@@ -4660,6 +4944,7 @@ function acWatchFb(){
   acSyncFbBadge();
   acLoadCurrentQR();
   acLoadCurrentAmount();
+  acLoadTrash();
   if(window._acInited) return;
   window._acInited = true;
   try{
@@ -4726,6 +5011,7 @@ async function acSaveRecord(){
     await db.ref('aadhaar_pvc_requests/'+aadhaarNo).update(record);
     const t=document.getElementById('ac-toast');
     if(t){ t.style.display='block'; t.textContent = record.pdfLink ? '✅ PVC PDF link save ho gaya! User ke data me dikh jayega.' : '✅ Request save ho gayi!'; setTimeout(()=>t.style.display='none',2500); }
+    logActivity(record.pdfLink?'Aadhaar PVC (PDF Diya)':'Aadhaar PVC (Save)', `Aadhaar ${aadhaarNo} (${name}) — ${record.pdfLink?'PVC PDF link diya gaya':'Request save/update ki gayi'}`);
     acClearForm();
   }catch(e){
     alert('Save nahi hua, internet check karein.');
@@ -4784,12 +5070,78 @@ function acEditEntry(key){
 }
 
 async function acDeleteEntry(key){
-  if(!confirm('Yeh request delete karein?')) return;
+  if(!confirm('Yeh request Trash mein bhejein? (Trash se restore ho sakta hai)')) return;
   try{
+    const rec = (acAllData||{})[key] || {};
+    await db.ref('aadhaar_pvc_trash/'+key).set({...rec, deletedAt: new Date().toLocaleString('en-IN')});
     await db.ref('aadhaar_pvc_requests/'+key).remove();
+    logActivity('Aadhaar PVC (Delete)', `Aadhaar ${key} (${rec.name||''}) Trash mein bheja gaya`);
+    acLoadTrash();
   }catch(e){
     alert('Delete nahi hua, internet check karein.');
   }
+}
+
+// ── AADHAAR PVC: TRASH / RESTORE ──
+function acLoadTrash(){
+  db.ref('aadhaar_pvc_trash').once('value').then(snap=>{
+    window._acTrash = snap.val() || {};
+    acRenderTrash();
+  }).catch(()=>{});
+}
+
+function acRenderTrash(){
+  const wrap = document.getElementById('ac-trash-list');
+  const cnt  = document.getElementById('ac-trash-count');
+  if(!wrap) return;
+  const entries = Object.entries(window._acTrash||{});
+  if(cnt) cnt.textContent = entries.length;
+  if(!entries.length){ wrap.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text2);font-size:.78rem">🗑️ Trash khaali hai</div>'; return; }
+  wrap.innerHTML = entries.map(([key,r])=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid var(--border)">
+      <div style="font-size:.78rem;color:var(--text)"><b>${r.aadhaarNo||key}</b> — ${r.name||'—'} <span style="color:var(--text2)">(${r.deletedAt||''})</span></div>
+      <div style="display:flex;gap:6px">
+        <button onclick="acRestoreEntry('${key}')" style="background:rgba(78,203,110,.12);color:var(--g4);border:1px solid rgba(78,203,110,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer">♻️ Restore</button>
+        <button onclick="acPermanentDelete('${key}')" style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer">🔥 Hamesha Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+async function acRestoreEntry(key){
+  try{
+    const rec = (window._acTrash||{})[key]; if(!rec) return;
+    const { deletedAt, ...clean } = rec;
+    await db.ref('aadhaar_pvc_requests/'+key).set(clean);
+    await db.ref('aadhaar_pvc_trash/'+key).remove();
+    logActivity('Aadhaar PVC (Restore)', `Aadhaar ${key} (${rec.name||''}) Trash se restore kiya gaya`);
+    acLoadTrash();
+  }catch(e){ alert('Restore nahi hua, internet check karein.'); }
+}
+
+async function acPermanentDelete(key){
+  if(!confirm('⚠️ Yeh hamesha ke liye delete ho jayega, wapas nahi aayega. Pakka?')) return;
+  try{
+    const rec = (window._acTrash||{})[key] || {};
+    await db.ref('aadhaar_pvc_trash/'+key).remove();
+    logActivity('Aadhaar PVC (Permanent Delete)', `Aadhaar ${key} (${rec.name||''}) hamesha ke liye delete kiya gaya`);
+    acLoadTrash();
+  }catch(e){ alert('Delete nahi hua, internet check karein.'); }
+}
+
+function acExportCsv(){
+  const entries = Object.entries(acAllData||{});
+  if(!entries.length){ toast('❌ Koi data nahi','fail'); return; }
+  const headers = ['Aadhaar No','Naam','Mobile','PDF Password','BG Color','Mobile Print','UTR','Payment Status','PVC PDF Link','Note','Last Update'];
+  const rows = entries.map(([key,r])=>[
+    r.aadhaarNo||key, r.name||'', r.mobile||'', r.pdfPassword||'', r.bgColor||'', r.mobilePrint||'',
+    r.utr||'', r.paymentVerified?'Verified':'Pending', r.pdfLink||'', r.remark||'', r.updated||''
+  ].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download='Aadhaar_PVC_Requests_'+new Date().toLocaleDateString('en-IN').replace(/\//g,'-')+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast('✅ CSV download ho rahi hai!','ok');
 }
 
 // ── AADHAAR PVC: PAYMENT QR REPLACE ──
@@ -4823,6 +5175,7 @@ async function acSaveQR(){
     await db.ref('settings/aadhaarPvcQrCode').set(_acNewQRData);
     const t=document.getElementById('ac-qr-toast');
     if(t){ t.style.display='block'; t.textContent='✅ QR update ho gaya! User ke Aadhaar PVC Converter page par ab yehi naya QR dikhega.'; setTimeout(()=>t.style.display='none',3000); }
+    logActivity('Aadhaar PVC (QR Update)', 'Payment QR code update kiya gaya');
     acLoadCurrentQR();
     document.getElementById('ac-qr-preview-wrap').style.display='none';
     document.getElementById('ac-qr-file-input').value='';
@@ -4848,8 +5201,11 @@ async function acSaveAmount(){
   if(!amt || amt <= 0){ alert('Sahi amount dalein!'); return; }
   try{
     await db.ref('settings/aadhaarPvcAmount').set(amt);
+    window._aadhaarPvcAmt = amt;
     const t=document.getElementById('ac-amount-toast');
     if(t){ t.style.display='block'; t.textContent='✅ Amount update ho gaya! User ke Aadhaar PVC Converter page par ab ₹'+amt+' dikhega.'; setTimeout(()=>t.style.display='none',3000); }
+    logActivity('Aadhaar PVC (Amount Update)', `Application fee ₹${amt} set kiya gaya`);
+    if(typeof renderOverview==='function') renderOverview();
   }catch(e){
     alert('Amount save nahi hua, internet check karein.');
   }

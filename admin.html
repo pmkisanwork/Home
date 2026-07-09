@@ -1911,18 +1911,66 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
               <button class="tb-btn" id="toggle-pass-btn" onclick="togglePassView()">👁️ Passwords Dekhen</button>
             </div>
           </div>
+
+          <!-- Pending Signup Approvals stat -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:18px">
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:#f87171" id="users-sPending">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">⏳ Pending Signup Approvals</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:#4ecb6e" id="users-sActive">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">✅ Active Users</div>
+            </div>
+          </div>
+
           <div class="filter-bar">
             <div class="search-wrap"><input type="text" class="search-inp" id="users-search" placeholder="Naam, Mobile..." oninput="filterUsers()"/></div>
           </div>
           <div style="overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:14px">
             <table class="users-table">
               <thead><tr>
-                <th>User</th><th>Mobile</th><th>Password</th><th>Status</th><th>Actions</th>
+                <th>User</th><th>Mobile</th><th>Password</th><th>Signup UTR</th><th>Status</th><th>Actions</th>
               </tr></thead>
-              <tbody id="users-tbody"><tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text2)">Loading...</td></tr></tbody>
+              <tbody id="users-tbody"><tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text2)">Loading...</td></tr></tbody>
             </table>
           </div>
           <div class="pager" id="users-pager"></div>
+
+          <!-- ── SIGNUP CHARGE AMOUNT — EDIT ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-top:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:14px;display:flex;align-items:center;gap:8px">💰 Signup Charge (Naye users se liya jane wala amount)</h3>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">₹ Amount</label>
+                <input id="signup-amount-input" type="number" min="1" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.9rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:140px;font-weight:800" placeholder="49"/>
+              </div>
+              <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none" onclick="signupSaveAmount()">💾 Amount Save Karein</button>
+              <div id="signup-amount-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
+            </div>
+          </div>
+
+          <!-- ── SIGNUP PAYMENT QR — REPLACE / MANAGE ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-top:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:14px;display:flex;align-items:center;gap:8px">💳 Signup Payment QR Code (Register page par dikhta hai)</h3>
+            <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+              <div style="text-align:center">
+                <img id="signup-qr-current" src="" alt="Current QR" style="width:150px;height:150px;object-fit:contain;border-radius:12px;background:#fff;padding:6px;border:1.5px solid var(--border)"/>
+                <div style="font-size:.65rem;color:var(--text2);margin-top:6px">Current QR</div>
+              </div>
+              <div style="flex:1;min-width:220px">
+                <input type="file" id="signup-qr-file-input" accept="image/*" style="display:none" onchange="signupQrFileSelected(this)">
+                <button class="tb-btn" onclick="document.getElementById('signup-qr-file-input').click()">📤 Naya QR Select Karein</button>
+                <div id="signup-qr-preview-wrap" style="display:none;margin-top:12px">
+                  <img id="signup-qr-preview-img" src="" style="width:120px;height:120px;object-fit:contain;border-radius:10px;background:#fff;padding:6px;border:1.5px solid var(--border)"/>
+                  <div style="margin-top:8px">
+                    <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none" onclick="signupSaveQR()">💾 Yeh QR Save Karein</button>
+                  </div>
+                </div>
+                <div id="signup-qr-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;margin-top:10px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- ═══ ANALYTICS ═══ -->
@@ -3408,13 +3456,17 @@ function renderUsers(users){
   setText('users-count', users.length);
   setText('nav-users-badge', users.length);
   setText('ov-users', users.length);
+  const pendingCount = users.filter(u=>u.active===false && u.signupPaymentStatus==='pending').length;
+  const activeCount = users.filter(u=>u.active!==false).length;
+  setText('users-sPending', pendingCount);
+  setText('users-sActive', activeCount);
   renderUsersTable(users);
 }
 function renderUsersTable(users){
   const tb = document.getElementById('users-tbody');
   if(!tb) return;
   if(!users.length){
-    tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text2)">Koi user nahi</td></tr>';
+    tb.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text2)">Koi user nahi</td></tr>';
     renderPager('users-pager','users',0,0);
     return;
   }
@@ -3428,11 +3480,17 @@ function renderUsersTable(users){
     const pw = u.password||'—';
     const passShow = _showPass ? `<span style="font-family:monospace;font-size:.75rem;color:var(--g4)">${pw}</span>` : `<span style="letter-spacing:.1em;color:rgba(255,255,255,.3)">••••••••</span>`;
     const active = u.active!==false;
-    return `<tr>
+    const isPendingSignup = !active && u.signupPaymentStatus==='pending';
+    const utrCell = u.signupUtr
+      ? `<span style="font-family:monospace;font-size:.72rem;color:${isPendingSignup?'#f0a500':'var(--text2)'}">${u.signupUtr}</span>`
+      : `<span style="color:var(--text2)">—</span>`;
+    const rowStyle = isPendingSignup ? 'border-left:3px solid #f0a500' : '';
+    return `<tr style="${rowStyle}">
       <td><div style="display:flex;align-items:center;gap:9px"><div class="user-av-sm">${nm[0].toUpperCase()}</div><div style="font-weight:600;font-size:.82rem">${nm}</div></div></td>
       <td style="font-size:.78rem">📱 ${mob}</td>
       <td>${passShow}</td>
-      <td><span class="badge ${active?'approved':'rejected'}">${active?'✅ Active':'🚫 Blocked'}</span></td>
+      <td>${utrCell}</td>
+      <td><span class="badge ${active?'approved':(isPendingSignup?'pending':'rejected')}">${active?'✅ Active':(isPendingSignup?'⏳ Payment Pending Approval':'🚫 Blocked')}</span></td>
       <td>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           <button onclick="toggleUser('${mob}','${nm}',${!active})" class="action-btn ${!active?'app':'del'}" style="font-size:.65rem">${!active?'✅ Activate':'🚫 Block'}</button>
@@ -3447,9 +3505,11 @@ async function toggleUser(mob, name, makeActive){
   if(!confirm('"'+name+'" ko '+(makeActive?'activate':'block')+' karna chahte hain?')) return;
   try{
     await db.ref('users/'+mob+'/active').set(makeActive);
+    if(makeActive) await db.ref('users/'+mob+'/signupPaymentStatus').set('verified').catch(()=>{});
     const idx=_allUsers.findIndex(u=>u.mobile===mob);
-    if(idx!==-1) _allUsers[idx].active=makeActive;
+    if(idx!==-1){ _allUsers[idx].active=makeActive; if(makeActive) _allUsers[idx].signupPaymentStatus='verified'; }
     toast((makeActive?'✅ Activated':'🚫 Blocked')+': '+name,'ok');
+    logActivity(makeActive?'User Activate':'User Block', `${name} (${mob}) ko ${makeActive?'activate':'block'} kiya gaya`);
     renderUsers(_allUsers);
   }catch(e){toast('❌ Update nahi hua','fail');}
 }
@@ -3459,9 +3519,76 @@ async function deleteUser(mob, name){
     await db.ref('users/'+mob).remove();
     _allUsers=_allUsers.filter(u=>u.mobile!==mob);
     toast('🗑️ User delete ho gaya: '+name,'ok');
+    logActivity('User Delete', `${name} (${mob}) ka account delete kiya gaya`);
     renderUsers(_allUsers);
   }catch(e){toast('❌ Delete nahi hua','fail');}
 }
+
+// ── SIGNUP CHARGE AMOUNT — EDITABLE ──
+function signupLoadCurrentAmount(){
+  const inp = document.getElementById('signup-amount-input');
+  if(!inp) return;
+  db.ref('settings/signupAmount').once('value').then(snap=>{
+    const v = snap.val();
+    inp.value = v || 49;
+  }).catch(()=>{ inp.value = 49; });
+}
+
+async function signupSaveAmount(){
+  const inp = document.getElementById('signup-amount-input');
+  const amt = parseInt(inp.value, 10);
+  if(!amt || amt <= 0){ alert('Sahi amount dalein!'); return; }
+  try{
+    await db.ref('settings/signupAmount').set(amt);
+    const t=document.getElementById('signup-amount-toast');
+    if(t){ t.style.display='block'; t.textContent='✅ Amount update ho gaya! Register page par ab ₹'+amt+' dikhega.'; setTimeout(()=>t.style.display='none',3000); }
+    logActivity('Signup Amount Update', `Signup charge ₹${amt} set kiya gaya`);
+  }catch(e){
+    alert('Amount save nahi hua, internet check karein.');
+  }
+}
+
+// ── SIGNUP PAYMENT QR — REPLACE / MANAGE ──
+let _signupNewQRData = '';
+
+function signupLoadCurrentQR(){
+  const img = document.getElementById('signup-qr-current');
+  if(!img) return;
+  db.ref('settings/signupQrCode').once('value').then(snap=>{
+    const v = snap.val();
+    img.src = v || (typeof PF_DEFAULT_QR!=='undefined' ? PF_DEFAULT_QR : '');
+  }).catch(()=>{});
+}
+
+function signupQrFileSelected(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ alert('Sirf image file select karein!'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    _signupNewQRData = e.target.result;
+    document.getElementById('signup-qr-preview-img').src = _signupNewQRData;
+    document.getElementById('signup-qr-preview-wrap').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function signupSaveQR(){
+  if(!_signupNewQRData){ alert('Pehle naya QR image select karein!'); return; }
+  try{
+    await db.ref('settings/signupQrCode').set(_signupNewQRData);
+    const t=document.getElementById('signup-qr-toast');
+    if(t){ t.style.display='block'; t.textContent='✅ QR update ho gaya! Register page par ab yehi naya QR dikhega.'; setTimeout(()=>t.style.display='none',3000); }
+    logActivity('Signup QR Update', 'Signup payment QR code update kiya gaya');
+    signupLoadCurrentQR();
+    document.getElementById('signup-qr-preview-wrap').style.display='none';
+    document.getElementById('signup-qr-file-input').value='';
+    _signupNewQRData='';
+  }catch(e){
+    alert('QR save nahi hua, internet check karein.');
+  }
+}
+
 
 // ── ANALYTICS ──
 function renderAnalytics(){
@@ -3815,6 +3942,7 @@ function showSection(sec){
   if(sec==='panfind'){ pfWatchFb(); pfRenderRecords(); }
   if(sec==='voterfind'){ vfWatchFb(); vfRenderRecords(); }
   if(sec==='aadhaarpvc'){ acWatchFb(); acRenderRecords(); }
+  if(sec==='users'){ signupLoadCurrentAmount(); signupLoadCurrentQR(); }
   if(sec==='contactmsgs'){ cmLoadMsgs(); }
   if(sec==='trash'){ renderTrash(); }
   if(sec==='activitylog'){ renderActivityLog(); }

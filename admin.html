@@ -599,35 +599,31 @@ body.light-mode .cc-inp{background:#fff;color:#0d1f12}
   .sidebar.open{transform:translateX(0)}
   .sidebar-overlay.open{display:block}
   .mobile-toggle{display:flex}
-  .stats-grid{grid-template-columns:1fr 1fr}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:10px}
   .app-details{grid-template-columns:1fr 1fr}
   .content{padding:14px}
-  .topbar{padding:10px 14px}
+  .topbar{padding:12px 14px;height:auto;min-height:auto;display:flex;flex-direction:column;align-items:stretch;gap:10px}
+  .topbar-left{flex:1;min-width:0;width:100%}
+  .page-title{font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .page-breadcrumb{font-size:.62rem}
+  .topbar-right{width:100%;display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-start;align-items:center}
+  .topbar-right .tb-btn,.topbar-right .theme-toggle{padding:6px 10px;font-size:.68rem;flex:0 0 auto}
   .analytics-grid{grid-template-columns:1fr}
 }
 @media(max-width:480px){
-  .stats-grid{grid-template-columns:1fr}
+  #notif-panel{width:calc(100vw - 28px)!important;right:-6px!important}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .stat-card{padding:14px 12px}
+  .stat-icon{font-size:1.25rem;margin-bottom:6px}
+  .stat-val{font-size:1.5rem}
+  .stat-label{font-size:.62rem}
+  .stat-change{font-size:.58rem;padding:2px 6px}
   .app-details{grid-template-columns:1fr}
   .login-card{padding:28px 20px}
   .tricolor-bar{margin:-28px -20px 24px}
-
-  /* ── Topbar: stack + shrink so buttons don't overflow/overlap ── */
-  .topbar{
-    height:auto;flex-wrap:wrap;row-gap:10px;padding:12px 12px;
-  }
-  .topbar-left{width:100%}
-  .page-title{font-size:.95rem}
-  .page-breadcrumb{font-size:.65rem}
-  .topbar-right{
-    width:100%;justify-content:flex-start;flex-wrap:wrap;gap:8px;
-  }
-  .theme-toggle,.tb-btn{
-    padding:6px 10px;font-size:.68rem;gap:4px;border-radius:9px;
-  }
-  #notif-panel{
-    position:fixed !important;top:64px !important;left:12px !important;right:12px !important;
-    width:auto !important;max-width:calc(100vw - 24px) !important;
-  }
+  .topbar-right .tb-btn,.topbar-right .theme-toggle{padding:6px 9px;font-size:.65rem}
+  .page-title{font-size:.85rem}
+  .section-hd h2{font-size:1rem}
 }
 
 /* Loading spinner */
@@ -1111,6 +1107,10 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
           <span class="nav-icon">🪪</span> Aadhaar PVC Converter
           <span class="nav-badge" id="nav-aadhaarpvc-badge">0</span>
         </button>
+        <button class="nav-item" onclick="showSection('rationcard')" data-sec="rationcard">
+          <span class="nav-icon">🍚</span> Ration Card
+          <span class="nav-badge" id="nav-rationcard-badge">0</span>
+        </button>
         <button class="nav-item" onclick="showSection('contactmsgs')" data-sec="contactmsgs">
           <span class="nav-icon">📨</span> Contact Messages
           <span class="nav-badge" id="nav-cm-badge">0</span>
@@ -1247,6 +1247,12 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
               <div class="stat-label">Aadhaar PVC Requests</div>
               <div class="stat-change" style="background:rgba(59,130,246,.12);color:#93c5fd" id="ov-aadhaarpvc-chg">0 pending</div>
             </div>
+            <div class="stat-card blue" onclick="showSection('rationcard')">
+              <div class="stat-icon">🍚</div>
+              <div class="stat-val" id="ov-rationcard" style="color:#93c5fd">0</div>
+              <div class="stat-label">Ration Card Requests</div>
+              <div class="stat-change" style="background:rgba(59,130,246,.12);color:#93c5fd" id="ov-rationcard-chg">0 pending</div>
+            </div>
             <div class="stat-card amber">
               <div class="stat-icon">💰</div>
               <div class="stat-val" id="ov-revenue" style="color:var(--gold2)">₹0</div>
@@ -1262,6 +1268,7 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
               <button class="tb-btn" onclick="showSection('panfind')" style="font-size:.78rem">🪪 PAN Find Dekhein</button>
               <button class="tb-btn" onclick="showSection('voterfind')" style="font-size:.78rem">🗳️ Voter Card Dekhein</button>
               <button class="tb-btn" onclick="showSection('aadhaarpvc')" style="font-size:.78rem">🆔 Aadhaar PVC Dekhein</button>
+              <button class="tb-btn" onclick="showSection('rationcard')" style="font-size:.78rem">🍚 Ration Card Dekhein</button>
               <button class="tb-btn" onclick="showSection('pending')" style="font-size:.78rem">⏳ Pending Dekhein</button>
               <button class="tb-btn" onclick="exportCSV()" style="font-size:.78rem">📊 CSV Export</button>
               <button class="tb-btn" onclick="showSection('settings')" style="font-size:.78rem">🔑 Password Change</button>
@@ -1880,6 +1887,147 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
             <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:8px;display:flex;align-items:center;gap:8px">🗑️ Trash <span class="count-badge red" id="ac-trash-count">0</span></h3>
             <p style="font-size:.7rem;color:var(--text2);margin-bottom:10px">Delete ki gayi requests yahan safe rehti hain — chahein to restore kar sakte hain.</p>
             <div id="ac-trash-list" style="border-top:1px solid var(--border)"><div style="text-align:center;padding:16px;color:var(--text2);font-size:.78rem">🗑️ Trash khaali hai</div></div>
+          </div>
+        </div>
+
+        <!-- ═══ RATION CARD ═══ -->
+        <div class="section-page" id="sec-rationcard">
+          <div class="section-hd">
+            <h2>🍚 Ration Card <span class="count-badge" id="rtc-recCount">0</span></h2>
+            <div style="display:flex;gap:8px">
+              <span id="rtc-fbStatus" style="font-size:.7rem;padding:5px 12px;border-radius:12px;font-weight:700;background:rgba(239,68,68,.12);color:#f87171">⚪ Connecting...</span>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:18px">
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:var(--g4)" id="rtc-sTot">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">📋 Total Requests</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:#f87171" id="rtc-sPayPending">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">💰 Payment Pending</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:var(--gold2)" id="rtc-sPending">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">⏳ Card Pending</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:#4ecb6e" id="rtc-sFound">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">✅ Card Taiyar</div>
+            </div>
+          </div>
+
+          <!-- ── ADD / EDIT REQUEST CARD ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px" id="rtc-formCard">
+            <h3 id="rtc-formTitle" style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);padding-bottom:10px">📝 Nayi Request Add Karein</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">🆔 Aadhaar Number *</label>
+                <input id="rtc-fRationNo" maxlength="12" inputmode="numeric" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);letter-spacing:1px" placeholder="12 digit Aadhaar Number"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">👤 Naam *</label>
+                <input id="rtc-fName" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="Ration Card jaisa naam"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">📱 Mobile No</label>
+                <input id="rtc-fMobile" maxlength="10" inputmode="numeric" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="10 digit mobile (optional)"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">🧾 UTR / Transaction No.</label>
+                <input id="rtc-fUtr" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="User dwara diya gaya UTR"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">💰 Payment Status</label>
+                <select id="rtc-fPaid" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)">
+                  <option value="no">⏳ Pending — Verify nahi hui</option>
+                  <option value="yes">✅ Verified — Payment mil gayi</option>
+                </select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;grid-column:1/-1">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">📄 Final Ration Card Link (jab taiyar ho jaye — user ko yehi link dikhega)</label>
+                <input id="rtc-fPdfLink" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="Ration Card ka download link (URL)"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;grid-column:1/-1">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">📝 Note</label>
+                <textarea id="rtc-fRemark" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);resize:vertical;min-height:50px" placeholder="Koi note ya comment..."></textarea>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:16px">
+              <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none;flex:1;justify-content:center;padding:12px" onclick="rtcSaveRecord()">💾 Save Karein</button>
+              <button class="tb-btn" onclick="rtcClearForm()">🗑️ Clear</button>
+            </div>
+            <div id="rtc-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:11px 14px;margin-top:12px;font-size:.8rem;color:var(--g4);font-weight:600"></div>
+          </div>
+
+          <!-- ── ALL REQUESTS TABLE ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+              <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);display:flex;align-items:center;gap:8px">📋 Saari Requests</h3>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="tb-btn" style="font-size:.75rem" onclick="rtcExportCsv()">⬇️ CSV Export</button>
+                <input type="text" id="rtc-recSearch" placeholder="🔍 Naam, Aadhaar No, Mobile, UTR..." oninput="rtcRenderRecords()"
+                  style="padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.78rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:230px"/>
+              </div>
+            </div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:.75rem">
+                <thead><tr style="border-bottom:1px solid var(--border)">
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700;white-space:nowrap">🆔 Aadhaar No</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">👤 Name</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">📱 Mobile</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">🧾 UTR</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">💰 Payment</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">📄 Ration Card</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">⚙️ Action</th>
+                </tr></thead>
+                <tbody id="rtc-recordsBody"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text2)">🔄 Loading...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ── CHARGE AMOUNT — EDIT ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:14px;display:flex;align-items:center;gap:8px">💰 Service Charge (User side amount yahan se control hota hai)</h3>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">₹ Amount</label>
+                <input id="rtc-amount-input" type="number" min="1" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.9rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:140px;font-weight:800" placeholder="30"/>
+              </div>
+              <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none" onclick="rtcSaveAmount()">💾 Amount Save Karein</button>
+              <div id="rtc-amount-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
+            </div>
+          </div>
+
+          <!-- ── PAYMENT QR — REPLACE / MANAGE ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:14px;display:flex;align-items:center;gap:8px">💳 Payment QR Code (User side "Ration Card" me dikhta hai)</h3>
+            <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+              <div style="text-align:center">
+                <img id="rtc-qr-current" src="" alt="Current QR" style="width:150px;height:150px;object-fit:contain;border-radius:12px;background:#fff;padding:6px;border:1.5px solid var(--border)"/>
+                <div style="font-size:.65rem;color:var(--text2);margin-top:6px">Current QR</div>
+              </div>
+              <div style="flex:1;min-width:220px">
+                <input type="file" id="rtc-qr-file-input" accept="image/*" style="display:none" onchange="rtcQrFileSelected(this)">
+                <button class="tb-btn" onclick="document.getElementById('rtc-qr-file-input').click()">📤 Naya QR Select Karein</button>
+                <div id="rtc-qr-preview-wrap" style="display:none;margin-top:12px">
+                  <img id="rtc-qr-preview-img" src="" style="width:120px;height:120px;object-fit:contain;border-radius:10px;background:#fff;padding:6px;border:1.5px solid var(--border)"/>
+                  <div style="margin-top:8px">
+                    <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none" onclick="rtcSaveQR()">💾 Yeh QR Save Karein</button>
+                  </div>
+                </div>
+                <div id="rtc-qr-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;margin-top:10px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── TRASH / RESTORE ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:8px;display:flex;align-items:center;gap:8px">🗑️ Trash <span class="count-badge red" id="rtc-trash-count">0</span></h3>
+            <p style="font-size:.7rem;color:var(--text2);margin-bottom:10px">Delete ki gayi requests yahan safe rehti hain — chahein to restore kar sakte hain.</p>
+            <div id="rtc-trash-list" style="border-top:1px solid var(--border)"><div style="text-align:center;padding:16px;color:var(--text2);font-size:.78rem">🗑️ Trash khaali hai</div></div>
           </div>
         </div>
 
@@ -2863,16 +3011,18 @@ async function initDashboard(){
 async function loadAll(){
   showLoader('Data load ho raha hai...');
   try{
-    const [subSnap, userSnap, frSnap, pfSnap, vfSnap, acSnap, pfAmtSnap, vfAmtSnap, acAmtSnap] = await Promise.all([
+    const [subSnap, userSnap, frSnap, pfSnap, vfSnap, acSnap, rtcSnap, pfAmtSnap, vfAmtSnap, acAmtSnap, rtcAmtSnap] = await Promise.all([
       db.ref('submissions').once('value'),
       db.ref('users').once('value'),
       db.ref('farmer_registry').once('value'),
       db.ref('pan_find_requests').once('value'),
       db.ref('voter_find_requests').once('value'),
       db.ref('aadhaar_pvc_requests').once('value'),
+      db.ref('ration_card_requests').once('value'),
       db.ref('settings/panFindAmount').once('value'),
       db.ref('settings/voterFindAmount').once('value'),
       db.ref('settings/aadhaarPvcAmount').once('value'),
+      db.ref('settings/rationCardAmount').once('value'),
     ]);
     _allSubs   = subSnap.val()  ? Object.values(subSnap.val()).filter(Boolean)  : [];
     _allUsers  = userSnap.val() ? Object.values(userSnap.val()).filter(u=>u&&u.mobile&&u.mobile!=='undefined') : [];
@@ -2882,9 +3032,11 @@ async function loadAll(){
     pfAllData = pfSnap.val() || {};
     vfAllData = vfSnap.val() || {};
     acAllData = acSnap.val() || {};
+    rtcAllData = rtcSnap.val() || {};
     window._panFindAmt     = pfAmtSnap.val() || 50;
     window._voterFindAmt   = vfAmtSnap.val() || 60;
     window._aadhaarPvcAmt  = acAmtSnap.val() || 10;
+    window._rationCardAmt  = rtcAmtSnap.val() || 30;
   }catch(e){ toast('⚠️ Load error: '+e.message,'fail'); }
   hideLoader();
   renderAll();
@@ -2904,6 +3056,7 @@ function renderAll(){
   if(typeof pfRenderRecords==='function'){ pfRenderRecords(); }
   if(typeof vfRenderRecords==='function'){ vfRenderRecords(); }
   if(typeof acRenderRecords==='function'){ acRenderRecords(); }
+  if(typeof rtcRenderRecords==='function'){ rtcRenderRecords(); }
 }
 
 // ── OVERVIEW ──
@@ -2917,18 +3070,22 @@ function renderOverview(){
   const pfVals = Object.values(pfAllData||{});
   const vfVals = Object.values(vfAllData||{});
   const acVals = Object.values(acAllData||{});
-  const pfTotal = pfVals.length, vfTotal = vfVals.length, acTotal = acVals.length;
+  const rtcVals = Object.values(rtcAllData||{});
+  const pfTotal = pfVals.length, vfTotal = vfVals.length, acTotal = acVals.length, rtcTotal = rtcVals.length;
   const pfDone  = pfVals.filter(r=>r.panNo&&String(r.panNo).trim()).length;
   const vfDone  = vfVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
   const acDone  = acVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
+  const rtcDone = rtcVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
   const pfPend  = pfTotal - pfDone;
   const vfPend  = vfTotal - vfDone;
   const acPend  = acTotal - acDone;
+  const rtcPend = rtcTotal - rtcDone;
 
   const panFindAmt    = window._panFindAmt    || 50;
   const voterFindAmt  = window._voterFindAmt  || 60;
   const aadhaarPvcAmt = window._aadhaarPvcAmt || 10;
-  const servicesRevenue = (pfDone*panFindAmt) + (vfDone*voterFindAmt) + (acDone*aadhaarPvcAmt);
+  const rationCardAmt = window._rationCardAmt || 30;
+  const servicesRevenue = (pfDone*panFindAmt) + (vfDone*voterFindAmt) + (acDone*aadhaarPvcAmt) + (rtcDone*rationCardAmt);
   const revenue = landRevenue + servicesRevenue;
 
   setText('ov-total',    total);
@@ -2945,6 +3102,8 @@ function renderOverview(){
   setText('ov-voterfind-chg', vfPend+' pending');
   setText('ov-aadhaarpvc',     acTotal);
   setText('ov-aadhaarpvc-chg', acPend+' pending');
+  setText('ov-rationcard',     rtcTotal);
+  setText('ov-rationcard-chg', rtcPend+' pending');
   setText('ov-rev-chg', `Land ₹${landRevenue} + Services ₹${servicesRevenue}`);
 
   // Recent list (last 5)
@@ -3621,13 +3780,16 @@ function renderAnalytics(){
   const pfVals = Object.values(pfAllData||{});
   const vfVals = Object.values(vfAllData||{});
   const acVals = Object.values(acAllData||{});
+  const rtcVals = Object.values(rtcAllData||{});
   const pfDone = pfVals.filter(r=>r.panNo&&String(r.panNo).trim()).length;
   const vfDone = vfVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
   const acDone = acVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
+  const rtcDone = rtcVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
   const panFindAmt    = window._panFindAmt    || 50;
   const voterFindAmt  = window._voterFindAmt  || 60;
   const aadhaarPvcAmt = window._aadhaarPvcAmt || 10;
-  const servicesRevenue = (pfDone*panFindAmt) + (vfDone*voterFindAmt) + (acDone*aadhaarPvcAmt);
+  const rationCardAmt = window._rationCardAmt || 30;
+  const servicesRevenue = (pfDone*panFindAmt) + (vfDone*voterFindAmt) + (acDone*aadhaarPvcAmt) + (rtcDone*rationCardAmt);
   const revenue = landRevenue + servicesRevenue;
 
   setText('an-apr-rate', rate+'%');
@@ -3942,6 +4104,7 @@ const sectionTitles={
   panfind:'🪪 PAN No Find – Aadhaar Card',
   voterfind:'🗳️ Voter Card Pdf – Without OTP',
   aadhaarpvc:'🪪 Aadhaar PVC Converter',
+  rationcard:'🍚 Ration Card',
   contactmsgs:'📨 Contact Messages',
   trash:'🗑️ Trash (Deleted Applications)',
   activitylog:'🕵️ Activity Log',
@@ -3960,6 +4123,7 @@ function showSection(sec){
   if(sec==='panfind'){ pfWatchFb(); pfRenderRecords(); }
   if(sec==='voterfind'){ vfWatchFb(); vfRenderRecords(); }
   if(sec==='aadhaarpvc'){ acWatchFb(); acRenderRecords(); }
+  if(sec==='rationcard'){ rtcWatchFb(); rtcRenderRecords(); }
   if(sec==='users'){ signupLoadCurrentAmount(); signupLoadCurrentQR(); }
   if(sec==='contactmsgs'){ cmLoadMsgs(); }
   if(sec==='trash'){ renderTrash(); }
@@ -5351,6 +5515,268 @@ async function acSaveAmount(){
     const t=document.getElementById('ac-amount-toast');
     if(t){ t.style.display='block'; t.textContent='✅ Amount update ho gaya! User ke Aadhaar PVC Converter page par ab ₹'+amt+' dikhega.'; setTimeout(()=>t.style.display='none',3000); }
     logActivity('Aadhaar PVC (Amount Update)', `Application fee ₹${amt} set kiya gaya`);
+    if(typeof renderOverview==='function') renderOverview();
+  }catch(e){
+    alert('Amount save nahi hua, internet check karein.');
+  }
+}
+
+// ═══════════════ RATION CARD ═══════════════
+let rtcAllData = {};
+
+function rtcWatchFb(){
+  rtcSyncFbBadge();
+  rtcLoadCurrentQR();
+  rtcLoadCurrentAmount();
+  rtcLoadTrash();
+  if(window._rtcInited) return;
+  window._rtcInited = true;
+  try{
+    db.ref('ration_card_requests').on('value', snap=>{
+      rtcAllData = snap.val()||{};
+      rtcSyncFbBadge();
+      rtcUpdateStats();
+      rtcRenderRecords();
+      const badge=document.getElementById('nav-rationcard-badge');
+      if(badge) badge.textContent = Object.values(rtcAllData).filter(r=>!r.pdfLink).length;
+    },()=>{
+      const el=document.getElementById('rtc-fbStatus');
+      if(el){el.textContent='🔴 Error';el.style.background='rgba(239,68,68,.12)';el.style.color='#f87171';}
+    });
+  }catch(e){}
+}
+
+function rtcSyncFbBadge(){
+  const el=document.getElementById('rtc-fbStatus');
+  if(!el) return;
+  el.textContent='🟢 Connected'; el.style.background='rgba(78,203,110,.15)'; el.style.color='#4ecb6e';
+}
+
+function rtcUpdateStats(){
+  const vals=Object.values(rtcAllData||{});
+  const tot=vals.length;
+  const found=vals.filter(r=>r.pdfLink&&r.pdfLink.trim()).length;
+  const paid=vals.filter(r=>r.paymentVerified).length;
+  const payPend=tot-paid;
+  const cardPend=tot-found;
+  const t=document.getElementById('rtc-sTot'); if(t)t.textContent=tot;
+  const pp=document.getElementById('rtc-sPayPending'); if(pp)pp.textContent=payPend;
+  const p=document.getElementById('rtc-sPending'); if(p)p.textContent=cardPend;
+  const f=document.getElementById('rtc-sFound'); if(f)f.textContent=found;
+  const c=document.getElementById('rtc-recCount'); if(c)c.textContent=tot;
+}
+
+function rtcClearForm(){
+  ['rtc-fRationNo','rtc-fName','rtc-fMobile','rtc-fUtr','rtc-fPdfLink','rtc-fRemark'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  const paid=document.getElementById('rtc-fPaid'); if(paid) paid.value='no';
+  document.getElementById('rtc-formTitle').textContent='📝 Nayi Request Add Karein';
+  const inp=document.getElementById('rtc-fRationNo'); if(inp) inp.removeAttribute('readonly');
+}
+
+async function rtcSaveRecord(){
+  const aadhaarNo=(document.getElementById('rtc-fRationNo').value||'').trim().replace(/\s+/g,'');
+  const name=(document.getElementById('rtc-fName').value||'').trim();
+  if(!/^[0-9]{12}$/.test(aadhaarNo)){ alert('Sahi 12 digit Aadhaar Number dalein!'); return; }
+  if(!name){ alert('Naam zaroori hai!'); return; }
+  const record={
+    aadhaarNo, name,
+    mobile:(document.getElementById('rtc-fMobile').value||'').trim(),
+    utr:(document.getElementById('rtc-fUtr').value||'').trim(),
+    paymentVerified:(document.getElementById('rtc-fPaid').value==='yes'),
+    pdfLink:(document.getElementById('rtc-fPdfLink').value||'').trim(),
+    remark:(document.getElementById('rtc-fRemark').value||'').trim(),
+    updated:new Date().toLocaleString('en-IN')
+  };
+  try{
+    await db.ref('ration_card_requests/'+aadhaarNo).update(record);
+    const t=document.getElementById('rtc-toast');
+    if(t){ t.style.display='block'; t.textContent = record.pdfLink ? '✅ Ration Card link save ho gaya! User ke data me dikh jayega.' : '✅ Request save ho gayi!'; setTimeout(()=>t.style.display='none',2500); }
+    logActivity(record.pdfLink?'Ration Card (Card Diya)':'Ration Card (Save)', `Aadhaar ${aadhaarNo} (${name}) — ${record.pdfLink?'Card link diya gaya':'Request save/update ki gayi'}`);
+    rtcClearForm();
+  }catch(e){
+    alert('Save nahi hua, internet check karein.');
+  }
+}
+
+function rtcRenderRecords(){
+  const tbody=document.getElementById('rtc-recordsBody');
+  if(!tbody) return;
+  const q=((document.getElementById('rtc-recSearch')||{}).value||'').toLowerCase();
+  const entries=Object.entries(rtcAllData||{});
+  const filtered=q?entries.filter(([k,r])=>
+    (r.aadhaarNo||k||'').toLowerCase().includes(q)||(r.name||'').toLowerCase().includes(q)||
+    (r.mobile||'').toLowerCase().includes(q)||(r.utr||'').toLowerCase().includes(q)
+  ):entries;
+  if(!filtered.length){ tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:22px;color:var(--text2)">Koi request nahi mili</td></tr>'; return; }
+  tbody.innerHTML=filtered.sort((a,b)=>(b[1].updated||'').localeCompare(a[1].updated||'')).map(([key,r])=>{
+    const found = r.pdfLink && r.pdfLink.trim();
+    const paid  = !!r.paymentVerified;
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 10px;font-weight:700;color:var(--text);letter-spacing:.5px">${r.aadhaarNo||key}</td>
+      <td style="padding:9px 10px;color:var(--text)">${r.name||'—'}</td>
+      <td style="padding:9px 10px;color:var(--text)">${r.mobile||'—'}</td>
+      <td style="padding:9px 10px;color:var(--text)">${r.utr||'—'}</td>
+      <td style="padding:9px 10px"><span style="font-size:.62rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:${paid?'#2e7d32':'#f87171'};color:#fff;border-radius:14px;padding:3px 10px">${paid?'✅ VERIFIED':'⏳ PENDING'}</span></td>
+      <td style="padding:9px 10px;color:var(--text)">${found?`<a href="${r.pdfLink}" target="_blank" rel="noopener" style="color:var(--g4);font-weight:700;text-decoration:underline">📄 Link</a>`:'<span style="color:var(--text2);font-style:italic;font-weight:400">— taiyar ho raha hai —</span>'}</td>
+      <td style="padding:9px 10px;white-space:nowrap">
+        <button onclick="rtcEditEntry('${key}')" style="background:rgba(78,203,110,.12);color:var(--g4);border:1px solid rgba(78,203,110,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer;margin-right:5px">✏️ Edit</button>
+        <button onclick="rtcDeleteEntry('${key}')" style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function rtcEditEntry(key){
+  const r=(rtcAllData||{})[key]; if(!r) return;
+  document.getElementById('rtc-fRationNo').value = r.aadhaarNo||key;
+  document.getElementById('rtc-fName').value      = r.name||'';
+  document.getElementById('rtc-fMobile').value    = r.mobile||'';
+  document.getElementById('rtc-fUtr').value       = r.utr||'';
+  document.getElementById('rtc-fPaid').value      = r.paymentVerified ? 'yes' : 'no';
+  document.getElementById('rtc-fPdfLink').value   = r.pdfLink||'';
+  document.getElementById('rtc-fRemark').value    = r.remark||'';
+  document.getElementById('rtc-formTitle').textContent='✏️ Request Update Karein: '+(r.name||key);
+  const inp=document.getElementById('rtc-fRationNo'); if(inp) inp.setAttribute('readonly','readonly');
+  const card=document.getElementById('rtc-formCard');
+  if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+async function rtcDeleteEntry(key){
+  if(!confirm('Yeh request Trash mein bhejein? (Trash se restore ho sakta hai)')) return;
+  try{
+    const rec = (rtcAllData||{})[key] || {};
+    await db.ref('ration_card_trash/'+key).set({...rec, deletedAt: new Date().toLocaleString('en-IN')});
+    await db.ref('ration_card_requests/'+key).remove();
+    logActivity('Ration Card (Delete)', `Aadhaar ${key} (${rec.name||''}) Trash mein bheja gaya`);
+    rtcLoadTrash();
+  }catch(e){
+    alert('Delete nahi hua, internet check karein.');
+  }
+}
+
+// ── RATION CARD: TRASH / RESTORE ──
+function rtcLoadTrash(){
+  db.ref('ration_card_trash').once('value').then(snap=>{
+    window._rtcTrash = snap.val() || {};
+    rtcRenderTrash();
+  }).catch(()=>{});
+}
+
+function rtcRenderTrash(){
+  const wrap = document.getElementById('rtc-trash-list');
+  const cnt  = document.getElementById('rtc-trash-count');
+  if(!wrap) return;
+  const entries = Object.entries(window._rtcTrash||{});
+  if(cnt) cnt.textContent = entries.length;
+  if(!entries.length){ wrap.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text2);font-size:.78rem">🗑️ Trash khaali hai</div>'; return; }
+  wrap.innerHTML = entries.map(([key,r])=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid var(--border)">
+      <div style="font-size:.78rem;color:var(--text)"><b>${r.aadhaarNo||key}</b> — ${r.name||'—'} <span style="color:var(--text2)">(${r.deletedAt||''})</span></div>
+      <div style="display:flex;gap:6px">
+        <button onclick="rtcRestoreEntry('${key}')" style="background:rgba(78,203,110,.12);color:var(--g4);border:1px solid rgba(78,203,110,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer">♻️ Restore</button>
+        <button onclick="rtcPermanentDelete('${key}')" style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer">🔥 Hamesha Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+async function rtcRestoreEntry(key){
+  try{
+    const rec = (window._rtcTrash||{})[key]; if(!rec) return;
+    const { deletedAt, ...clean } = rec;
+    await db.ref('ration_card_requests/'+key).set(clean);
+    await db.ref('ration_card_trash/'+key).remove();
+    logActivity('Ration Card (Restore)', `Aadhaar ${key} (${rec.name||''}) Trash se restore kiya gaya`);
+    rtcLoadTrash();
+  }catch(e){ alert('Restore nahi hua, internet check karein.'); }
+}
+
+async function rtcPermanentDelete(key){
+  if(!confirm('⚠️ Yeh hamesha ke liye delete ho jayega, wapas nahi aayega. Pakka?')) return;
+  try{
+    const rec = (window._rtcTrash||{})[key] || {};
+    await db.ref('ration_card_trash/'+key).remove();
+    logActivity('Ration Card (Permanent Delete)', `Aadhaar ${key} (${rec.name||''}) hamesha ke liye delete kiya gaya`);
+    rtcLoadTrash();
+  }catch(e){ alert('Delete nahi hua, internet check karein.'); }
+}
+
+function rtcExportCsv(){
+  const entries = Object.entries(rtcAllData||{});
+  if(!entries.length){ toast('❌ Koi data nahi','fail'); return; }
+  const headers = ['Aadhaar No','Naam','Mobile','UTR','Payment Status','Ration Card Link','Note','Last Update'];
+  const rows = entries.map(([key,r])=>[
+    r.aadhaarNo||key, r.name||'', r.mobile||'', r.utr||'',
+    r.paymentVerified?'Verified':'Pending', r.pdfLink||'', r.remark||'', r.updated||''
+  ].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download='Ration_Card_Requests_'+new Date().toLocaleDateString('en-IN').replace(/\//g,'-')+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast('✅ CSV download ho rahi hai!','ok');
+}
+
+// ── RATION CARD: PAYMENT QR REPLACE ──
+let _rtcNewQRData = '';
+
+function rtcLoadCurrentQR(){
+  const img = document.getElementById('rtc-qr-current');
+  if(!img) return;
+  db.ref('settings/rationCardQrCode').once('value').then(snap=>{
+    const v = snap.val();
+    img.src = v || (typeof PF_DEFAULT_QR!=='undefined' ? PF_DEFAULT_QR : '');
+  }).catch(()=>{});
+}
+
+function rtcQrFileSelected(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ alert('Sirf image file select karein!'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    _rtcNewQRData = e.target.result;
+    document.getElementById('rtc-qr-preview-img').src = _rtcNewQRData;
+    document.getElementById('rtc-qr-preview-wrap').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function rtcSaveQR(){
+  if(!_rtcNewQRData){ alert('Pehle naya QR image select karein!'); return; }
+  try{
+    await db.ref('settings/rationCardQrCode').set(_rtcNewQRData);
+    const t=document.getElementById('rtc-qr-toast');
+    if(t){ t.style.display='block'; t.textContent='✅ QR update ho gaya! User ke Ration Card page par ab yehi naya QR dikhega.'; setTimeout(()=>t.style.display='none',3000); }
+    logActivity('Ration Card (QR Update)', 'Payment QR code update kiya gaya');
+    rtcLoadCurrentQR();
+    document.getElementById('rtc-qr-preview-wrap').style.display='none';
+    document.getElementById('rtc-qr-file-input').value='';
+    _rtcNewQRData='';
+  }catch(e){
+    alert('QR save nahi hua, internet check karein.');
+  }
+}
+
+// ── RATION CARD: SERVICE CHARGE AMOUNT — EDITABLE ──
+function rtcLoadCurrentAmount(){
+  const inp = document.getElementById('rtc-amount-input');
+  if(!inp) return;
+  db.ref('settings/rationCardAmount').once('value').then(snap=>{
+    const v = snap.val();
+    inp.value = v || 30;
+  }).catch(()=>{ inp.value = 30; });
+}
+
+async function rtcSaveAmount(){
+  const inp = document.getElementById('rtc-amount-input');
+  const amt = parseInt(inp.value, 10);
+  if(!amt || amt <= 0){ alert('Sahi amount dalein!'); return; }
+  try{
+    await db.ref('settings/rationCardAmount').set(amt);
+    window._rationCardAmt = amt;
+    const t=document.getElementById('rtc-amount-toast');
+    if(t){ t.style.display='block'; t.textContent='✅ Amount update ho gaya! User ke Ration Card page par ab ₹'+amt+' dikhega.'; setTimeout(()=>t.style.display='none',3000); }
+    logActivity('Ration Card (Amount Update)', `Service charge ₹${amt} set kiya gaya`);
     if(typeof renderOverview==='function') renderOverview();
   }catch(e){
     alert('Amount save nahi hua, internet check karein.');

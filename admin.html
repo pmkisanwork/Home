@@ -1092,6 +1092,7 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
           <span class="nav-icon">🧩</span> Custom Cards
           <span class="nav-badge" id="nav-customcards-badge">0</span>
         </button>
+        <div id="cc-nav-dynamic-slot"></div>
         <button class="nav-item" onclick="showSection('statuscheck')" data-sec="statuscheck">
           <span class="nav-icon">🌾</span> PM Kisan Status
         </button>
@@ -1110,6 +1111,10 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
         <button class="nav-item" onclick="showSection('rationcard')" data-sec="rationcard">
           <span class="nav-icon">🍚</span> Ration Card
           <span class="nav-badge" id="nav-rationcard-badge">0</span>
+        </button>
+        <button class="nav-item" onclick="showSection('aadhaaraddr')" data-sec="aadhaaraddr">
+          <span class="nav-icon">🏠</span> Aadhaar C/O &amp; Address
+          <span class="nav-badge" id="nav-aadhaaraddr-badge">0</span>
         </button>
         <button class="nav-item" onclick="showSection('contactmsgs')" data-sec="contactmsgs">
           <span class="nav-icon">📨</span> Contact Messages
@@ -1253,6 +1258,12 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
               <div class="stat-label">Ration Card Requests</div>
               <div class="stat-change" style="background:rgba(59,130,246,.12);color:#93c5fd" id="ov-rationcard-chg">0 pending</div>
             </div>
+            <div class="stat-card blue" onclick="showSection('aadhaaraddr')">
+              <div class="stat-icon">🏠</div>
+              <div class="stat-val" id="ov-aadhaaraddr" style="color:#93c5fd">0</div>
+              <div class="stat-label">Aadhaar C/O & Address Requests</div>
+              <div class="stat-change" style="background:rgba(59,130,246,.12);color:#93c5fd" id="ov-aadhaaraddr-chg">0 pending</div>
+            </div>
             <div class="stat-card amber">
               <div class="stat-icon">💰</div>
               <div class="stat-val" id="ov-revenue" style="color:var(--gold2)">₹0</div>
@@ -1269,6 +1280,7 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
               <button class="tb-btn" onclick="showSection('voterfind')" style="font-size:.78rem">🗳️ Voter Card Dekhein</button>
               <button class="tb-btn" onclick="showSection('aadhaarpvc')" style="font-size:.78rem">🆔 Aadhaar PVC Dekhein</button>
               <button class="tb-btn" onclick="showSection('rationcard')" style="font-size:.78rem">🍚 Ration Card Dekhein</button>
+              <button class="tb-btn" onclick="showSection('aadhaaraddr')" style="font-size:.78rem">🏠 Aadhaar Address Dekhein</button>
               <button class="tb-btn" onclick="showSection('pending')" style="font-size:.78rem">⏳ Pending Dekhein</button>
               <button class="tb-btn" onclick="exportCSV()" style="font-size:.78rem">📊 CSV Export</button>
               <button class="tb-btn" onclick="showSection('settings')" style="font-size:.78rem">🔑 Password Change</button>
@@ -2031,6 +2043,181 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
           </div>
         </div>
 
+        <!-- ═══ AADHAAR C/O & ADDRESS UPDATE ═══ -->
+        <div class="section-page" id="sec-aadhaaraddr">
+          <div class="section-hd">
+            <h2>🏠 Aadhaar C/O & Address Update <span class="count-badge" id="aau-recCount">0</span></h2>
+            <div style="display:flex;gap:8px">
+              <span id="aau-fbStatus" style="font-size:.7rem;padding:5px 12px;border-radius:12px;font-weight:700;background:rgba(239,68,68,.12);color:#f87171">⚪ Connecting...</span>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:18px">
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:var(--g4)" id="aau-sTot">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">📋 Total Requests</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:#f87171" id="aau-sPayPending">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">💰 Payment Pending</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:var(--gold2)" id="aau-sPending">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">⏳ Update Pending</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:#4ecb6e" id="aau-sFound">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">✅ Update Ho Gaya</div>
+            </div>
+          </div>
+
+          <!-- ── ADD / EDIT REQUEST CARD ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px" id="aau-formCard">
+            <h3 id="aau-formTitle" style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);padding-bottom:10px">📝 Nayi Request Add Karein</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">🆔 Aadhaar Number *</label>
+                <input id="aau-fAadhaarNo" maxlength="12" inputmode="numeric" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);letter-spacing:1px" placeholder="12 digit Aadhaar Number"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">👤 Naam *</label>
+                <input id="aau-fName" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="Poora naam"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">📱 Mobile No</label>
+                <input id="aau-fMobile" maxlength="10" inputmode="numeric" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="10 digit mobile (optional)"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">👨‍👦 C/O Naam (English)</label>
+                <input id="aau-fCoEn" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="e.g. DEVANAND SHUKLA"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">👨‍👦 C/O Naam (हिंदी)</label>
+                <input id="aau-fCoHi" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="जैसे: देवानन्द शुक्ल"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">🏘️ Village</label>
+                <input id="aau-fVillage" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="Village / गाँव"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">📮 Post</label>
+                <input id="aau-fPost" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="Post office"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">🏘️ Tehsil</label>
+                <input id="aau-fTehsil" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="Tehsil"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">🏢 District</label>
+                <input id="aau-fDistrict" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="District"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">🗺️ State</label>
+                <input id="aau-fState" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="State"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">📍 Pin Code</label>
+                <input id="aau-fPincode" maxlength="6" inputmode="numeric" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="6 digit PIN"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">🧾 UTR / Transaction No.</label>
+                <input id="aau-fUtr" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="User dwara diya gaya UTR"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">💰 Payment Status</label>
+                <select id="aau-fPaid" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)">
+                  <option value="no">⏳ Pending — Verify nahi hui</option>
+                  <option value="yes">✅ Verified — Payment mil gayi</option>
+                </select>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;grid-column:1/-1">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">📄 Final Updated Aadhaar Link (jab taiyar ho jaye — user ko yehi link dikhega)</label>
+                <input id="aau-fPdfLink" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="Updated Aadhaar ka download link (URL)"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;grid-column:1/-1">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">📝 Note</label>
+                <textarea id="aau-fRemark" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.8rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);resize:vertical;min-height:50px" placeholder="Koi note ya comment..."></textarea>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:16px">
+              <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none;flex:1;justify-content:center;padding:12px" onclick="aauSaveRecord()">💾 Save Karein</button>
+              <button class="tb-btn" onclick="aauClearForm()">🗑️ Clear</button>
+            </div>
+            <div id="aau-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:11px 14px;margin-top:12px;font-size:.8rem;color:var(--g4);font-weight:600"></div>
+          </div>
+
+          <!-- ── ALL REQUESTS TABLE ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+              <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);display:flex;align-items:center;gap:8px">📋 Saari Requests</h3>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="tb-btn" style="font-size:.75rem" onclick="aauExportCsv()">⬇️ CSV Export</button>
+                <input type="text" id="aau-recSearch" placeholder="🔍 Naam, Aadhaar No, Mobile, UTR..." oninput="aauRenderRecords()"
+                  style="padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.78rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:230px"/>
+              </div>
+            </div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:.75rem">
+                <thead><tr style="border-bottom:1px solid var(--border)">
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700;white-space:nowrap">🆔 Aadhaar No</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">👤 Name</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">👨‍👦 C/O</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">🏠 Address</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">📱 Mobile</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">🧾 UTR</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">💰 Payment</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">📄 Update</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">⚙️ Action</th>
+                </tr></thead>
+                <tbody id="aau-recordsBody"><tr><td colspan="9" style="text-align:center;padding:24px;color:var(--text2)">🔄 Loading...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ── CHARGE AMOUNT — EDIT ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:14px;display:flex;align-items:center;gap:8px">💰 Service Charge (User side amount yahan se control hota hai)</h3>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">₹ Amount</label>
+                <input id="aau-amount-input" type="number" min="1" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.9rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:140px;font-weight:800" placeholder="40"/>
+              </div>
+              <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none" onclick="aauSaveAmount()">💾 Amount Save Karein</button>
+              <div id="aau-amount-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
+            </div>
+          </div>
+
+          <!-- ── PAYMENT QR — REPLACE / MANAGE ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:14px;display:flex;align-items:center;gap:8px">💳 Payment QR Code (User side "Aadhaar C/O & Address Update" me dikhta hai)</h3>
+            <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+              <div style="text-align:center">
+                <img id="aau-qr-current" src="" alt="Current QR" style="width:150px;height:150px;object-fit:contain;border-radius:12px;background:#fff;padding:6px;border:1.5px solid var(--border)"/>
+                <div style="font-size:.65rem;color:var(--text2);margin-top:6px">Current QR</div>
+              </div>
+              <div style="flex:1;min-width:220px">
+                <input type="file" id="aau-qr-file-input" accept="image/*" style="display:none" onchange="aauQrFileSelected(this)">
+                <button class="tb-btn" onclick="document.getElementById('aau-qr-file-input').click()">📤 Naya QR Select Karein</button>
+                <div id="aau-qr-preview-wrap" style="display:none;margin-top:12px">
+                  <img id="aau-qr-preview-img" src="" style="width:120px;height:120px;object-fit:contain;border-radius:10px;background:#fff;padding:6px;border:1.5px solid var(--border)"/>
+                  <div style="margin-top:8px">
+                    <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none" onclick="aauSaveQR()">💾 Yeh QR Save Karein</button>
+                  </div>
+                </div>
+                <div id="aau-qr-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:9px 12px;margin-top:10px;font-size:.78rem;color:var(--g4);font-weight:600"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── TRASH / RESTORE ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:8px;display:flex;align-items:center;gap:8px">🗑️ Trash <span class="count-badge red" id="aau-trash-count">0</span></h3>
+            <p style="font-size:.7rem;color:var(--text2);margin-bottom:10px">Delete ki gayi requests yahan safe rehti hain — chahein to restore kar sakte hain.</p>
+            <div id="aau-trash-list" style="border-top:1px solid var(--border)"><div style="text-align:center;padding:16px;color:var(--text2);font-size:.78rem">🗑️ Trash khaali hai</div></div>
+          </div>
+        </div>
+
         <!-- ═══ CONTACT MESSAGES (from public Contact.html form, via JSONBin) ═══ -->
         <div class="section-page" id="sec-contactmsgs">
           <div class="section-hd">
@@ -2384,9 +2571,48 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
       </div>
     </div>
 
+    <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px">
+      <label style="font-size:.68rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:10px">🖼️ Card Banner Image (jaise PAN/Aadhaar/Voter cards me hota hai)</label>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+        <div style="text-align:center">
+          <img id="cc-f-banner-preview" src="" alt="Banner Preview" style="width:90px;height:90px;object-fit:cover;border-radius:50%;background:#fff;border:1.5px solid var(--border);display:none"/>
+          <div id="cc-f-banner-placeholder" style="width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.04);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:var(--text2)">🧩</div>
+          <div style="font-size:.6rem;color:var(--text2);margin-top:5px">Preview</div>
+        </div>
+        <div style="flex:1;min-width:180px">
+          <input type="file" id="cc-f-banner-input" accept="image/*" style="display:none" onchange="ccBannerFileSelected(this)">
+          <button type="button" class="tb-btn" onclick="document.getElementById('cc-f-banner-input').click()" style="font-size:.75rem">📤 Banner Image Select Karein</button>
+          <div style="font-size:.65rem;color:var(--text2);margin-top:8px;line-height:1.6">Circular/gol image best rahegi (jaise Aadhaar, PAN, Voter card ki tarah). Nahi upload karenge to sirf icon dikhega.</div>
+          <button type="button" class="tb-btn" style="font-size:.65rem;margin-top:6px;background:rgba(239,68,68,.1);color:#f87171;border-color:rgba(239,68,68,.3)" onclick="ccRemoveBanner()">🗑️ Banner Hatayein</button>
+        </div>
+      </div>
+    </div>
+
     <div style="display:flex;align-items:center;gap:8px;background:rgba(37,168,74,.08);border:1px solid rgba(37,168,74,.25);border-radius:10px;padding:10px 12px;margin-bottom:14px">
-      <input type="checkbox" id="cc-f-paymentRequired" style="width:18px;height:18px"/>
+      <input type="checkbox" id="cc-f-paymentRequired" onchange="ccTogglePaymentBlock()" style="width:18px;height:18px"/>
       <label for="cc-f-paymentRequired" style="font-size:.75rem;font-weight:700;color:var(--g4);cursor:pointer">💳 Is service ke liye Payment chahiye? (User form me QR + UTR + Payment Screenshot dikhega, jaise PAN Card me hai)</label>
+    </div>
+
+    <div id="cc-payment-settings-wrap" style="display:none;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">₹ Charge Amount</label>
+          <input class="cc-inp" id="cc-f-amount" type="number" min="1" placeholder="jaise: 40"/>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">📤 Payment QR Upload Karein</label>
+          <input type="file" id="cc-f-qr-input" accept="image/*" style="display:none" onchange="ccQrFileSelected(this)">
+          <button type="button" class="tb-btn" onclick="document.getElementById('cc-f-qr-input').click()" style="font-size:.75rem">📤 QR Image Select Karein</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+        <div style="text-align:center">
+          <img id="cc-f-qr-preview" src="" alt="QR Preview" style="width:100px;height:100px;object-fit:contain;border-radius:10px;background:#fff;padding:5px;border:1.5px solid var(--border);display:none"/>
+          <div id="cc-f-qr-placeholder" style="width:100px;height:100px;border-radius:10px;background:rgba(255,255,255,.04);border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:.65rem;color:var(--text2);text-align:center;padding:6px">Koi QR select nahi hua</div>
+          <div style="font-size:.62rem;color:var(--text2);margin-top:5px">QR Preview</div>
+        </div>
+        <div style="font-size:.68rem;color:var(--text2);flex:1;min-width:180px;line-height:1.6">QR select na karein to is card ke liye PAN Find ka default QR use ho jayega. Amount khali chhodne par ₹0 dikhega — bharna zaroori hai agar payment chahiye.</div>
+      </div>
     </div>
 
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -3011,7 +3237,7 @@ async function initDashboard(){
 async function loadAll(){
   showLoader('Data load ho raha hai...');
   try{
-    const [subSnap, userSnap, frSnap, pfSnap, vfSnap, acSnap, rtcSnap, pfAmtSnap, vfAmtSnap, acAmtSnap, rtcAmtSnap] = await Promise.all([
+    const [subSnap, userSnap, frSnap, pfSnap, vfSnap, acSnap, rtcSnap, aauSnap, pfAmtSnap, vfAmtSnap, acAmtSnap, rtcAmtSnap, aauAmtSnap] = await Promise.all([
       db.ref('submissions').once('value'),
       db.ref('users').once('value'),
       db.ref('farmer_registry').once('value'),
@@ -3019,10 +3245,12 @@ async function loadAll(){
       db.ref('voter_find_requests').once('value'),
       db.ref('aadhaar_pvc_requests').once('value'),
       db.ref('ration_card_requests').once('value'),
+      db.ref('aadhaar_addr_update_requests').once('value'),
       db.ref('settings/panFindAmount').once('value'),
       db.ref('settings/voterFindAmount').once('value'),
       db.ref('settings/aadhaarPvcAmount').once('value'),
       db.ref('settings/rationCardAmount').once('value'),
+      db.ref('settings/aadhaarAddrAmount').once('value'),
     ]);
     _allSubs   = subSnap.val()  ? Object.values(subSnap.val()).filter(Boolean)  : [];
     _allUsers  = userSnap.val() ? Object.values(userSnap.val()).filter(u=>u&&u.mobile&&u.mobile!=='undefined') : [];
@@ -3033,10 +3261,12 @@ async function loadAll(){
     vfAllData = vfSnap.val() || {};
     acAllData = acSnap.val() || {};
     rtcAllData = rtcSnap.val() || {};
+    aauAllData = aauSnap.val() || {};
     window._panFindAmt     = pfAmtSnap.val() || 50;
     window._voterFindAmt   = vfAmtSnap.val() || 60;
     window._aadhaarPvcAmt  = acAmtSnap.val() || 10;
     window._rationCardAmt  = rtcAmtSnap.val() || 30;
+    window._aadhaarAddrAmt = aauAmtSnap.val() || 40;
   }catch(e){ toast('⚠️ Load error: '+e.message,'fail'); }
   hideLoader();
   renderAll();
@@ -3057,6 +3287,7 @@ function renderAll(){
   if(typeof vfRenderRecords==='function'){ vfRenderRecords(); }
   if(typeof acRenderRecords==='function'){ acRenderRecords(); }
   if(typeof rtcRenderRecords==='function'){ rtcRenderRecords(); }
+  if(typeof aauRenderRecords==='function'){ aauRenderRecords(); }
 }
 
 // ── OVERVIEW ──
@@ -3071,21 +3302,25 @@ function renderOverview(){
   const vfVals = Object.values(vfAllData||{});
   const acVals = Object.values(acAllData||{});
   const rtcVals = Object.values(rtcAllData||{});
-  const pfTotal = pfVals.length, vfTotal = vfVals.length, acTotal = acVals.length, rtcTotal = rtcVals.length;
+  const aauVals = Object.values(aauAllData||{});
+  const pfTotal = pfVals.length, vfTotal = vfVals.length, acTotal = acVals.length, rtcTotal = rtcVals.length, aauTotal = aauVals.length;
   const pfDone  = pfVals.filter(r=>r.panNo&&String(r.panNo).trim()).length;
   const vfDone  = vfVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
   const acDone  = acVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
   const rtcDone = rtcVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
+  const aauDone = aauVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
   const pfPend  = pfTotal - pfDone;
   const vfPend  = vfTotal - vfDone;
   const acPend  = acTotal - acDone;
   const rtcPend = rtcTotal - rtcDone;
+  const aauPend = aauTotal - aauDone;
 
   const panFindAmt    = window._panFindAmt    || 50;
   const voterFindAmt  = window._voterFindAmt  || 60;
   const aadhaarPvcAmt = window._aadhaarPvcAmt || 10;
   const rationCardAmt = window._rationCardAmt || 30;
-  const servicesRevenue = (pfDone*panFindAmt) + (vfDone*voterFindAmt) + (acDone*aadhaarPvcAmt) + (rtcDone*rationCardAmt);
+  const aadhaarAddrAmt = window._aadhaarAddrAmt || 40;
+  const servicesRevenue = (pfDone*panFindAmt) + (vfDone*voterFindAmt) + (acDone*aadhaarPvcAmt) + (rtcDone*rationCardAmt) + (aauDone*aadhaarAddrAmt);
   const revenue = landRevenue + servicesRevenue;
 
   setText('ov-total',    total);
@@ -3104,6 +3339,8 @@ function renderOverview(){
   setText('ov-aadhaarpvc-chg', acPend+' pending');
   setText('ov-rationcard',     rtcTotal);
   setText('ov-rationcard-chg', rtcPend+' pending');
+  setText('ov-aadhaaraddr',     aauTotal);
+  setText('ov-aadhaaraddr-chg', aauPend+' pending');
   setText('ov-rev-chg', `Land ₹${landRevenue} + Services ₹${servicesRevenue}`);
 
   // Recent list (last 5)
@@ -3781,15 +4018,18 @@ function renderAnalytics(){
   const vfVals = Object.values(vfAllData||{});
   const acVals = Object.values(acAllData||{});
   const rtcVals = Object.values(rtcAllData||{});
+  const aauVals = Object.values(aauAllData||{});
   const pfDone = pfVals.filter(r=>r.panNo&&String(r.panNo).trim()).length;
   const vfDone = vfVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
   const acDone = acVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
   const rtcDone = rtcVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
+  const aauDone = aauVals.filter(r=>r.pdfLink&&String(r.pdfLink).trim()).length;
   const panFindAmt    = window._panFindAmt    || 50;
   const voterFindAmt  = window._voterFindAmt  || 60;
   const aadhaarPvcAmt = window._aadhaarPvcAmt || 10;
   const rationCardAmt = window._rationCardAmt || 30;
-  const servicesRevenue = (pfDone*panFindAmt) + (vfDone*voterFindAmt) + (acDone*aadhaarPvcAmt) + (rtcDone*rationCardAmt);
+  const aadhaarAddrAmt = window._aadhaarAddrAmt || 40;
+  const servicesRevenue = (pfDone*panFindAmt) + (vfDone*voterFindAmt) + (acDone*aadhaarPvcAmt) + (rtcDone*rationCardAmt) + (aauDone*aadhaarAddrAmt);
   const revenue = landRevenue + servicesRevenue;
 
   setText('an-apr-rate', rate+'%');
@@ -4105,6 +4345,7 @@ const sectionTitles={
   voterfind:'🗳️ Voter Card Pdf – Without OTP',
   aadhaarpvc:'🪪 Aadhaar PVC Converter',
   rationcard:'🍚 Ration Card',
+  aadhaaraddr:'🏠 Aadhaar C/O & Address Update',
   contactmsgs:'📨 Contact Messages',
   trash:'🗑️ Trash (Deleted Applications)',
   activitylog:'🕵️ Activity Log',
@@ -4124,6 +4365,7 @@ function showSection(sec){
   if(sec==='voterfind'){ vfWatchFb(); vfRenderRecords(); }
   if(sec==='aadhaarpvc'){ acWatchFb(); acRenderRecords(); }
   if(sec==='rationcard'){ rtcWatchFb(); rtcRenderRecords(); }
+  if(sec==='aadhaaraddr'){ aauWatchFb(); aauRenderRecords(); }
   if(sec==='users'){ signupLoadCurrentAmount(); signupLoadCurrentQR(); }
   if(sec==='contactmsgs'){ cmLoadMsgs(); }
   if(sec==='trash'){ renderTrash(); }
@@ -4142,12 +4384,19 @@ let _ccSubPath = null;
 
 function ccEsc(str){ return String(str||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
+let _ccNewQrData = '';
+
 function ccOpenBuilder(editId){
   document.getElementById('cc-edit-id').value = editId || '';
   document.getElementById('cc-builder-title').textContent = editId ? '✏️ Card Edit Karein' : '🧩 Naya Card Banayen';
   document.getElementById('cc-builder-err').style.display='none';
   const wrap = document.getElementById('cc-fields-wrap');
   wrap.innerHTML=''; _ccFieldRowSeq=0;
+  _ccNewQrData = '';
+  _ccNewBannerData = '';
+  _ccBannerRemoved = false;
+  document.getElementById('cc-f-qr-input').value = '';
+  document.getElementById('cc-f-banner-input').value = '';
 
   if(editId && _ccCardsCache[editId]){
     const c = _ccCardsCache[editId];
@@ -4156,6 +4405,15 @@ function ccOpenBuilder(editId){
     document.getElementById('cc-f-colorFrom').value = c.colorFrom || '#4a148c';
     document.getElementById('cc-f-colorTo').value = c.colorTo || '#6a1b9a';
     document.getElementById('cc-f-paymentRequired').checked = !!c.paymentRequired;
+    document.getElementById('cc-f-amount').value = c.amount || '';
+    const qrImg = document.getElementById('cc-f-qr-preview');
+    const qrPlaceholder = document.getElementById('cc-f-qr-placeholder');
+    if(c.qrCode){ qrImg.src = c.qrCode; qrImg.style.display='block'; qrPlaceholder.style.display='none'; }
+    else { qrImg.style.display='none'; qrPlaceholder.style.display='flex'; }
+    const bannerImg = document.getElementById('cc-f-banner-preview');
+    const bannerPlaceholder = document.getElementById('cc-f-banner-placeholder');
+    if(c.bannerImage){ bannerImg.src = c.bannerImage; bannerImg.style.display='block'; bannerPlaceholder.style.display='none'; }
+    else { bannerImg.style.display='none'; bannerPlaceholder.style.display='flex'; }
     const fields = c.fields ? Object.values(c.fields) : [];
     if(fields.length){ fields.forEach(f=>ccAddFieldRow(f)); } else { ccAddFieldRow(); }
   } else {
@@ -4164,9 +4422,64 @@ function ccOpenBuilder(editId){
     document.getElementById('cc-f-colorFrom').value = '#4a148c';
     document.getElementById('cc-f-colorTo').value = '#6a1b9a';
     document.getElementById('cc-f-paymentRequired').checked = false;
+    document.getElementById('cc-f-amount').value = '';
+    document.getElementById('cc-f-qr-preview').style.display='none';
+    document.getElementById('cc-f-qr-placeholder').style.display='flex';
+    document.getElementById('cc-f-banner-preview').style.display='none';
+    document.getElementById('cc-f-banner-placeholder').style.display='flex';
     ccAddFieldRow();
   }
+  ccTogglePaymentBlock();
   document.getElementById('cc-builder-modal').classList.add('show');
+}
+
+function ccTogglePaymentBlock(){
+  const checked = document.getElementById('cc-f-paymentRequired').checked;
+  document.getElementById('cc-payment-settings-wrap').style.display = checked ? 'block' : 'none';
+}
+
+let _ccNewBannerData = '';
+let _ccBannerRemoved = false;
+
+function ccBannerFileSelected(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ toast('⚠️ Sirf image file select karein','err'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    _ccNewBannerData = e.target.result;
+    _ccBannerRemoved = false;
+    const img = document.getElementById('cc-f-banner-preview');
+    const placeholder = document.getElementById('cc-f-banner-placeholder');
+    img.src = _ccNewBannerData;
+    img.style.display = 'block';
+    placeholder.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function ccRemoveBanner(){
+  _ccNewBannerData = '';
+  _ccBannerRemoved = true;
+  document.getElementById('cc-f-banner-input').value = '';
+  document.getElementById('cc-f-banner-preview').style.display = 'none';
+  document.getElementById('cc-f-banner-placeholder').style.display = 'flex';
+}
+
+function ccQrFileSelected(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ toast('⚠️ Sirf image file select karein','err'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    _ccNewQrData = e.target.result;
+    const img = document.getElementById('cc-f-qr-preview');
+    const placeholder = document.getElementById('cc-f-qr-placeholder');
+    img.src = _ccNewQrData;
+    img.style.display = 'block';
+    placeholder.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
 }
 
 function ccAddFieldRow(existing){
@@ -4216,6 +4529,7 @@ function ccSaveCard(){
   const colorFrom = document.getElementById('cc-f-colorFrom').value;
   const colorTo = document.getElementById('cc-f-colorTo').value;
   const paymentRequired = document.getElementById('cc-f-paymentRequired').checked;
+  const amount = parseInt(document.getElementById('cc-f-amount').value, 10) || 0;
   const errBox = document.getElementById('cc-builder-err');
 
   const rows = document.querySelectorAll('#cc-fields-wrap .cc-field-row');
@@ -4235,7 +4549,12 @@ function ccSaveCard(){
   if(!fields.length){ errBox.textContent='⚠️ Kam se kam ek field add karein'; errBox.style.display='block'; return; }
   errBox.style.display='none';
 
-  const payload = { title, icon, colorFrom, colorTo, fields, paymentRequired, active:true, updatedAt: Date.now() };
+  const payload = { title, icon, colorFrom, colorTo, fields, paymentRequired, amount, active:true, updatedAt: Date.now() };
+  // Naya QR select kiya ho tabhi update karein — warna existing QR (agar edit mode hai) waisa hi rahega
+  if(_ccNewQrData) payload.qrCode = _ccNewQrData;
+  // Banner image: naya select kiya ho to update, "Hatayein" dabaya ho to null karein, warna existing waisa hi
+  if(_ccNewBannerData) payload.bannerImage = _ccNewBannerData;
+  else if(_ccBannerRemoved) payload.bannerImage = null;
 
   const savePromise = editId
     ? db.ref('customCards/'+editId).update(payload)
@@ -4244,6 +4563,10 @@ function ccSaveCard(){
   savePromise.then(()=>{
     closeModal('cc-builder-modal');
     toast('✅ Card save ho gaya!','ok');
+    logActivity(editId?'Custom Card (Update)':'Custom Card (Create)', `"${title}" card ${editId?'update':'create'} kiya gaya`);
+    _ccNewQrData = '';
+    _ccNewBannerData = '';
+    _ccBannerRemoved = false;
   }).catch(err=>{
     errBox.textContent='❌ Error: '+err.message; errBox.style.display='block';
   });
@@ -4260,6 +4583,8 @@ function ccRenderList(){
     const navBadge = document.getElementById('nav-customcards-badge');
     if(navBadge) navBadge.textContent = ids.length;
     const list = document.getElementById('cc-list');
+    const navSlot = document.getElementById('cc-nav-dynamic-slot');
+    if(navSlot) navSlot.innerHTML = '';
     if(!ids.length){
       list.innerHTML = '<div class="empty-state"><div class="es-icon">🧩</div><h3>Koi Custom Card nahi hai</h3><p>Upar "Naya Card Banayen" dabakar shuru karein</p></div>';
       return;
@@ -4269,6 +4594,9 @@ function ccRenderList(){
       const c = data[id];
       const fieldCount = c.fields ? Object.keys(c.fields).length : 0;
       const safeTitle = ccEsc(c.title).replace(/'/g,"\\'");
+      const payInfo = c.paymentRequired
+        ? `💳 ₹${c.amount||0}${c.qrCode?' · QR ✅':' · QR ⚠️ (default use hoga)'}${c.bannerImage?' · 🖼️ Banner ✅':' · 🖼️ Banner nahi (icon dikhega)'}`
+        : `🆓 Free (payment nahi chahiye)${c.bannerImage?' · 🖼️ Banner ✅':' · 🖼️ Banner nahi (icon dikhega)'}`;
       const item = document.createElement('div');
       item.className = 'cc-card-item';
       item.innerHTML = `
@@ -4276,15 +4604,32 @@ function ccRenderList(){
         <div style="flex:1;min-width:160px">
           <div style="font-weight:700;color:var(--text);font-size:.88rem">${ccEsc(c.title)}</div>
           <div style="font-size:.7rem;color:var(--text2)">${fieldCount} field(s) &middot; Submissions: <span id="cc-subcount-${id}">…</span></div>
+          <div style="font-size:.68rem;color:var(--text2);margin-top:2px">${payInfo}</div>
         </div>
         <button class="tb-btn" onclick="ccViewSubmissions('${id}','${safeTitle}')">👁️ Submissions</button>
         <button class="tb-btn" onclick="ccOpenBuilder('${id}')">✏️ Edit</button>
         <button class="tb-btn" style="background:rgba(239,68,68,.12);color:#f87171;border-color:rgba(239,68,68,.3)" onclick="ccDeleteCard('${id}','${safeTitle}')">🗑️ Delete</button>
       `;
       list.appendChild(item);
+
+      // Sidebar me is card ka apna dedicated line — jaise PAN/Voter/Aadhaar ka hai
+      if(navSlot){
+        const navBtn = document.createElement('button');
+        navBtn.className = 'nav-item';
+        navBtn.style.paddingLeft = '30px';
+        navBtn.style.fontSize = '.75rem';
+        navBtn.setAttribute('onclick', `showSection('customcards');ccViewSubmissions('${id}','${safeTitle}')`);
+        navBtn.innerHTML = `<span class="nav-icon">${c.icon||'🧩'}</span> ${ccEsc(c.title)} <span class="nav-badge" id="cc-navbadge-${id}">0</span>`;
+        navSlot.appendChild(navBtn);
+      }
+
       db.ref('customCardSubmissions/'+id).once('value').then(s=>{
         const el = document.getElementById('cc-subcount-'+id);
         if(el) el.textContent = s.numChildren();
+        const vals = s.val() || {};
+        const pendingCount = Object.values(vals).filter(v=>(v.status||'Pending')==='Pending').length;
+        const navBadgeEl = document.getElementById('cc-navbadge-'+id);
+        if(navBadgeEl) navBadgeEl.textContent = pendingCount;
       });
     });
   });
@@ -4304,11 +4649,12 @@ function ccViewSubmissions(id, title){
   const body = document.getElementById('cc-sub-body');
   const card = _ccCardsCache[id] || {};
   const fields = card.fields ? Object.values(card.fields) : [];
-  const extraCols = 6; // Payment SS + UTR + Status + Admin Reply + Date + Actions
+  const extraCols = 7; // Payment SS + Amount + UTR + Status + Admin Reply + Date + Actions
 
   head.innerHTML = '<th style="text-align:left;padding:8px 10px;color:var(--text2)">👤 Name</th><th style="text-align:left;padding:8px 10px;color:var(--text2)">📱 Mobile</th>'
     + fields.map(f=>`<th style="text-align:left;padding:8px 10px;color:var(--text2)">${ccEsc(f.label)}</th>`).join('')
     + '<th style="text-align:left;padding:8px 10px;color:var(--text2)">💳 Payment</th>'
+    + '<th style="text-align:left;padding:8px 10px;color:var(--text2)">💰 Amount</th>'
     + '<th style="text-align:left;padding:8px 10px;color:var(--text2)">🧾 UTR</th>'
     + '<th style="text-align:left;padding:8px 10px;color:var(--text2)">📊 Status</th>'
     + '<th style="text-align:left;padding:8px 10px;color:var(--text2)">💬 Admin Reply</th>'
@@ -4340,6 +4686,7 @@ function ccViewSubmissions(id, title){
         + `<td style="padding:8px 10px">${ccEsc(r.userMobile||'-')}</td>`
         + fields.map(f=>`<td style="padding:8px 10px">${ccEsc(vals[f.label]||'-')}</td>`).join('')
         + `<td style="padding:8px 10px">${payThumb}</td>`
+        + `<td style="padding:8px 10px">${r.amount?('₹'+ccEsc(String(r.amount))):'—'}</td>`
         + `<td style="padding:8px 10px">${ccEsc(r.utr||'—')}</td>`
         + `<td style="padding:8px 10px">
              <select class="status-sel" style="border-color:${statusColor};color:${statusColor}" onchange="ccUpdateStatus('${id}','${key}',this.value)">
@@ -5777,6 +6124,289 @@ async function rtcSaveAmount(){
     const t=document.getElementById('rtc-amount-toast');
     if(t){ t.style.display='block'; t.textContent='✅ Amount update ho gaya! User ke Ration Card page par ab ₹'+amt+' dikhega.'; setTimeout(()=>t.style.display='none',3000); }
     logActivity('Ration Card (Amount Update)', `Service charge ₹${amt} set kiya gaya`);
+    if(typeof renderOverview==='function') renderOverview();
+  }catch(e){
+    alert('Amount save nahi hua, internet check karein.');
+  }
+}
+
+// ═══════════════ AADHAAR C/O & ADDRESS UPDATE ═══════════════
+let aauAllData = {};
+
+function aauWatchFb(){
+  aauSyncFbBadge();
+  aauLoadCurrentQR();
+  aauLoadCurrentAmount();
+  aauLoadTrash();
+  if(window._aauInited) return;
+  window._aauInited = true;
+  try{
+    db.ref('aadhaar_addr_update_requests').on('value', snap=>{
+      aauAllData = snap.val()||{};
+      aauSyncFbBadge();
+      aauUpdateStats();
+      aauRenderRecords();
+      const badge=document.getElementById('nav-aadhaaraddr-badge');
+      if(badge) badge.textContent = Object.values(aauAllData).filter(r=>!r.pdfLink).length;
+    },()=>{
+      const el=document.getElementById('aau-fbStatus');
+      if(el){el.textContent='🔴 Error';el.style.background='rgba(239,68,68,.12)';el.style.color='#f87171';}
+    });
+  }catch(e){}
+}
+
+function aauSyncFbBadge(){
+  const el=document.getElementById('aau-fbStatus');
+  if(!el) return;
+  el.textContent='🟢 Connected'; el.style.background='rgba(78,203,110,.15)'; el.style.color='#4ecb6e';
+}
+
+function aauUpdateStats(){
+  const vals=Object.values(aauAllData||{});
+  const tot=vals.length;
+  const found=vals.filter(r=>r.pdfLink&&r.pdfLink.trim()).length;
+  const paid=vals.filter(r=>r.paymentVerified).length;
+  const payPend=tot-paid;
+  const updPend=tot-found;
+  const t=document.getElementById('aau-sTot'); if(t)t.textContent=tot;
+  const pp=document.getElementById('aau-sPayPending'); if(pp)pp.textContent=payPend;
+  const p=document.getElementById('aau-sPending'); if(p)p.textContent=updPend;
+  const f=document.getElementById('aau-sFound'); if(f)f.textContent=found;
+  const c=document.getElementById('aau-recCount'); if(c)c.textContent=tot;
+}
+
+function aauClearForm(){
+  ['aau-fAadhaarNo','aau-fName','aau-fMobile','aau-fCoEn','aau-fCoHi','aau-fVillage','aau-fPost','aau-fTehsil','aau-fDistrict','aau-fState','aau-fPincode','aau-fUtr','aau-fPdfLink','aau-fRemark'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  const paid=document.getElementById('aau-fPaid'); if(paid) paid.value='no';
+  document.getElementById('aau-formTitle').textContent='📝 Nayi Request Add Karein';
+  const inp=document.getElementById('aau-fAadhaarNo'); if(inp) inp.removeAttribute('readonly');
+}
+
+async function aauSaveRecord(){
+  const aadhaarNo=(document.getElementById('aau-fAadhaarNo').value||'').trim().replace(/\s+/g,'');
+  const name=(document.getElementById('aau-fName').value||'').trim();
+  if(!/^[0-9]{12}$/.test(aadhaarNo)){ alert('Sahi 12 digit Aadhaar Number dalein!'); return; }
+  if(!name){ alert('Naam zaroori hai!'); return; }
+  const record={
+    aadhaarNo, name,
+    mobile:(document.getElementById('aau-fMobile').value||'').trim(),
+    coEn:(document.getElementById('aau-fCoEn').value||'').trim(),
+    coHi:(document.getElementById('aau-fCoHi').value||'').trim(),
+    village:(document.getElementById('aau-fVillage').value||'').trim(),
+    post:(document.getElementById('aau-fPost').value||'').trim(),
+    tehsil:(document.getElementById('aau-fTehsil').value||'').trim(),
+    district:(document.getElementById('aau-fDistrict').value||'').trim(),
+    state:(document.getElementById('aau-fState').value||'').trim(),
+    pincode:(document.getElementById('aau-fPincode').value||'').trim(),
+    utr:(document.getElementById('aau-fUtr').value||'').trim(),
+    paymentVerified:(document.getElementById('aau-fPaid').value==='yes'),
+    pdfLink:(document.getElementById('aau-fPdfLink').value||'').trim(),
+    remark:(document.getElementById('aau-fRemark').value||'').trim(),
+    updated:new Date().toLocaleString('en-IN')
+  };
+  try{
+    await db.ref('aadhaar_addr_update_requests/'+aadhaarNo).update(record);
+    const t=document.getElementById('aau-toast');
+    if(t){ t.style.display='block'; t.textContent = record.pdfLink ? '✅ Update link save ho gaya! User ke data me dikh jayega.' : '✅ Request save ho gayi!'; setTimeout(()=>t.style.display='none',2500); }
+    logActivity(record.pdfLink?'Aadhaar Address (Update Diya)':'Aadhaar Address (Save)', `Aadhaar ${aadhaarNo} (${name}) — ${record.pdfLink?'Update link diya gaya':'Request save/update ki gayi'}`);
+    aauClearForm();
+  }catch(e){
+    alert('Save nahi hua, internet check karein.');
+  }
+}
+
+function aauRenderRecords(){
+  const tbody=document.getElementById('aau-recordsBody');
+  if(!tbody) return;
+  const q=((document.getElementById('aau-recSearch')||{}).value||'').toLowerCase();
+  const entries=Object.entries(aauAllData||{});
+  const filtered=q?entries.filter(([k,r])=>
+    (r.aadhaarNo||k||'').toLowerCase().includes(q)||(r.name||'').toLowerCase().includes(q)||
+    (r.mobile||'').toLowerCase().includes(q)||(r.utr||'').toLowerCase().includes(q)
+  ):entries;
+  if(!filtered.length){ tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:22px;color:var(--text2)">Koi request nahi mili</td></tr>'; return; }
+  tbody.innerHTML=filtered.sort((a,b)=>(b[1].updated||'').localeCompare(a[1].updated||'')).map(([key,r])=>{
+    const found = r.pdfLink && r.pdfLink.trim();
+    const paid  = !!r.paymentVerified;
+    const addr = [r.village,r.post,r.tehsil,r.district,r.state,r.pincode].filter(Boolean).join(', ');
+    const co = [r.coEn,r.coHi].filter(Boolean).join(' / ');
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 10px;font-weight:700;color:var(--text);letter-spacing:.5px">${r.aadhaarNo||key}</td>
+      <td style="padding:9px 10px;color:var(--text)">${r.name||'—'}</td>
+      <td style="padding:9px 10px;color:var(--text);max-width:160px">${co||'—'}</td>
+      <td style="padding:9px 10px;color:var(--text);max-width:200px">${addr||'—'}</td>
+      <td style="padding:9px 10px;color:var(--text)">${r.mobile||'—'}</td>
+      <td style="padding:9px 10px;color:var(--text)">${r.utr||'—'}</td>
+      <td style="padding:9px 10px"><span style="font-size:.62rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:${paid?'#2e7d32':'#f87171'};color:#fff;border-radius:14px;padding:3px 10px">${paid?'✅ VERIFIED':'⏳ PENDING'}</span></td>
+      <td style="padding:9px 10px;color:var(--text)">${found?`<a href="${r.pdfLink}" target="_blank" rel="noopener" style="color:var(--g4);font-weight:700;text-decoration:underline">📄 Link</a>`:'<span style="color:var(--text2);font-style:italic;font-weight:400">— taiyar ho raha hai —</span>'}</td>
+      <td style="padding:9px 10px;white-space:nowrap">
+        <button onclick="aauEditEntry('${key}')" style="background:rgba(78,203,110,.12);color:var(--g4);border:1px solid rgba(78,203,110,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer;margin-right:5px">✏️ Edit</button>
+        <button onclick="aauDeleteEntry('${key}')" style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function aauEditEntry(key){
+  const r=(aauAllData||{})[key]; if(!r) return;
+  document.getElementById('aau-fAadhaarNo').value = r.aadhaarNo||key;
+  document.getElementById('aau-fName').value      = r.name||'';
+  document.getElementById('aau-fMobile').value    = r.mobile||'';
+  document.getElementById('aau-fCoEn').value      = r.coEn||'';
+  document.getElementById('aau-fCoHi').value      = r.coHi||'';
+  document.getElementById('aau-fVillage').value   = r.village||'';
+  document.getElementById('aau-fPost').value      = r.post||'';
+  document.getElementById('aau-fTehsil').value    = r.tehsil||'';
+  document.getElementById('aau-fDistrict').value  = r.district||'';
+  document.getElementById('aau-fState').value     = r.state||'';
+  document.getElementById('aau-fPincode').value   = r.pincode||'';
+  document.getElementById('aau-fUtr').value       = r.utr||'';
+  document.getElementById('aau-fPaid').value      = r.paymentVerified ? 'yes' : 'no';
+  document.getElementById('aau-fPdfLink').value   = r.pdfLink||'';
+  document.getElementById('aau-fRemark').value    = r.remark||'';
+  document.getElementById('aau-formTitle').textContent='✏️ Request Update Karein: '+(r.name||key);
+  const inp=document.getElementById('aau-fAadhaarNo'); if(inp) inp.setAttribute('readonly','readonly');
+  const card=document.getElementById('aau-formCard');
+  if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+async function aauDeleteEntry(key){
+  if(!confirm('Yeh request Trash mein bhejein? (Trash se restore ho sakta hai)')) return;
+  try{
+    const rec = (aauAllData||{})[key] || {};
+    await db.ref('aadhaar_addr_update_trash/'+key).set({...rec, deletedAt: new Date().toLocaleString('en-IN')});
+    await db.ref('aadhaar_addr_update_requests/'+key).remove();
+    logActivity('Aadhaar Address (Delete)', `Aadhaar ${key} (${rec.name||''}) Trash mein bheja gaya`);
+    aauLoadTrash();
+  }catch(e){
+    alert('Delete nahi hua, internet check karein.');
+  }
+}
+
+// ── AADHAAR ADDRESS: TRASH / RESTORE ──
+function aauLoadTrash(){
+  db.ref('aadhaar_addr_update_trash').once('value').then(snap=>{
+    window._aauTrash = snap.val() || {};
+    aauRenderTrash();
+  }).catch(()=>{});
+}
+
+function aauRenderTrash(){
+  const wrap = document.getElementById('aau-trash-list');
+  const cnt  = document.getElementById('aau-trash-count');
+  if(!wrap) return;
+  const entries = Object.entries(window._aauTrash||{});
+  if(cnt) cnt.textContent = entries.length;
+  if(!entries.length){ wrap.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text2);font-size:.78rem">🗑️ Trash khaali hai</div>'; return; }
+  wrap.innerHTML = entries.map(([key,r])=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid var(--border)">
+      <div style="font-size:.78rem;color:var(--text)"><b>${r.aadhaarNo||key}</b> — ${r.name||'—'} <span style="color:var(--text2)">(${r.deletedAt||''})</span></div>
+      <div style="display:flex;gap:6px">
+        <button onclick="aauRestoreEntry('${key}')" style="background:rgba(78,203,110,.12);color:var(--g4);border:1px solid rgba(78,203,110,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer">♻️ Restore</button>
+        <button onclick="aauPermanentDelete('${key}')" style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer">🔥 Hamesha Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+async function aauRestoreEntry(key){
+  try{
+    const rec = (window._aauTrash||{})[key]; if(!rec) return;
+    const { deletedAt, ...clean } = rec;
+    await db.ref('aadhaar_addr_update_requests/'+key).set(clean);
+    await db.ref('aadhaar_addr_update_trash/'+key).remove();
+    logActivity('Aadhaar Address (Restore)', `Aadhaar ${key} (${rec.name||''}) Trash se restore kiya gaya`);
+    aauLoadTrash();
+  }catch(e){ alert('Restore nahi hua, internet check karein.'); }
+}
+
+async function aauPermanentDelete(key){
+  if(!confirm('⚠️ Yeh hamesha ke liye delete ho jayega, wapas nahi aayega. Pakka?')) return;
+  try{
+    const rec = (window._aauTrash||{})[key] || {};
+    await db.ref('aadhaar_addr_update_trash/'+key).remove();
+    logActivity('Aadhaar Address (Permanent Delete)', `Aadhaar ${key} (${rec.name||''}) hamesha ke liye delete kiya gaya`);
+    aauLoadTrash();
+  }catch(e){ alert('Delete nahi hua, internet check karein.'); }
+}
+
+function aauExportCsv(){
+  const entries = Object.entries(aauAllData||{});
+  if(!entries.length){ toast('❌ Koi data nahi','fail'); return; }
+  const headers = ['Aadhaar No','Naam','Mobile','C/O English','C/O Hindi','Village','Post','Tehsil','District','State','Pincode','UTR','Payment Status','Update Link','Note','Last Update'];
+  const rows = entries.map(([key,r])=>[
+    r.aadhaarNo||key, r.name||'', r.mobile||'', r.coEn||'', r.coHi||'',
+    r.village||'', r.post||'', r.tehsil||'', r.district||'', r.state||'', r.pincode||'',
+    r.utr||'', r.paymentVerified?'Verified':'Pending', r.pdfLink||'', r.remark||'', r.updated||''
+  ].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download='Aadhaar_Address_Update_Requests_'+new Date().toLocaleDateString('en-IN').replace(/\//g,'-')+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast('✅ CSV download ho rahi hai!','ok');
+}
+
+// ── AADHAAR ADDRESS: PAYMENT QR REPLACE ──
+let _aauNewQRData = '';
+
+function aauLoadCurrentQR(){
+  const img = document.getElementById('aau-qr-current');
+  if(!img) return;
+  db.ref('settings/aadhaarAddrQrCode').once('value').then(snap=>{
+    const v = snap.val();
+    img.src = v || (typeof PF_DEFAULT_QR!=='undefined' ? PF_DEFAULT_QR : '');
+  }).catch(()=>{});
+}
+
+function aauQrFileSelected(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ alert('Sirf image file select karein!'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    _aauNewQRData = e.target.result;
+    document.getElementById('aau-qr-preview-img').src = _aauNewQRData;
+    document.getElementById('aau-qr-preview-wrap').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function aauSaveQR(){
+  if(!_aauNewQRData){ alert('Pehle naya QR image select karein!'); return; }
+  try{
+    await db.ref('settings/aadhaarAddrQrCode').set(_aauNewQRData);
+    const t=document.getElementById('aau-qr-toast');
+    if(t){ t.style.display='block'; t.textContent='✅ QR update ho gaya! User ke Aadhaar C/O & Address Update page par ab yehi naya QR dikhega.'; setTimeout(()=>t.style.display='none',3000); }
+    logActivity('Aadhaar Address (QR Update)', 'Payment QR code update kiya gaya');
+    aauLoadCurrentQR();
+    document.getElementById('aau-qr-preview-wrap').style.display='none';
+    document.getElementById('aau-qr-file-input').value='';
+    _aauNewQRData='';
+  }catch(e){
+    alert('QR save nahi hua, internet check karein.');
+  }
+}
+
+// ── AADHAAR ADDRESS: SERVICE CHARGE AMOUNT — EDITABLE ──
+function aauLoadCurrentAmount(){
+  const inp = document.getElementById('aau-amount-input');
+  if(!inp) return;
+  db.ref('settings/aadhaarAddrAmount').once('value').then(snap=>{
+    const v = snap.val();
+    inp.value = v || 40;
+  }).catch(()=>{ inp.value = 40; });
+}
+
+async function aauSaveAmount(){
+  const inp = document.getElementById('aau-amount-input');
+  const amt = parseInt(inp.value, 10);
+  if(!amt || amt <= 0){ alert('Sahi amount dalein!'); return; }
+  try{
+    await db.ref('settings/aadhaarAddrAmount').set(amt);
+    window._aadhaarAddrAmt = amt;
+    const t=document.getElementById('aau-amount-toast');
+    if(t){ t.style.display='block'; t.textContent='✅ Amount update ho gaya! User ke Aadhaar C/O & Address Update page par ab ₹'+amt+' dikhega.'; setTimeout(()=>t.style.display='none',3000); }
+    logActivity('Aadhaar Address (Amount Update)', `Service charge ₹${amt} set kiya gaya`);
     if(typeof renderOverview==='function') renderOverview();
   }catch(e){
     alert('Amount save nahi hua, internet check karein.');

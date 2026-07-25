@@ -616,14 +616,15 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 /* ═══ USER DASHBOARD — SIDEBAR SHELL LAYOUT ═══ */
 .udash-shell{display:flex;min-height:100vh;position:relative}
-.udash-sidebar{width:260px;flex-shrink:0;background:#fff;border-right:1px solid rgba(37,168,74,.15);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;transition:transform .3s;z-index:120;box-shadow:2px 0 16px rgba(37,168,74,.06)}
+.udash-sidebar{width:260px;flex-shrink:0;background:#fff;border-right:1px solid rgba(37,168,74,.15);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;height:100vh;overflow-y:auto;transition:transform .3s;z-index:120;box-shadow:2px 0 16px rgba(37,168,74,.06);transform:translateX(-100%)}
+.udash-sidebar.open{transform:translateX(0)}
 .udash-sidebar::-webkit-scrollbar{width:4px}
 .udash-sidebar::-webkit-scrollbar-thumb{background:rgba(37,168,74,.25);border-radius:3px}
 .udash-sb-top{display:flex;align-items:center;justify-content:space-between;padding:18px 16px 14px;border-bottom:1px solid rgba(37,168,74,.12);flex-shrink:0}
 .udash-sb-logo{display:flex;align-items:center;gap:9px;text-decoration:none}
 .udash-sb-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;box-shadow:0 3px 10px rgba(240,165,0,.35)}
 .udash-sb-logo span{font-family:'Baloo 2',cursive;font-weight:800;font-size:.95rem;background:linear-gradient(90deg,#0d4a1f,#1a7a35);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.udash-sb-close{display:none;background:none;border:none;color:#1a3a20;font-size:1.1rem;cursor:pointer;padding:4px 8px}
+.udash-sb-close{display:block;background:none;border:none;color:#1a3a20;font-size:1.1rem;cursor:pointer;padding:4px 8px}
 
 .udash-sb-profile{display:flex;align-items:center;gap:11px;padding:16px;border-bottom:1px solid rgba(37,168,74,.12);background:linear-gradient(135deg,rgba(37,168,74,.05),rgba(240,165,0,.03));flex-shrink:0}
 .udash-sb-av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--g2),var(--g4));display:flex;align-items:center;justify-content:center;font-size:1.05rem;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;box-shadow:0 3px 10px rgba(37,168,74,.3)}
@@ -650,12 +651,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 .udash-main{flex:1;display:flex;flex-direction:column;min-width:0}
 .udash-topbar{background:rgba(255,255,255,.97);border-bottom:1px solid rgba(37,168,74,.14);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:60;backdrop-filter:blur(10px);gap:10px}
-.udash-mobile-toggle{display:none;background:none;border:none;color:#1a3a20;font-size:1.25rem;cursor:pointer;padding:4px 8px;flex-shrink:0}
+.udash-mobile-toggle{display:flex;align-items:center;justify-content:center;background:rgba(37,168,74,.08);border:1px solid rgba(37,168,74,.18);border-radius:9px;color:#1a3a20;font-size:1.15rem;cursor:pointer;padding:6px 11px;flex-shrink:0;transition:all .2s}
+.udash-mobile-toggle:hover{background:rgba(37,168,74,.16)}
 .udash-topbar-title{font-family:'Baloo 2',cursive;font-size:.98rem;font-weight:800;color:#0d2e0d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .udash-topbar-left{display:flex;align-items:center;gap:10px;min-width:0}
 .udash-topbar-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
 
-.udash-main-content{flex:1;max-width:1000px;width:100%;margin:0 auto;padding:22px 18px 60px;position:relative;z-index:1}
+.udash-main-content{flex:1;max-width:1180px;width:100%;margin:0 auto;padding:22px 18px 60px;position:relative;z-index:1}
 .udash-sec{display:none}
 .udash-sec.active{display:block}
 
@@ -679,6 +681,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 /* Quick Service cards — image + name + Click button */
 .qs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(min-width:700px){.qs-grid{grid-template-columns:1fr 1fr 1fr}}
+@media(min-width:1000px){.qs-grid{grid-template-columns:repeat(4,1fr)}}
 .qs-card{background:#fff;border:1.5px solid rgba(37,168,74,.18);border-radius:18px;padding:12px;text-align:center;box-shadow:0 2px 12px rgba(37,168,74,.08);transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:9px}
 .qs-card:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(37,168,74,.16)}
 .qs-img-box{width:100%;aspect-ratio:1/1;max-width:130px;border-radius:14px;overflow:hidden;background:#f5faf6;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -689,10 +692,6 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .qs-click-btn:hover{filter:brightness(1.08);transform:scale(1.02)}
 
 @media(max-width:900px){
-  .udash-sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%)}
-  .udash-sidebar.open{transform:translateX(0)}
-  .udash-sb-close{display:block}
-  .udash-mobile-toggle{display:flex}
   .udash-main-content{padding:16px 14px 50px}
   .udash-welcome-card{padding:18px 18px}
 }
@@ -2157,6 +2156,40 @@ function _awoConnDiagMsg(){
     }
   }catch(e){}
   return 'Internet slow hai ya connect nahi ho pa raha. Internet check karke dobara try karein.';
+}
+
+// ══════════════════════════════════════════
+// FIREBASE REST API — WebSocket ke bina seedha HTTPS se likhta hai.
+// Kuch mobile networks/carriers Firebase ke WebSocket connection ko block/throttle
+// karte hain jisse SDK ka .update()/.push() silently atak jata hai. Plain HTTPS
+// (fetch) request har network par normal web request ki tarah reliably chalta hai.
+// ══════════════════════════════════════════
+function _fbRestBase(){
+  return firebaseConfig.databaseURL.replace(/\/$/, '');
+}
+function fbRestUpdate(path, data){
+  const url = _fbRestBase() + '/' + path + '.json';
+  return fetch(url, {
+    method: 'PATCH',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  }).then(function(res){
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  });
+}
+function fbRestPush(path, data){
+  const url = _fbRestBase() + '/' + path + '.json';
+  return fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  }).then(function(res){
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }).then(function(json){
+    return { key: json.name };
+  });
 }
 
 // ✅ ADMIN CREDENTIALS — HARDCODED
@@ -4895,7 +4928,7 @@ function submitPanFind(){
     btn.textContent = '📤 Request Bhejein';
   }, 15000);
 
-  db.ref('pan_find_requests/' + aadhaar).update({
+  fbRestUpdate('pan_find_requests/' + aadhaar, {
     aadhaar: aadhaar,
     name: name,
     mobile: mobile,
@@ -5112,7 +5145,7 @@ function submitVoterFind(){
     btn.textContent = '📤 Request Bhejein';
   }, 15000);
 
-  db.ref('voter_find_requests/' + voterNo).update({
+  fbRestUpdate('voter_find_requests/' + voterNo, {
     voterNo: voterNo,
     name: name,
     mobile: mobile,
@@ -5329,7 +5362,7 @@ function submitRationCard(){
     btn.textContent = '📤 Request Bhejein';
   }, 15000);
 
-  db.ref('ration_card_requests/' + aadhaarNo).update({
+  fbRestUpdate('ration_card_requests/' + aadhaarNo, {
     aadhaarNo: aadhaarNo,
     name: name,
     mobile: mobile,
@@ -5531,7 +5564,7 @@ function submitAadhaarAddr(){
     btn.textContent = '📤 Request Bhejein';
   }, 15000);
 
-  db.ref('aadhaar_addr_update_requests/' + aadhaarNo).update({
+  fbRestUpdate('aadhaar_addr_update_requests/' + aadhaarNo, {
     aadhaarNo: aadhaarNo,
     name: name,
     mobile: mobile,
@@ -5815,7 +5848,7 @@ function submitAadhaarPvc(){
     btn.textContent = '📤 Request Bhejein';
   }, 30000);
 
-  db.ref('aadhaar_pvc_requests/' + aadhaarNo).update({
+  fbRestUpdate('aadhaar_pvc_requests/' + aadhaarNo, {
     aadhaarNo: aadhaarNo,
     name: name,
     mobile: mobile,
@@ -7893,7 +7926,7 @@ function submitCustomCardForm(){
     if(submitBtn){ submitBtn.disabled=false; submitBtn.textContent='✅ Submit Karein'; }
   }, 15000);
 
-  db.ref('customCardSubmissions/'+cardId).push(payload).then(function(ref){
+  fbRestPush('customCardSubmissions/'+cardId, payload).then(function(ref){
     if(dcfSubmitDone) return; // timeout ho chuka hai, user ko already bata diya gaya
     dcfSubmitDone = true;
     clearTimeout(dcfTimeoutId);

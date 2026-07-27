@@ -1116,6 +1116,10 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
           <span class="nav-icon">🏠</span> Aadhaar C/O &amp; Address
           <span class="nav-badge" id="nav-aadhaaraddr-badge">0</span>
         </button>
+        <button class="nav-item" onclick="showSection('wallet')" data-sec="wallet">
+          <span class="nav-icon">💰</span> Wallet
+          <span class="nav-badge" id="nav-wallet-badge">0</span>
+        </button>
         <button class="nav-item" onclick="showSection('contactmsgs')" data-sec="contactmsgs">
           <span class="nav-icon">📨</span> Contact Messages
           <span class="nav-badge" id="nav-cm-badge">0</span>
@@ -1263,6 +1267,12 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
               <div class="stat-val" id="ov-aadhaaraddr" style="color:#93c5fd">0</div>
               <div class="stat-label">Aadhaar C/O & Address Requests</div>
               <div class="stat-change" style="background:rgba(59,130,246,.12);color:#93c5fd" id="ov-aadhaaraddr-chg">0 pending</div>
+            </div>
+            <div class="stat-card blue" onclick="showSection('wallet')">
+              <div class="stat-icon">💰</div>
+              <div class="stat-val" id="ov-wallet" style="color:#93c5fd">₹0</div>
+              <div class="stat-label">Total Wallet Balance</div>
+              <div class="stat-change" style="background:rgba(59,130,246,.12);color:#93c5fd" id="ov-wallet-chg">0 pending top-ups</div>
             </div>
             <div class="stat-card amber">
               <div class="stat-icon">💰</div>
@@ -2215,6 +2225,87 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
             <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:8px;display:flex;align-items:center;gap:8px">🗑️ Trash <span class="count-badge red" id="aau-trash-count">0</span></h3>
             <p style="font-size:.7rem;color:var(--text2);margin-bottom:10px">Delete ki gayi requests yahan safe rehti hain — chahein to restore kar sakte hain.</p>
             <div id="aau-trash-list" style="border-top:1px solid var(--border)"><div style="text-align:center;padding:16px;color:var(--text2);font-size:.78rem">🗑️ Trash khaali hai</div></div>
+          </div>
+        </div>
+
+        <!-- ═══ WALLET MANAGEMENT ═══ -->
+        <div class="section-page" id="sec-wallet">
+          <div class="section-hd">
+            <h2>💰 Wallet Management <span class="count-badge" id="wal-recCount">0</span></h2>
+            <div style="display:flex;gap:8px">
+              <span id="wal-fbStatus" style="font-size:.7rem;padding:5px 12px;border-radius:12px;font-weight:700;background:rgba(239,68,68,.12);color:#f87171">⚪ Connecting...</span>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:18px">
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:var(--gold2)" id="wal-sTotalBalance">₹0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">💰 Total Wallet Balance (Sab Users)</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:#f87171" id="wal-sPending">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">⏳ Pending Top-up Requests</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:#4ecb6e" id="wal-sApproved">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">✅ Approved Top-ups</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center">
+              <div style="font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;color:var(--g4)" id="wal-sTotalUsers">0</div>
+              <div style="font-size:.7rem;color:var(--text2);font-weight:600;margin-top:2px">👥 Wallet Waale Users</div>
+            </div>
+          </div>
+
+          <!-- ── TOP-UP REQUESTS TABLE ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+              <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);display:flex;align-items:center;gap:8px">📋 Top-up Requests</h3>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <select id="wal-statusFilter" onchange="walRenderRecords()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.75rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)">
+                  <option value="">Sab Status</option>
+                  <option value="Pending">⏳ Pending</option>
+                  <option value="Approved">✅ Approved</option>
+                  <option value="Rejected">❌ Rejected</option>
+                </select>
+                <button class="tb-btn" style="font-size:.75rem" onclick="walExportCsv()">⬇️ CSV Export</button>
+                <input type="text" id="wal-recSearch" placeholder="🔍 Naam, Mobile, UTR..." oninput="walRenderRecords()"
+                  style="padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.78rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:230px"/>
+              </div>
+            </div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:.75rem">
+                <thead><tr style="border-bottom:1px solid var(--border)">
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">👤 Name</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">📱 Mobile</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">💰 Amount</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">🧾 UTR</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">📊 Status</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">🕐 Request Kiya</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">⚙️ Action</th>
+                </tr></thead>
+                <tbody id="wal-recordsBody"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text2)">🔄 Loading...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ── USER WALLET BALANCES ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+              <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);display:flex;align-items:center;gap:8px">👥 User Wallet Balances</h3>
+              <input type="text" id="wal-userSearch" placeholder="🔍 Mobile se dhoondein..." oninput="walRenderUserBalances()"
+                style="padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.78rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);width:230px"/>
+            </div>
+            <div style="overflow-x:auto">
+              <table style="width:100%;border-collapse:collapse;font-size:.75rem">
+                <thead><tr style="border-bottom:1px solid var(--border)">
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">📱 Mobile</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">💰 Balance</th>
+                  <th style="text-align:left;padding:8px 10px;color:var(--text2);font-weight:700">⚙️ Manual Adjust</th>
+                </tr></thead>
+                <tbody id="wal-usersBody"><tr><td colspan="3" style="text-align:center;padding:24px;color:var(--text2)">🔄 Loading...</td></tr></tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -3237,7 +3328,7 @@ async function initDashboard(){
 async function loadAll(){
   showLoader('Data load ho raha hai...');
   try{
-    const [subSnap, userSnap, frSnap, pfSnap, vfSnap, acSnap, rtcSnap, aauSnap, pfAmtSnap, vfAmtSnap, acAmtSnap, rtcAmtSnap, aauAmtSnap] = await Promise.all([
+    const [subSnap, userSnap, frSnap, pfSnap, vfSnap, acSnap, rtcSnap, aauSnap, walReqSnap, walWalletSnap, pfAmtSnap, vfAmtSnap, acAmtSnap, rtcAmtSnap, aauAmtSnap] = await Promise.all([
       db.ref('submissions').once('value'),
       db.ref('users').once('value'),
       db.ref('farmer_registry').once('value'),
@@ -3246,6 +3337,8 @@ async function loadAll(){
       db.ref('aadhaar_pvc_requests').once('value'),
       db.ref('ration_card_requests').once('value'),
       db.ref('aadhaar_addr_update_requests').once('value'),
+      db.ref('wallet_topup_requests').once('value'),
+      db.ref('wallets').once('value'),
       db.ref('settings/panFindAmount').once('value'),
       db.ref('settings/voterFindAmount').once('value'),
       db.ref('settings/aadhaarPvcAmount').once('value'),
@@ -3262,6 +3355,8 @@ async function loadAll(){
     acAllData = acSnap.val() || {};
     rtcAllData = rtcSnap.val() || {};
     aauAllData = aauSnap.val() || {};
+    walAllRequests = walReqSnap.val() || {};
+    walAllWallets = walWalletSnap.val() || {};
     window._panFindAmt     = pfAmtSnap.val() || 50;
     window._voterFindAmt   = vfAmtSnap.val() || 60;
     window._aadhaarPvcAmt  = acAmtSnap.val() || 10;
@@ -3288,6 +3383,9 @@ function renderAll(){
   if(typeof acRenderRecords==='function'){ acRenderRecords(); }
   if(typeof rtcRenderRecords==='function'){ rtcRenderRecords(); }
   if(typeof aauRenderRecords==='function'){ aauRenderRecords(); }
+  if(typeof walRenderRecords==='function'){ walRenderRecords(); }
+  if(typeof walRenderUserBalances==='function'){ walRenderUserBalances(); }
+  if(typeof walUpdateStats==='function'){ walUpdateStats(); }
 }
 
 // ── OVERVIEW ──
@@ -3342,6 +3440,11 @@ function renderOverview(){
   setText('ov-aadhaaraddr',     aauTotal);
   setText('ov-aadhaaraddr-chg', aauPend+' pending');
   setText('ov-rev-chg', `Land ₹${landRevenue} + Services ₹${servicesRevenue}`);
+
+  const walTotalBal = Object.values(walAllWallets||{}).reduce((sum,w)=>sum+(Number(w.balance)||0),0);
+  const walPendingCount = Object.values(walAllRequests||{}).filter(r=>(r.status||'Pending')==='Pending').length;
+  setText('ov-wallet', '₹'+walTotalBal);
+  setText('ov-wallet-chg', walPendingCount+' pending top-ups');
 
   // Recent list (last 5)
   const recent = _allSubs.slice(0,5);
@@ -4346,6 +4449,7 @@ const sectionTitles={
   aadhaarpvc:'🪪 Aadhaar PVC Converter',
   rationcard:'🍚 Ration Card',
   aadhaaraddr:'🏠 Aadhaar C/O & Address Update',
+  wallet:'💰 Wallet Management',
   contactmsgs:'📨 Contact Messages',
   trash:'🗑️ Trash (Deleted Applications)',
   activitylog:'🕵️ Activity Log',
@@ -4366,6 +4470,7 @@ function showSection(sec){
   if(sec==='aadhaarpvc'){ acWatchFb(); acRenderRecords(); }
   if(sec==='rationcard'){ rtcWatchFb(); rtcRenderRecords(); }
   if(sec==='aadhaaraddr'){ aauWatchFb(); aauRenderRecords(); }
+  if(sec==='wallet'){ walWatchFb(); walRenderRecords(); }
   if(sec==='users'){ signupLoadCurrentAmount(); signupLoadCurrentQR(); }
   if(sec==='contactmsgs'){ cmLoadMsgs(); }
   if(sec==='trash'){ renderTrash(); }
@@ -6411,6 +6516,169 @@ async function aauSaveAmount(){
   }catch(e){
     alert('Amount save nahi hua, internet check karein.');
   }
+}
+
+// ═══════════════ WALLET MANAGEMENT ═══════════════
+let walAllRequests = {};
+let walAllWallets = {};
+
+function walKeySafe(mobile){
+  return String(mobile||'').replace(/[.#$\[\]\/]/g, '_');
+}
+
+function walWatchFb(){
+  const el=document.getElementById('wal-fbStatus');
+  if(el){ el.textContent='🟢 Connected'; el.style.background='rgba(78,203,110,.15)'; el.style.color='#4ecb6e'; }
+  walLoadWallets();
+  if(window._walInited) return;
+  window._walInited = true;
+  try{
+    db.ref('wallet_topup_requests').on('value', snap=>{
+      walAllRequests = snap.val()||{};
+      walUpdateStats();
+      walRenderRecords();
+      const badge=document.getElementById('nav-wallet-badge');
+      if(badge) badge.textContent = Object.values(walAllRequests).filter(r=>(r.status||'Pending')==='Pending').length;
+    },()=>{
+      const el2=document.getElementById('wal-fbStatus');
+      if(el2){el2.textContent='🔴 Error';el2.style.background='rgba(239,68,68,.12)';el2.style.color='#f87171';}
+    });
+  }catch(e){}
+}
+
+function walLoadWallets(){
+  db.ref('wallets').once('value').then(snap=>{
+    walAllWallets = snap.val()||{};
+    walUpdateStats();
+    walRenderUserBalances();
+  }).catch(()=>{});
+}
+
+function walUpdateStats(){
+  const reqs = Object.values(walAllRequests||{});
+  const pending = reqs.filter(r=>(r.status||'Pending')==='Pending').length;
+  const approved = reqs.filter(r=>r.status==='Approved').length;
+  const totalBalance = Object.values(walAllWallets||{}).reduce((sum,w)=>sum+(Number(w.balance)||0),0);
+  const totalUsers = Object.keys(walAllWallets||{}).length;
+  setText('wal-sTotalBalance', '₹'+totalBalance);
+  setText('wal-sPending', pending);
+  setText('wal-sApproved', approved);
+  setText('wal-sTotalUsers', totalUsers);
+  setText('wal-recCount', reqs.length);
+}
+
+function walRenderRecords(){
+  const tbody = document.getElementById('wal-recordsBody');
+  if(!tbody) return;
+  const q = ((document.getElementById('wal-recSearch')||{}).value||'').toLowerCase();
+  const statusFilter = (document.getElementById('wal-statusFilter')||{}).value||'';
+  let entries = Object.entries(walAllRequests||{});
+  if(statusFilter) entries = entries.filter(([k,r])=>(r.status||'Pending')===statusFilter);
+  if(q) entries = entries.filter(([k,r])=>
+    (r.name||'').toLowerCase().includes(q) || (r.mobile||'').toLowerCase().includes(q) || (r.utr||'').toLowerCase().includes(q)
+  );
+  if(!entries.length){ tbody.innerHTML='<tr><td colspan="7" style="text-align:center;padding:22px;color:var(--text2)">Koi request nahi mili</td></tr>'; return; }
+  entries.sort((a,b)=>(b[1].requestedAtTs||0)-(a[1].requestedAtTs||0));
+  tbody.innerHTML = entries.map(([key,r])=>{
+    const status = r.status || 'Pending';
+    const badgeBg = status==='Approved' ? '#2e7d32' : (status==='Rejected' ? '#e53935' : '#f0a500');
+    const actionBtns = status==='Pending'
+      ? `<button onclick="walApprove('${key}')" style="background:rgba(78,203,110,.12);color:var(--g4);border:1px solid rgba(78,203,110,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer;margin-right:5px">✅ Approve</button>
+         <button onclick="walReject('${key}')" style="background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer">❌ Reject</button>`
+      : `<span style="color:var(--text2);font-style:italic;font-size:.7rem">— ${status} —</span>`;
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 10px;color:var(--text)">${r.name||'—'}</td>
+      <td style="padding:9px 10px;color:var(--text)">${r.mobile||'—'}</td>
+      <td style="padding:9px 10px;font-weight:700;color:var(--gold2)">₹${r.amount||0}</td>
+      <td style="padding:9px 10px;color:var(--text)">${r.utr||'—'}</td>
+      <td style="padding:9px 10px"><span style="font-size:.62rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:${badgeBg};color:#fff;border-radius:14px;padding:3px 10px">${status}</span></td>
+      <td style="padding:9px 10px;color:var(--text2);font-size:.72rem">${r.requestedAt||'—'}</td>
+      <td style="padding:9px 10px;white-space:nowrap">${actionBtns}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function walApprove(reqId){
+  const r = (walAllRequests||{})[reqId];
+  if(!r){ alert('Request nahi mili'); return; }
+  if(!confirm(`₹${r.amount} "${r.name}" (${r.mobile}) ke wallet me add karna chahte hain?`)) return;
+  try{
+    const key = walKeySafe(r.mobile);
+    const snap = await db.ref('wallets/'+key+'/balance').once('value');
+    const currentBalance = Number(snap.val())||0;
+    const newBalance = currentBalance + Number(r.amount||0);
+    await db.ref('wallets/'+key+'/balance').set(newBalance);
+    await db.ref('wallet_topup_requests/'+reqId).update({status:'Approved', verifiedAt: new Date().toLocaleString('en-IN')});
+    logActivity('Wallet Top-up (Approved)', `${r.name} (${r.mobile}) — ₹${r.amount} wallet me add kiya gaya. Naya balance: ₹${newBalance}`);
+    toast('✅ Approve ho gaya! Wallet me paise add ho gaye.','ok');
+    walLoadWallets();
+  }catch(e){
+    alert('Approve nahi hua, internet check karein.');
+  }
+}
+
+async function walReject(reqId){
+  const r = (walAllRequests||{})[reqId];
+  if(!r){ alert('Request nahi mili'); return; }
+  if(!confirm(`"${r.name}" ki ₹${r.amount} ki request reject karna chahte hain?`)) return;
+  try{
+    await db.ref('wallet_topup_requests/'+reqId).update({status:'Rejected', verifiedAt: new Date().toLocaleString('en-IN')});
+    logActivity('Wallet Top-up (Rejected)', `${r.name} (${r.mobile}) — ₹${r.amount} ki request reject ki gayi`);
+    toast('❌ Request reject ho gayi','ok');
+  }catch(e){
+    alert('Reject nahi hua, internet check karein.');
+  }
+}
+
+function walRenderUserBalances(){
+  const tbody = document.getElementById('wal-usersBody');
+  if(!tbody) return;
+  const q = ((document.getElementById('wal-userSearch')||{}).value||'').toLowerCase();
+  let entries = Object.entries(walAllWallets||{});
+  if(q) entries = entries.filter(([k,w])=>k.toLowerCase().includes(q));
+  if(!entries.length){ tbody.innerHTML='<tr><td colspan="3" style="text-align:center;padding:22px;color:var(--text2)">Koi wallet nahi mila</td></tr>'; return; }
+  entries.sort((a,b)=>(Number(b[1].balance)||0)-(Number(a[1].balance)||0));
+  tbody.innerHTML = entries.map(([mobile,w])=>{
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 10px;color:var(--text)">${mobile}</td>
+      <td style="padding:9px 10px;font-weight:700;color:var(--gold2)">₹${Number(w.balance)||0}</td>
+      <td style="padding:9px 10px">
+        <button onclick="walManualAdjust('${mobile}')" style="background:rgba(78,203,110,.12);color:var(--g4);border:1px solid rgba(78,203,110,.3);border-radius:7px;padding:5px 9px;font-size:.7rem;cursor:pointer">✏️ Adjust</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function walManualAdjust(mobile){
+  const w = (walAllWallets||{})[mobile] || {};
+  const current = Number(w.balance)||0;
+  const input = prompt(`"${mobile}" ka current balance ₹${current} hai.\nNaya balance kitna karna hai? (poora naya amount dalein)`, current);
+  if(input===null) return;
+  const newBalance = parseInt(input, 10);
+  if(isNaN(newBalance) || newBalance < 0){ alert('Sahi amount dalein!'); return; }
+  try{
+    await db.ref('wallets/'+mobile+'/balance').set(newBalance);
+    logActivity('Wallet (Manual Adjust)', `${mobile} ka balance ₹${current} se ₹${newBalance} kiya gaya`);
+    toast('✅ Balance update ho gaya!','ok');
+    walLoadWallets();
+  }catch(e){
+    alert('Update nahi hua, internet check karein.');
+  }
+}
+
+function walExportCsv(){
+  const entries = Object.entries(walAllRequests||{});
+  if(!entries.length){ toast('❌ Koi data nahi','fail'); return; }
+  const headers = ['Request No','Naam','Mobile','Amount','UTR','Status','Requested At'];
+  const rows = entries.map(([key,r])=>[
+    key, r.name||'', r.mobile||'', r.amount||0, r.utr||'', r.status||'Pending', r.requestedAt||''
+  ].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download='Wallet_Topup_Requests_'+new Date().toLocaleDateString('en-IN').replace(/\//g,'-')+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast('✅ CSV download ho rahi hai!','ok');
 }
 
 

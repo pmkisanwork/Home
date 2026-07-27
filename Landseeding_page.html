@@ -1209,6 +1209,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <nav class="udash-sb-nav">
         <div class="udash-sb-lbl">MAIN MENU</div>
         <button class="udash-nav-item active" data-usec="dashboard" onclick="udashShowSection('dashboard')"><span class="uni">📊</span> Dashboard</button>
+        <button class="udash-nav-item" onclick="openWallet()"><span class="uni">💰</span> My Wallet <span class="udash-nav-badge green" id="nav-wallet-badge">₹0</span></button>
         <button class="udash-nav-item" data-usec="pending" onclick="udashShowSection('pending')"><span class="uni">⏳</span> Pending Apps <span class="udash-nav-badge" id="nav-u-pending-badge">0</span></button>
         <button class="udash-nav-item" data-usec="approved" onclick="udashShowSection('approved')"><span class="uni">✅</span> Approved <span class="udash-nav-badge green" id="nav-u-approved-badge">0</span></button>
         <button class="udash-nav-item" data-usec="rejected" onclick="udashShowSection('rejected')"><span class="uni">❌</span> Rejected <span class="udash-nav-badge red" id="nav-u-rejected-badge">0</span></button>
@@ -1296,6 +1297,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
               <div class="last-login-badge" id="last-login-display">🕐 Last login: —</div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+              <button onclick="openWallet()" style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);color:#fff;font-weight:800;font-size:.8rem;padding:9px 16px;border-radius:20px;cursor:pointer;font-family:'Poppins',sans-serif">💰 Wallet: ₹<span id="udash-wallet-balance">0</span></button>
               <button class="udash-help-btn" onclick="openContactAdmin()">❓ Help</button>
               <button class="udash-new-btn" onclick="showPage('form-page');resetForm()">➕ Naya Application</button>
             </div>
@@ -1334,6 +1336,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
               <span style="display:inline-block;flex:1;height:2px;background:linear-gradient(90deg,rgba(26,122,53,.15),transparent);border-radius:2px"></span>
             </div>
             <div class="qs-grid">
+
+              <!-- Wallet -->
+              <div class="qs-card">
+                <div class="qs-img-box"><div class="qs-icon-box" style="background:linear-gradient(135deg,#f0a500,#ff8f00)">💰</div></div>
+                <div class="qs-name">My Wallet</div>
+                <button class="qs-click-btn" style="background:linear-gradient(135deg,#f0a500,#ff8f00)" onclick="openWallet()">👉 Click Karein</button>
+              </div>
 
               <!-- Complaint -->
               <div class="qs-card">
@@ -2189,6 +2198,99 @@ function fbRestPush(path, data){
     return res.json();
   }).then(function(json){
     return { key: json.name };
+  });
+}
+function fbRestGet(path){
+  const url = _fbRestBase() + '/' + path + '.json';
+  return fetch(url).then(function(res){
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  });
+}
+function fbRestSet(path, data){
+  const url = _fbRestBase() + '/' + path + '.json';
+  return fetch(url, {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  }).then(function(res){
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  });
+}
+
+// ══════════════════════════════════════════
+// WALLET — sabhi services ka payment ab QR/UTR ki jagah
+// wallet balance se hota hai. UPI ID: BHARATPE.8R0K1Z0V1R62609@fbpe
+// ══════════════════════════════════════════
+const WALLET_UPI_ID = 'BHARATPE.8R0K1Z0V1R62609@fbpe';
+const WALLET_PAYEE_NAME = 'All Work Online';
+
+function walletKey(mobile){
+  return String(mobile||'').replace(/[.#$\[\]\/]/g, '_');
+}
+
+function walletGetBalance(mobile){
+  return fbRestGet('wallets/' + walletKey(mobile) + '/balance').then(function(v){
+    return Number(v) || 0;
+  }).catch(function(){ return 0; });
+}
+
+// UPI deep-link se ek QR image URL banata hai (goqr.me ka free public QR API — sirf plain HTTPS
+// image request hai, isme koi WebSocket/Firebase involve nahi, isliye reliably chalta hai)
+function walletBuildQrUrl(amount){
+  const upiUri = 'upi://pay?pa=' + encodeURIComponent(WALLET_UPI_ID)
+    + '&pn=' + encodeURIComponent(WALLET_PAYEE_NAME)
+    + '&am=' + encodeURIComponent(amount)
+    + '&cu=INR&tn=' + encodeURIComponent('Wallet Top-up');
+  return 'https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=' + encodeURIComponent(upiUri);
+}
+
+// Ek service ke payment block (QR+UTR) ki jagah wallet-balance-check UI render karta hai.
+// containerEl: wo <div> jisme yeh UI banegi
+// amount: is service ka charge
+// onReady(sufficient): balance load hone ke baad callback — sufficient true/false
+function walletRenderPaymentBlock(containerEl, amount, onReady){
+  const sess = (typeof getSession==='function') ? getSession() : null;
+  const mobile = sess ? sess.mobile : '';
+  containerEl.innerHTML = '<div style="text-align:center;padding:14px;color:#888;font-size:.8rem">⏳ Wallet balance check ho raha hai...</div>';
+  walletGetBalance(mobile).then(function(balance){
+    const sufficient = balance >= amount;
+    if(sufficient){
+      containerEl.innerHTML =
+        '<div style="background:linear-gradient(135deg,#e8f9ee,#f5fffa);border:1.5px solid rgba(46,125,50,.35);border-radius:14px;padding:16px;text-align:center">'
+        + '<div style="font-size:.72rem;color:#3a6a3d;font-weight:700;margin-bottom:4px">💰 Wallet Balance</div>'
+        + '<div style="font-family:\'Baloo 2\',cursive;font-size:1.5rem;font-weight:800;color:#1b5e20">₹' + balance + '</div>'
+        + '<div style="font-size:.74rem;color:#555;margin-top:8px">Is service ka charge <b>₹' + amount + '</b> hai — submit karte hi wallet se kat jayega.</div>'
+        + '</div>';
+    } else {
+      containerEl.innerHTML =
+        '<div style="background:#fdecea;border:1.5px solid rgba(211,47,47,.35);border-radius:14px;padding:16px;text-align:center">'
+        + '<div style="font-size:.72rem;color:#b71c1c;font-weight:700;margin-bottom:4px">⚠️ Wallet me paise kam hain</div>'
+        + '<div style="font-size:.8rem;color:#333;margin-bottom:10px">Balance: <b>₹' + balance + '</b> — Charge: <b>₹' + amount + '</b></div>'
+        + '<button type="button" onclick="openWallet()" style="background:linear-gradient(135deg,#f0a500,#ff8f00);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-weight:700;font-size:.8rem;cursor:pointer;font-family:\'Poppins\',sans-serif">💰 Wallet Me Paise Add Karein</button>'
+        + '</div>';
+    }
+    if(onReady) onReady(sufficient, balance);
+  });
+}
+
+// Wallet se amount kaatta hai — submit se pehle call karein. Resolve(true) agar successful,
+// Resolve(false) agar balance kam ho gaya (dusri jagah se pehle hi kat chuka ho sakta hai)
+function walletDeduct(mobile, amount){
+  return walletGetBalance(mobile).then(function(balance){
+    if(balance < amount) return false;
+    const newBalance = balance - amount;
+    return fbRestSet('wallets/' + walletKey(mobile) + '/balance', newBalance).then(function(){
+      return true;
+    });
+  });
+}
+
+// Agar deduction ke baad request save karne me error aaye to paise wapas add karne ke liye
+function walletAddBalance(mobile, amount){
+  return walletGetBalance(mobile).then(function(balance){
+    return fbRestSet('wallets/' + walletKey(mobile) + '/balance', balance + amount);
   });
 }
 
@@ -4806,8 +4908,6 @@ function openPanFind(){
   document.getElementById('pf-aadhaar').value = '';
   document.getElementById('pf-name').value    = sess ? (sess.name || '') : '';
   document.getElementById('pf-mobile').value  = sess ? (sess.mobile || '') : '';
-  document.getElementById('pf-utr').value     = '';
-  pfLoadQR();
   pfLoadAmount();
 
   document.getElementById('pf-track-inp').value = '';
@@ -4822,24 +4922,17 @@ function closePanFind(){
   renderUserDash();
 }
 
-// Load payment QR — Firebase 'settings/panFindQrCode' se, warna default QR dikhega
-function pfLoadQR(){
-  const img = document.getElementById('pf-qr-img');
-  if(img) img.src = PF_DEFAULT_QR;
-  db.ref('settings/panFindQrCode').once('value').then(snap=>{
-    const v = snap.val();
-    if(v && img) img.src = v;
-  }).catch(()=>{ /* keep default QR */ });
-}
-
-// Load charge amount — Firebase 'settings/panFindAmount' se (admin change kar sakta hai), default ₹50
+// Charge amount load karke wallet-balance payment block dikhata hai (QR ki jagah)
+let _pfCurrentAmount = 50;
 function pfLoadAmount(){
-  const el = document.getElementById('pf-amt-display');
-  if(el) el.textContent = '50';
   db.ref('settings/panFindAmount').once('value').then(snap=>{
-    const v = snap.val();
-    if(v && el) el.textContent = v;
-  }).catch(()=>{ /* keep default amount */ });
+    _pfCurrentAmount = snap.val() || 50;
+    const block = document.getElementById('pf-wallet-block');
+    if(block) walletRenderPaymentBlock(block, _pfCurrentAmount);
+  }).catch(()=>{
+    const block = document.getElementById('pf-wallet-block');
+    if(block) walletRenderPaymentBlock(block, _pfCurrentAmount);
+  });
 }
 
 function pfSwitchTab(tab){
@@ -4903,12 +4996,10 @@ function submitPanFind(){
   const aadhaar = document.getElementById('pf-aadhaar').value.trim().replace(/\D/g,'');
   const name    = document.getElementById('pf-name').value.trim();
   const mobile  = document.getElementById('pf-mobile').value.trim();
-  const utr     = document.getElementById('pf-utr').value.trim();
 
   if(!aadhaar || aadhaar.length !== 12){ showErr('Sahi 12 digit Aadhaar Number dalein!'); return; }
   if(!name){ showErr('Apna naam likhein!'); return; }
-  if(mobile && !/^[0-9]{10}$/.test(mobile)){ showErr('Sahi 10 digit mobile number dalein!'); return; }
-  if(!utr){ showErr('Payment karne ke baad UTR / Transaction No. zaroor dalein!'); return; }
+  if(!mobile || !/^[0-9]{10}$/.test(mobile)){ showErr('Sahi 10 digit mobile number dalein!'); return; }
 
   const btn = document.getElementById('pf-submit-btn');
 
@@ -4928,27 +5019,42 @@ function submitPanFind(){
     btn.textContent = '📤 Request Bhejein';
   }, 15000);
 
-  fbRestUpdate('pan_find_requests/' + aadhaar, {
-    aadhaar: aadhaar,
-    name: name,
-    mobile: mobile,
-    utr: utr,
-    paymentVerified: false,
-    updated: new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata', hour12:true})
-  }).then(()=>{
+  walletDeduct(mobile, _pfCurrentAmount).then(function(ok){
     if(pfDone) return;
-    pfDone = true;
-    clearTimeout(pfTimeoutId);
-    document.getElementById('panfind-form-view').style.display = 'none';
-    document.getElementById('panfind-success-view').style.display = 'block';
-    if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
-  }).catch(()=>{
-    if(pfDone) return;
-    pfDone = true;
-    clearTimeout(pfTimeoutId);
-    btn.disabled = false;
-    btn.textContent = '📤 Request Bhejein';
-    showErr('Internet check karein aur dobara try karein!');
+    if(!ok){
+      pfDone = true;
+      clearTimeout(pfTimeoutId);
+      btn.disabled = false;
+      btn.textContent = '📤 Request Bhejein';
+      showErr('Wallet me paise kam hain! Pehle Wallet me paise add karein.');
+      const block = document.getElementById('pf-wallet-block');
+      if(block) walletRenderPaymentBlock(block, _pfCurrentAmount);
+      return;
+    }
+    fbRestUpdate('pan_find_requests/' + aadhaar, {
+      aadhaar: aadhaar,
+      name: name,
+      mobile: mobile,
+      amount: _pfCurrentAmount,
+      paymentVerified: true,
+      updated: new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata', hour12:true})
+    }).then(()=>{
+      if(pfDone) return;
+      pfDone = true;
+      clearTimeout(pfTimeoutId);
+      walRefreshBalance();
+      document.getElementById('panfind-form-view').style.display = 'none';
+      document.getElementById('panfind-success-view').style.display = 'block';
+      if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
+    }).catch(()=>{
+      if(pfDone) return;
+      pfDone = true;
+      clearTimeout(pfTimeoutId);
+      walletAddBalance(mobile, _pfCurrentAmount); // refund kar dein kyunki request save nahi hui
+      btn.disabled = false;
+      btn.textContent = '📤 Request Bhejein';
+      showErr('Internet check karein aur dobara try karein! (Paise wapas kar diye gaye hain)');
+    });
   });
 }
 
@@ -5023,8 +5129,6 @@ function openVoterFind(){
   document.getElementById('vf-voterno').value = '';
   document.getElementById('vf-name').value    = sess ? (sess.name || '') : '';
   document.getElementById('vf-mobile').value  = sess ? (sess.mobile || '') : '';
-  document.getElementById('vf-utr').value     = '';
-  vfLoadQR();
   vfLoadAmount();
 
   document.getElementById('vf-track-inp').value = '';
@@ -5039,24 +5143,17 @@ function closeVoterFind(){
   renderUserDash();
 }
 
-// Load payment QR — Firebase 'settings/voterFindQrCode' se, warna PAN Find ka default QR dikhega
-function vfLoadQR(){
-  const img = document.getElementById('vf-qr-img');
-  if(img) img.src = (typeof PF_DEFAULT_QR!=='undefined') ? PF_DEFAULT_QR : '';
-  db.ref('settings/voterFindQrCode').once('value').then(snap=>{
-    const v = snap.val();
-    if(v && img) img.src = v;
-  }).catch(()=>{ /* keep default QR */ });
-}
-
-// Load charge amount — Firebase 'settings/voterFindAmount' se (admin change kar sakta hai), default ₹60
+// Charge amount load karke wallet-balance payment block dikhata hai (QR ki jagah)
+let _vfCurrentAmount = 60;
 function vfLoadAmount(){
-  const el = document.getElementById('vf-amt-display');
-  if(el) el.textContent = '60';
   db.ref('settings/voterFindAmount').once('value').then(snap=>{
-    const v = snap.val();
-    if(v && el) el.textContent = v;
-  }).catch(()=>{ /* keep default amount */ });
+    _vfCurrentAmount = snap.val() || 60;
+    const block = document.getElementById('vf-wallet-block');
+    if(block) walletRenderPaymentBlock(block, _vfCurrentAmount);
+  }).catch(()=>{
+    const block = document.getElementById('vf-wallet-block');
+    if(block) walletRenderPaymentBlock(block, _vfCurrentAmount);
+  });
 }
 
 function vfSwitchTab(tab){
@@ -5120,12 +5217,10 @@ function submitVoterFind(){
   const voterNo = document.getElementById('vf-voterno').value.trim().toUpperCase().replace(/\s+/g,'');
   const name    = document.getElementById('vf-name').value.trim();
   const mobile  = document.getElementById('vf-mobile').value.trim();
-  const utr     = document.getElementById('vf-utr').value.trim();
 
   if(!voterNo || voterNo.length < 6){ showErr('Sahi Voter ID Number (EPIC No.) dalein!'); return; }
   if(!name){ showErr('Apna naam likhein!'); return; }
-  if(mobile && !/^[0-9]{10}$/.test(mobile)){ showErr('Sahi 10 digit mobile number dalein!'); return; }
-  if(!utr){ showErr('Payment karne ke baad UTR / Transaction No. zaroor dalein!'); return; }
+  if(!mobile || !/^[0-9]{10}$/.test(mobile)){ showErr('Sahi 10 digit mobile number dalein!'); return; }
 
   const btn = document.getElementById('vf-submit-btn');
 
@@ -5145,27 +5240,42 @@ function submitVoterFind(){
     btn.textContent = '📤 Request Bhejein';
   }, 15000);
 
-  fbRestUpdate('voter_find_requests/' + voterNo, {
-    voterNo: voterNo,
-    name: name,
-    mobile: mobile,
-    utr: utr,
-    paymentVerified: false,
-    updated: new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata', hour12:true})
-  }).then(()=>{
+  walletDeduct(mobile, _vfCurrentAmount).then(function(ok){
     if(vfDone) return;
-    vfDone = true;
-    clearTimeout(vfTimeoutId);
-    document.getElementById('voterfind-form-view').style.display = 'none';
-    document.getElementById('voterfind-success-view').style.display = 'block';
-    if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
-  }).catch(()=>{
-    if(vfDone) return;
-    vfDone = true;
-    clearTimeout(vfTimeoutId);
-    btn.disabled = false;
-    btn.textContent = '📤 Request Bhejein';
-    showErr('Internet check karein aur dobara try karein!');
+    if(!ok){
+      vfDone = true;
+      clearTimeout(vfTimeoutId);
+      btn.disabled = false;
+      btn.textContent = '📤 Request Bhejein';
+      showErr('Wallet me paise kam hain! Pehle Wallet me paise add karein.');
+      const block = document.getElementById('vf-wallet-block');
+      if(block) walletRenderPaymentBlock(block, _vfCurrentAmount);
+      return;
+    }
+    fbRestUpdate('voter_find_requests/' + voterNo, {
+      voterNo: voterNo,
+      name: name,
+      mobile: mobile,
+      amount: _vfCurrentAmount,
+      paymentVerified: true,
+      updated: new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata', hour12:true})
+    }).then(()=>{
+      if(vfDone) return;
+      vfDone = true;
+      clearTimeout(vfTimeoutId);
+      walRefreshBalance();
+      document.getElementById('voterfind-form-view').style.display = 'none';
+      document.getElementById('voterfind-success-view').style.display = 'block';
+      if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
+    }).catch(()=>{
+      if(vfDone) return;
+      vfDone = true;
+      clearTimeout(vfTimeoutId);
+      walletAddBalance(mobile, _vfCurrentAmount);
+      btn.disabled = false;
+      btn.textContent = '📤 Request Bhejein';
+      showErr('Internet check karein aur dobara try karein! (Paise wapas kar diye gaye hain)');
+    });
   });
 }
 
@@ -5240,8 +5350,6 @@ function openRationCard(){
   document.getElementById('rc-rationno').value = '';
   document.getElementById('rtc-name').value    = sess ? (sess.name || '') : '';
   document.getElementById('rtc-mobile').value  = sess ? (sess.mobile || '') : '';
-  document.getElementById('rtc-utr').value     = '';
-  rcLoadQR();
   rcLoadAmount();
 
   document.getElementById('rc-track-inp').value = '';
@@ -5256,24 +5364,17 @@ function closeRationCard(){
   renderUserDash();
 }
 
-// Load payment QR — Firebase 'settings/rationCardQrCode' se, warna default QR dikhega
-function rcLoadQR(){
-  const img = document.getElementById('rc-qr-img');
-  if(img) img.src = (typeof PF_DEFAULT_QR!=='undefined') ? PF_DEFAULT_QR : '';
-  db.ref('settings/rationCardQrCode').once('value').then(snap=>{
-    const v = snap.val();
-    if(v && img) img.src = v;
-  }).catch(()=>{ /* keep default QR */ });
-}
-
-// Load charge amount — Firebase 'settings/rationCardAmount' se (admin change kar sakta hai), default ₹30
+// Charge amount load karke wallet-balance payment block dikhata hai (QR ki jagah)
+let _rcCurrentAmount = 30;
 function rcLoadAmount(){
-  const el = document.getElementById('rc-amt-display');
-  if(el) el.textContent = '30';
   db.ref('settings/rationCardAmount').once('value').then(snap=>{
-    const v = snap.val();
-    if(v && el) el.textContent = v;
-  }).catch(()=>{ /* keep default amount */ });
+    _rcCurrentAmount = snap.val() || 30;
+    const block = document.getElementById('rc-wallet-block');
+    if(block) walletRenderPaymentBlock(block, _rcCurrentAmount);
+  }).catch(()=>{
+    const block = document.getElementById('rc-wallet-block');
+    if(block) walletRenderPaymentBlock(block, _rcCurrentAmount);
+  });
 }
 
 function rcSwitchTab(tab){
@@ -5337,12 +5438,10 @@ function submitRationCard(){
   const aadhaarNo = document.getElementById('rc-rationno').value.trim().replace(/\s+/g,'');
   const name    = document.getElementById('rtc-name').value.trim();
   const mobile  = document.getElementById('rtc-mobile').value.trim();
-  const utr     = document.getElementById('rtc-utr').value.trim();
 
   if(!/^[0-9]{12}$/.test(aadhaarNo)){ showErr('Sahi 12 digit Aadhaar Number dalein!'); return; }
   if(!name){ showErr('Apna naam likhein!'); return; }
-  if(mobile && !/^[0-9]{10}$/.test(mobile)){ showErr('Sahi 10 digit mobile number dalein!'); return; }
-  if(!utr){ showErr('Payment karne ke baad UTR / Transaction No. zaroor dalein!'); return; }
+  if(!mobile || !/^[0-9]{10}$/.test(mobile)){ showErr('Sahi 10 digit mobile number dalein!'); return; }
 
   const btn = document.getElementById('rc-submit-btn');
 
@@ -5362,27 +5461,42 @@ function submitRationCard(){
     btn.textContent = '📤 Request Bhejein';
   }, 15000);
 
-  fbRestUpdate('ration_card_requests/' + aadhaarNo, {
-    aadhaarNo: aadhaarNo,
-    name: name,
-    mobile: mobile,
-    utr: utr,
-    paymentVerified: false,
-    updated: new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata', hour12:true})
-  }).then(()=>{
+  walletDeduct(mobile, _rcCurrentAmount).then(function(ok){
     if(rcDone) return;
-    rcDone = true;
-    clearTimeout(rcTimeoutId);
-    document.getElementById('rationcard-form-view').style.display = 'none';
-    document.getElementById('rationcard-success-view').style.display = 'block';
-    if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
-  }).catch(()=>{
-    if(rcDone) return;
-    rcDone = true;
-    clearTimeout(rcTimeoutId);
-    btn.disabled = false;
-    btn.textContent = '📤 Request Bhejein';
-    showErr('Internet check karein aur dobara try karein!');
+    if(!ok){
+      rcDone = true;
+      clearTimeout(rcTimeoutId);
+      btn.disabled = false;
+      btn.textContent = '📤 Request Bhejein';
+      showErr('Wallet me paise kam hain! Pehle Wallet me paise add karein.');
+      const block = document.getElementById('rc-wallet-block');
+      if(block) walletRenderPaymentBlock(block, _rcCurrentAmount);
+      return;
+    }
+    fbRestUpdate('ration_card_requests/' + aadhaarNo, {
+      aadhaarNo: aadhaarNo,
+      name: name,
+      mobile: mobile,
+      amount: _rcCurrentAmount,
+      paymentVerified: true,
+      updated: new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata', hour12:true})
+    }).then(()=>{
+      if(rcDone) return;
+      rcDone = true;
+      clearTimeout(rcTimeoutId);
+      walRefreshBalance();
+      document.getElementById('rationcard-form-view').style.display = 'none';
+      document.getElementById('rationcard-success-view').style.display = 'block';
+      if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
+    }).catch(()=>{
+      if(rcDone) return;
+      rcDone = true;
+      clearTimeout(rcTimeoutId);
+      walletAddBalance(mobile, _rcCurrentAmount);
+      btn.disabled = false;
+      btn.textContent = '📤 Request Bhejein';
+      showErr('Internet check karein aur dobara try karein! (Paise wapas kar diye gaye hain)');
+    });
   });
 }
 
@@ -5465,8 +5579,6 @@ function openAadhaarAddr(){
   document.getElementById('aau-district').value= '';
   document.getElementById('aau-state').value   = '';
   document.getElementById('aau-pincode').value = '';
-  document.getElementById('aau-utr').value     = '';
-  aauLoadQR();
   aauLoadAmount();
 
   document.getElementById('aau-track-inp').value = '';
@@ -5481,24 +5593,17 @@ function closeAadhaarAddr(){
   renderUserDash();
 }
 
-// Load payment QR — Firebase 'settings/aadhaarAddrQrCode' se, warna default QR dikhega
-function aauLoadQR(){
-  const img = document.getElementById('aau-qr-img');
-  if(img) img.src = (typeof PF_DEFAULT_QR!=='undefined') ? PF_DEFAULT_QR : '';
-  db.ref('settings/aadhaarAddrQrCode').once('value').then(snap=>{
-    const v = snap.val();
-    if(v && img) img.src = v;
-  }).catch(()=>{ /* keep default QR */ });
-}
-
-// Load charge amount — Firebase 'settings/aadhaarAddrAmount' se (admin change kar sakta hai), default ₹40
+// Charge amount load karke wallet-balance payment block dikhata hai (QR ki jagah)
+let _aauCurrentAmount = 40;
 function aauLoadAmount(){
-  const el = document.getElementById('aau-amt-display');
-  if(el) el.textContent = '40';
   db.ref('settings/aadhaarAddrAmount').once('value').then(snap=>{
-    const v = snap.val();
-    if(v && el) el.textContent = v;
-  }).catch(()=>{ /* keep default amount */ });
+    _aauCurrentAmount = snap.val() || 40;
+    const block = document.getElementById('aau-wallet-block');
+    if(block) walletRenderPaymentBlock(block, _aauCurrentAmount);
+  }).catch(()=>{
+    const block = document.getElementById('aau-wallet-block');
+    if(block) walletRenderPaymentBlock(block, _aauCurrentAmount);
+  });
 }
 
 function aauSwitchTab(tab){
@@ -5536,15 +5641,13 @@ function submitAadhaarAddr(){
   const district  = document.getElementById('aau-district').value.trim();
   const state     = document.getElementById('aau-state').value.trim();
   const pincode   = document.getElementById('aau-pincode').value.trim();
-  const utr       = document.getElementById('aau-utr').value.trim();
 
   if(!/^[0-9]{12}$/.test(aadhaarNo)){ showErr('Sahi 12 digit Aadhaar Number dalein!'); return; }
   if(!name){ showErr('Apna naam likhein!'); return; }
-  if(mobile && !/^[0-9]{10}$/.test(mobile)){ showErr('Sahi 10 digit mobile number dalein!'); return; }
+  if(!mobile || !/^[0-9]{10}$/.test(mobile)){ showErr('Sahi 10 digit mobile number dalein!'); return; }
   if(!coEn){ showErr('C/O Naam (English) zaroor dalein!'); return; }
   if(!village || !post || !district || !state){ showErr('Poora address (Village, Post, District, State) bharein!'); return; }
   if(!pincode || !/^[0-9]{6}$/.test(pincode)){ showErr('Sahi 6 digit Pin Code dalein!'); return; }
-  if(!utr){ showErr('Payment karne ke baad UTR / Transaction No. zaroor dalein!'); return; }
 
   const btn = document.getElementById('aau-submit-btn');
 
@@ -5564,35 +5667,50 @@ function submitAadhaarAddr(){
     btn.textContent = '📤 Request Bhejein';
   }, 15000);
 
-  fbRestUpdate('aadhaar_addr_update_requests/' + aadhaarNo, {
-    aadhaarNo: aadhaarNo,
-    name: name,
-    mobile: mobile,
-    coEn: coEn,
-    coHi: coHi,
-    village: village,
-    post: post,
-    tehsil: tehsil,
-    district: district,
-    state: state,
-    pincode: pincode,
-    utr: utr,
-    paymentVerified: false,
-    updated: new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata', hour12:true})
-  }).then(()=>{
+  walletDeduct(mobile, _aauCurrentAmount).then(function(ok){
     if(aauDone) return;
-    aauDone = true;
-    clearTimeout(aauTimeoutId);
-    document.getElementById('aadhaaraddr-form-view').style.display = 'none';
-    document.getElementById('aadhaaraddr-success-view').style.display = 'block';
-    if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
-  }).catch(()=>{
-    if(aauDone) return;
-    aauDone = true;
-    clearTimeout(aauTimeoutId);
-    btn.disabled = false;
-    btn.textContent = '📤 Request Bhejein';
-    showErr('Internet check karein aur dobara try karein!');
+    if(!ok){
+      aauDone = true;
+      clearTimeout(aauTimeoutId);
+      btn.disabled = false;
+      btn.textContent = '📤 Request Bhejein';
+      showErr('Wallet me paise kam hain! Pehle Wallet me paise add karein.');
+      const block = document.getElementById('aau-wallet-block');
+      if(block) walletRenderPaymentBlock(block, _aauCurrentAmount);
+      return;
+    }
+    fbRestUpdate('aadhaar_addr_update_requests/' + aadhaarNo, {
+      aadhaarNo: aadhaarNo,
+      name: name,
+      mobile: mobile,
+      coEn: coEn,
+      coHi: coHi,
+      village: village,
+      post: post,
+      tehsil: tehsil,
+      district: district,
+      state: state,
+      pincode: pincode,
+      amount: _aauCurrentAmount,
+      paymentVerified: true,
+      updated: new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata', hour12:true})
+    }).then(()=>{
+      if(aauDone) return;
+      aauDone = true;
+      clearTimeout(aauTimeoutId);
+      walRefreshBalance();
+      document.getElementById('aadhaaraddr-form-view').style.display = 'none';
+      document.getElementById('aadhaaraddr-success-view').style.display = 'block';
+      if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
+    }).catch(()=>{
+      if(aauDone) return;
+      aauDone = true;
+      clearTimeout(aauTimeoutId);
+      walletAddBalance(mobile, _aauCurrentAmount);
+      btn.disabled = false;
+      btn.textContent = '📤 Request Bhejein';
+      showErr('Internet check karein aur dobara try karein! (Paise wapas kar diye gaye hain)');
+    });
   });
 }
 
@@ -5673,6 +5791,187 @@ function aauLoadMyRecords(){
   });
 }
 
+// ══════════════════════════════════════════
+// WALLET — Add Money (UPI QR) + Status Check + Meri Records
+// ══════════════════════════════════════════
+function openWallet(){
+  const sess = getSession();
+  document.getElementById('wal-add-form-view').style.display = 'block';
+  document.getElementById('wal-success-view').style.display = 'none';
+  document.getElementById('wal-err').style.display = 'none';
+  document.getElementById('wal-amount').value = '';
+  document.getElementById('wal-utr').value = '';
+  document.getElementById('wal-qrbox').style.display = 'none';
+  document.getElementById('wal-utr-wrap').style.display = 'none';
+  document.getElementById('wal-track-inp').value = '';
+  document.getElementById('wal-track-result').innerHTML = '<div class="wal-empty"><div class="em-ico">📭</div><div class="em-txt">Apna top-up status dekhne ke liye Request No se search karein</div></div>';
+  walRefreshBalance();
+  walSwitchTab('add');
+  showPage('wallet-popup');
+}
+
+function closeWallet(){
+  showPage('user-dash-page');
+  renderUserDash();
+}
+
+function walRefreshBalance(){
+  const sess = getSession();
+  if(!sess || !sess.mobile) return;
+  walletGetBalance(sess.mobile).then(function(bal){
+    const el = document.getElementById('wal-balance-display');
+    if(el) el.textContent = bal;
+    const dashEl = document.getElementById('udash-wallet-balance');
+    if(dashEl) dashEl.textContent = bal;
+    const navEl = document.getElementById('nav-wallet-badge');
+    if(navEl) navEl.textContent = '₹' + bal;
+  });
+}
+
+function walSwitchTab(tab){
+  const tabs = {add:'wal-tab-add', track:'wal-tab-track', records:'wal-tab-records'};
+  const views = {add:'wal-view-add', track:'wal-view-track', records:'wal-view-records'};
+  Object.keys(tabs).forEach(function(k){
+    const tEl = document.getElementById(tabs[k]);
+    const vEl = document.getElementById(views[k]);
+    if(tEl) tEl.classList.toggle('active', k===tab);
+    if(vEl) vEl.style.display = (k===tab) ? 'block' : 'none';
+  });
+  if(tab === 'records') walLoadMyRecords();
+}
+
+function walSetAmount(amt){
+  document.getElementById('wal-amount').value = amt;
+}
+
+function walGenerateQr(){
+  const errBox = document.getElementById('wal-err');
+  errBox.style.display = 'none';
+  const amt = parseInt(document.getElementById('wal-amount').value, 10);
+  if(!amt || amt <= 0){
+    errBox.textContent = '⚠️ Sahi amount dalein';
+    errBox.style.display = 'block';
+    return;
+  }
+  document.getElementById('wal-qr-img').src = walletBuildQrUrl(amt);
+  document.getElementById('wal-qr-amt-badge').textContent = '₹' + amt;
+  document.getElementById('wal-qrbox').style.display = 'block';
+  document.getElementById('wal-utr-wrap').style.display = 'block';
+}
+
+function walGoTrackAfterSubmit(){
+  document.getElementById('wal-track-inp').value = window._walLastReqId || '';
+  walSwitchTab('track');
+  if(window._walLastReqId) trackWalletStatus();
+}
+
+function submitWalletTopup(){
+  const errBox = document.getElementById('wal-err');
+  errBox.style.display = 'none';
+  const amt = parseInt(document.getElementById('wal-amount').value, 10);
+  const utr = document.getElementById('wal-utr').value.trim();
+  if(!amt || amt <= 0){ errBox.textContent = '⚠️ Sahi amount dalein'; errBox.style.display='block'; return; }
+  if(!utr){ errBox.textContent = '⚠️ Payment ke baad UTR number dalein'; errBox.style.display='block'; return; }
+
+  const sess = getSession();
+  if(!sess || !sess.mobile){ errBox.textContent = '⚠️ Login karein'; errBox.style.display='block'; return; }
+
+  if(typeof navigator !== 'undefined' && navigator.onLine === false){
+    errBox.textContent = '⚠️ Internet connection nahi hai. Internet check karke dobara try karein.';
+    errBox.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('wal-submit-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Submit ho raha hai...';
+
+  let walDone = false;
+  const walTimeoutId = setTimeout(function(){
+    if(walDone) return;
+    walDone = true;
+    errBox.textContent = '⚠️ ' + _awoConnDiagMsg();
+    errBox.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '✅ Submit Karein';
+  }, 15000);
+
+  fbRestPush('wallet_topup_requests', {
+    mobile: sess.mobile,
+    name: sess.name || '',
+    amount: amt,
+    utr: utr,
+    status: 'Pending',
+    requestedAt: new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata', hour12:true}),
+    requestedAtTs: Date.now()
+  }).then(function(ref){
+    if(walDone) return;
+    walDone = true;
+    clearTimeout(walTimeoutId);
+    const idEl = document.getElementById('wal-success-appno');
+    document.getElementById('wal-add-form-view').style.display = 'none';
+    document.getElementById('wal-success-view').style.display = 'block';
+    const noteEl = document.getElementById('wal-success-view').querySelector('div[style*="line-height:1.6"]');
+    if(noteEl) noteEl.innerHTML = 'Admin verify karte hi paise aapke wallet me turant add ho jayenge.<br/><b>Request No: ' + (ref.key||'') + '</b>';
+    window._walLastReqId = ref.key || '';
+    if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
+  }).catch(function(){
+    if(walDone) return;
+    walDone = true;
+    clearTimeout(walTimeoutId);
+    btn.disabled = false;
+    btn.textContent = '✅ Submit Karein';
+    errBox.textContent = '❌ Internet check karein aur dobara try karein!';
+    errBox.style.display = 'block';
+  });
+}
+
+function walRenderRecordCard(reqId, r){
+  const status = r.status || 'Pending';
+  const cls = status==='Approved' ? 'wal-sbadge-done' : (status==='Rejected' ? 'wal-sbadge-rejected' : 'wal-sbadge-pending');
+  const ico = status==='Approved' ? '✅' : (status==='Rejected' ? '❌' : '⏳');
+  let html = '<div class="wal-track-card">'
+    + '<div class="wal-track-top"><span class="wal-track-num">🆔 ' + reqId + '</span><span class="wal-sbadge ' + cls + '">' + ico + ' ' + status + '</span></div>'
+    + '<div class="wal-track-row"><span class="k">💰 Amount</span><span class="v">₹' + (r.amount||0) + '</span></div>'
+    + '<div class="wal-track-row"><span class="k">🧾 UTR</span><span class="v">' + (r.utr||'—') + '</span></div>'
+    + '<div class="wal-track-row"><span class="k">🕐 Request Kiya</span><span class="v">' + (r.requestedAt||'—') + '</span></div>';
+  if(status==='Approved') html += '<div style="margin-top:8px;font-size:.79rem;color:#0a3622;background:#d1e7dd;border-radius:10px;padding:9px 11px">✅ Paise aapke wallet me add ho gaye hain!</div>';
+  html += '</div>';
+  return html;
+}
+
+function trackWalletStatus(){
+  const reqId = document.getElementById('wal-track-inp').value.trim();
+  const resultBox = document.getElementById('wal-track-result');
+  if(!reqId){ resultBox.innerHTML = '<div class="wal-empty"><div class="em-ico">⚠️</div><div class="em-txt">Request No dalein</div></div>'; return; }
+  resultBox.innerHTML = '<div class="wal-loading">⏳ Search ho raha hai...</div>';
+  fbRestGet('wallet_topup_requests/' + reqId).then(function(r){
+    if(!r){ resultBox.innerHTML = '<div class="wal-empty"><div class="em-ico">❌</div><div class="em-txt">Ye Request No nahi mila.<br/>Sahi No check karein.</div></div>'; return; }
+    resultBox.innerHTML = walRenderRecordCard(reqId, r);
+  }).catch(function(){
+    resultBox.innerHTML = '<div class="wal-empty"><div class="em-ico">❌</div><div class="em-txt">Load nahi hua. Internet check karein.</div></div>';
+  });
+}
+
+function walLoadMyRecords(){
+  const sess = getSession();
+  const wrap = document.getElementById('wal-records-result');
+  if(!sess || !sess.mobile){ wrap.innerHTML = '<div class="wal-empty"><div class="em-ico">⚠️</div><div class="em-txt">Login karein records dekhne ke liye</div></div>'; return; }
+  wrap.innerHTML = '<div class="wal-loading">⏳ Load ho raha hai...</div>';
+  fbRestGet('wallet_topup_requests').then(function(data){
+    data = data || {};
+    const entries = Object.entries(data).filter(function(e){ return e[1].mobile === sess.mobile; });
+    if(!entries.length){
+      wrap.innerHTML = '<div class="wal-empty"><div class="em-ico">📭</div><div class="em-txt">Aapki koi wallet request nahi mili</div></div>';
+      return;
+    }
+    entries.sort(function(a,b){ return (b[1].requestedAtTs||0) - (a[1].requestedAtTs||0); });
+    wrap.innerHTML = entries.map(function(e){ return walRenderRecordCard(e[0], e[1]); }).join('');
+  }).catch(function(){
+    wrap.innerHTML = '<div class="wal-empty"><div class="em-ico">❌</div><div class="em-txt">Load nahi hua. Internet check karein.</div></div>';
+  });
+}
+
 
 let _acPdfData = '';
 let _acPdfName = '';
@@ -5695,10 +5994,8 @@ function openAadhaarPvc(){
   document.getElementById('ac-pdfpass').value = '';
   document.getElementById('ac-bgcolor').value = 'Yellow';
   document.getElementById('ac-mobileprint').value = 'Yes';
-  document.getElementById('ac-utr').value     = '';
   document.getElementById('ac-pdf-filename').textContent = '';
   _acPdfData = ''; _acPdfName = '';
-  acLoadQR();
   acLoadAmount();
 
   document.getElementById('ac-track-inp').value = '';
@@ -5737,24 +6034,17 @@ function acPdfFileSelected(input){
   reader.readAsDataURL(file);
 }
 
-// Load payment QR — Firebase 'settings/aadhaarPvcQrCode' se
-function acLoadQR(){
-  const img = document.getElementById('ac-qr-img');
-  if(img) img.src = (typeof PF_DEFAULT_QR!=='undefined') ? PF_DEFAULT_QR : '';
-  db.ref('settings/aadhaarPvcQrCode').once('value').then(snap=>{
-    const v = snap.val();
-    if(v && img) img.src = v;
-  }).catch(()=>{ /* keep default QR */ });
-}
-
-// Load charge amount — Firebase 'settings/aadhaarPvcAmount' se (admin change kar sakta hai), default ₹10
+// Charge amount load karke wallet-balance payment block dikhata hai (QR ki jagah)
+let _acCurrentAmount = 10;
 function acLoadAmount(){
-  const el = document.getElementById('ac-amt-display');
-  if(el) el.textContent = '10';
   db.ref('settings/aadhaarPvcAmount').once('value').then(snap=>{
-    const v = snap.val();
-    if(v && el) el.textContent = v;
-  }).catch(()=>{ /* keep default amount */ });
+    _acCurrentAmount = snap.val() || 10;
+    const block = document.getElementById('ac-wallet-block');
+    if(block) walletRenderPaymentBlock(block, _acCurrentAmount);
+  }).catch(()=>{
+    const block = document.getElementById('ac-wallet-block');
+    if(block) walletRenderPaymentBlock(block, _acCurrentAmount);
+  });
 }
 
 function acSwitchTab(tab){
@@ -5821,14 +6111,12 @@ function submitAadhaarPvc(){
   const pdfPass   = document.getElementById('ac-pdfpass').value.trim();
   const bgColor   = document.getElementById('ac-bgcolor').value;
   const mobilePrint = document.getElementById('ac-mobileprint').value;
-  const utr       = document.getElementById('ac-utr').value.trim();
 
   if(!/^[0-9]{12}$/.test(aadhaarNo)){ showErr('Sahi 12 digit Aadhaar Number dalein!'); return; }
   if(!name){ showErr('Apna naam likhein!'); return; }
-  if(mobile && !/^[0-9]{10}$/.test(mobile)){ showErr('Sahi 10 digit mobile number dalein!'); return; }
+  if(!mobile || !/^[0-9]{10}$/.test(mobile)){ showErr('Sahi 10 digit mobile number dalein!'); return; }
   if(!_acPdfData){ showErr('Aadhaar PDF file select karein!'); return; }
   if(!pdfPass){ showErr('PDF Password dalein!'); return; }
-  if(!utr){ showErr('Payment karne ke baad UTR / Transaction No. zaroor dalein!'); return; }
 
   const btn = document.getElementById('ac-submit-btn');
 
@@ -5848,32 +6136,47 @@ function submitAadhaarPvc(){
     btn.textContent = '📤 Request Bhejein';
   }, 30000);
 
-  fbRestUpdate('aadhaar_pvc_requests/' + aadhaarNo, {
-    aadhaarNo: aadhaarNo,
-    name: name,
-    mobile: mobile,
-    pdfPassword: pdfPass,
-    bgColor: bgColor,
-    mobilePrint: mobilePrint,
-    pdfFile: _acPdfData,
-    pdfFileName: _acPdfName,
-    utr: utr,
-    paymentVerified: false,
-    updated: new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata', hour12:true})
-  }).then(()=>{
+  walletDeduct(mobile, _acCurrentAmount).then(function(ok){
     if(acDone) return;
-    acDone = true;
-    clearTimeout(acTimeoutId);
-    document.getElementById('aadhaarpvc-form-view').style.display = 'none';
-    document.getElementById('aadhaarpvc-success-view').style.display = 'block';
-    if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
-  }).catch(()=>{
-    if(acDone) return;
-    acDone = true;
-    clearTimeout(acTimeoutId);
-    btn.disabled = false;
-    btn.textContent = '📤 Request Bhejein';
-    showErr('Internet check karein aur dobara try karein! (PDF chhota rakhein)');
+    if(!ok){
+      acDone = true;
+      clearTimeout(acTimeoutId);
+      btn.disabled = false;
+      btn.textContent = '📤 Request Bhejein';
+      showErr('Wallet me paise kam hain! Pehle Wallet me paise add karein.');
+      const block = document.getElementById('ac-wallet-block');
+      if(block) walletRenderPaymentBlock(block, _acCurrentAmount);
+      return;
+    }
+    fbRestUpdate('aadhaar_pvc_requests/' + aadhaarNo, {
+      aadhaarNo: aadhaarNo,
+      name: name,
+      mobile: mobile,
+      pdfPassword: pdfPass,
+      bgColor: bgColor,
+      mobilePrint: mobilePrint,
+      pdfFile: _acPdfData,
+      pdfFileName: _acPdfName,
+      amount: _acCurrentAmount,
+      paymentVerified: true,
+      updated: new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata', hour12:true})
+    }).then(()=>{
+      if(acDone) return;
+      acDone = true;
+      clearTimeout(acTimeoutId);
+      walRefreshBalance();
+      document.getElementById('aadhaarpvc-form-view').style.display = 'none';
+      document.getElementById('aadhaarpvc-success-view').style.display = 'block';
+      if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
+    }).catch(()=>{
+      if(acDone) return;
+      acDone = true;
+      clearTimeout(acTimeoutId);
+      walletAddBalance(mobile, _acCurrentAmount);
+      btn.disabled = false;
+      btn.textContent = '📤 Request Bhejein';
+      showErr('Internet check karein aur dobara try karein! (PDF chhota rakhein, paise wapas kar diye gaye hain)');
+    });
   });
 }
 
@@ -6424,6 +6727,7 @@ async function renderUserDash(){
   if(!sess)return;
   udashShowSection('dashboard');
   loadQsBannerImages();
+  walRefreshBalance();
 
   // Update welcome header
   const name = sess.name || 'Kisan Ji';
@@ -7748,18 +8052,10 @@ function openCustomCardForm(cardId){
 
   // Payment section — sirf tab dikhega jab card.paymentRequired true ho (jaise PAN Card me)
   const payBlock = document.getElementById('dcf-payment-block');
-  document.getElementById('dcf-utr').value = '';
-  if(c.paymentRequired){
+  if(c.paymentRequired && c.amount && Number(c.amount) > 0){
     payBlock.style.display = 'block';
-    const qrImg = document.getElementById('dcf-qr-img');
-    qrImg.src = c.qrCode || (typeof PF_DEFAULT_QR!=='undefined' ? PF_DEFAULT_QR : '');
-    const amtBadge = document.getElementById('dcf-amt-badge');
-    if(c.amount && Number(c.amount) > 0){
-      amtBadge.textContent = '💰 Charge: ₹' + c.amount;
-      amtBadge.style.display = 'inline-block';
-    } else {
-      amtBadge.style.display = 'none';
-    }
+    const walBlock = document.getElementById('dcf-wallet-block');
+    if(walBlock) walletRenderPaymentBlock(walBlock, Number(c.amount));
   } else {
     payBlock.style.display = 'none';
   }
@@ -7884,28 +8180,17 @@ function submitCustomCardForm(){
     errBox.style.display='block';
     return;
   }
-
-  // Payment fields — jab card ko payment chahiye ho (sirf UTR, screenshot ki zaroorat nahi)
-  const utr = card.paymentRequired ? document.getElementById('dcf-utr').value.trim() : '';
-  if(card.paymentRequired){
-    if(!utr){ errBox.textContent='⚠️ Payment ke baad UTR / Transaction number dalein'; errBox.style.display='block'; return; }
-  }
   errBox.style.display='none';
 
   const sess = (typeof getSession==='function') ? getSession() : null;
-  const payload = {
-    values: values,
-    userName: sess ? (sess.name||'') : '',
-    userMobile: sess ? (sess.mobile||'') : '',
-    cardTitle: card.title || '',
-    status: 'Pending',
-    submittedAt: new Date().toISOString(),
-    submittedAtTs: Date.now()
-  };
-  if(card.paymentRequired){
-    payload.utr = utr;
-    payload.amount = card.amount || 0;
+  const amount = (card.paymentRequired && card.amount) ? Number(card.amount) : 0;
+
+  if(amount > 0 && (!sess || !sess.mobile)){
+    errBox.textContent = '⚠️ Login karein payment karne ke liye';
+    errBox.style.display='block';
+    return;
   }
+
   const submitBtn = document.querySelector('#dcf-form-view .dcf-submit');
 
   // Internet na ho to turant bata dein, Firebase ko hamesha ke liye wait na karne dein
@@ -7917,32 +8202,66 @@ function submitCustomCardForm(){
 
   if(submitBtn){ submitBtn.disabled=true; submitBtn.textContent='⏳ Submit ho raha hai...'; }
 
-  let dcfSubmitDone = false;
-  const dcfTimeoutId = setTimeout(function(){
-    if(dcfSubmitDone) return;
-    dcfSubmitDone = true;
-    errBox.textContent = '⚠️ ' + _awoConnDiagMsg();
-    errBox.style.display = 'block';
-    if(submitBtn){ submitBtn.disabled=false; submitBtn.textContent='✅ Submit Karein'; }
-  }, 15000);
+  function dcfDoFinalSubmit(){
+    let dcfSubmitDone = false;
+    const dcfTimeoutId = setTimeout(function(){
+      if(dcfSubmitDone) return;
+      dcfSubmitDone = true;
+      errBox.textContent = '⚠️ ' + _awoConnDiagMsg();
+      errBox.style.display = 'block';
+      if(submitBtn){ submitBtn.disabled=false; submitBtn.textContent='✅ Submit Karein'; }
+    }, 15000);
 
-  fbRestPush('customCardSubmissions/'+cardId, payload).then(function(ref){
-    if(dcfSubmitDone) return; // timeout ho chuka hai, user ko already bata diya gaya
-    dcfSubmitDone = true;
-    clearTimeout(dcfTimeoutId);
-    const appNo = ref.key || '';
-    const idEl = document.getElementById('dcf-success-appno');
-    if(idEl) idEl.textContent = appNo;
-    document.getElementById('dcf-form-view').style.display='none';
-    document.getElementById('dcf-success-view').style.display='block';
-  }).catch(function(err){
-    if(dcfSubmitDone) return;
-    dcfSubmitDone = true;
-    clearTimeout(dcfTimeoutId);
-    errBox.textContent = '❌ Error: '+err.message;
-    errBox.style.display='block';
-    if(submitBtn){ submitBtn.disabled=false; submitBtn.textContent='✅ Submit Karein'; }
-  });
+    const payload = {
+      values: values,
+      userName: sess ? (sess.name||'') : '',
+      userMobile: sess ? (sess.mobile||'') : '',
+      cardTitle: card.title || '',
+      status: 'Pending',
+      submittedAt: new Date().toISOString(),
+      submittedAtTs: Date.now()
+    };
+    if(amount > 0){
+      payload.amount = amount;
+      payload.paymentVerified = true;
+    }
+
+    fbRestPush('customCardSubmissions/'+cardId, payload).then(function(ref){
+      if(dcfSubmitDone) return; // timeout ho chuka hai, user ko already bata diya gaya
+      dcfSubmitDone = true;
+      clearTimeout(dcfTimeoutId);
+      const appNo = ref.key || '';
+      const idEl = document.getElementById('dcf-success-appno');
+      if(idEl) idEl.textContent = appNo;
+      if(amount > 0) walRefreshBalance();
+      document.getElementById('dcf-form-view').style.display='none';
+      document.getElementById('dcf-success-view').style.display='block';
+    }).catch(function(err){
+      if(dcfSubmitDone) return;
+      dcfSubmitDone = true;
+      clearTimeout(dcfTimeoutId);
+      if(amount > 0 && sess) walletAddBalance(sess.mobile, amount); // request save nahi hui, paise wapas
+      errBox.textContent = '❌ Error: '+err.message + (amount>0 ? ' (Paise wapas kar diye gaye hain)' : '');
+      errBox.style.display='block';
+      if(submitBtn){ submitBtn.disabled=false; submitBtn.textContent='✅ Submit Karein'; }
+    });
+  }
+
+  if(amount > 0){
+    walletDeduct(sess.mobile, amount).then(function(ok){
+      if(!ok){
+        if(submitBtn){ submitBtn.disabled=false; submitBtn.textContent='✅ Submit Karein'; }
+        errBox.textContent = '⚠️ Wallet me paise kam hain! Pehle Wallet me paise add karein.';
+        errBox.style.display = 'block';
+        const walBlock = document.getElementById('dcf-wallet-block');
+        if(walBlock) walletRenderPaymentBlock(walBlock, amount);
+        return;
+      }
+      dcfDoFinalSubmit();
+    });
+  } else {
+    dcfDoFinalSubmit();
+  }
 }
 
 // ── CUSTOM CARD: APPLICATION STATUS TRACK (jaise PAN Card status check) ──
@@ -8603,16 +8922,8 @@ function dcfCheckTrack(){
           <div id="dcf-fields"></div>
 
           <div id="dcf-payment-block" style="display:none">
-            <div style="font-size:.74rem;font-weight:700;color:#4a148c;margin:16px 0 10px;border-top:1px dashed rgba(106,27,154,.25);padding-top:14px">💳 Payment Karein</div>
-            <div style="text-align:center;background:#f7f2fb;border:1.5px solid rgba(106,27,154,.28);border-radius:14px;padding:14px;margin-bottom:14px">
-              <img id="dcf-qr-img" src="" alt="Scan to Pay QR" style="width:150px;height:150px;object-fit:contain;border-radius:10px;background:#fff;padding:6px"/>
-              <div style="font-size:.7rem;color:#5a5a7a;margin-top:8px">Scan karke payment karein, uske baad neeche UTR number dein</div>
-              <div id="dcf-amt-badge" style="display:none;margin-top:8px;background:linear-gradient(135deg,#4a148c,#6a1b9a);color:#fff;font-weight:800;font-size:.85rem;padding:4px 14px;border-radius:20px;letter-spacing:.3px"></div>
-            </div>
-            <div class="dcf-fg">
-              <label class="dcf-lbl">🧾 UTR / Transaction No. <span style="color:#e53935">*</span></label>
-              <input id="dcf-utr" class="dcf-field" type="text" placeholder="Payment app se UTR number copy karein"/>
-            </div>
+            <div style="font-size:.74rem;font-weight:700;color:#4a148c;margin:16px 0 10px;border-top:1px dashed rgba(106,27,154,.25);padding-top:14px">💳 Payment (Wallet Se)</div>
+            <div id="dcf-wallet-block"></div>
           </div>
 
           <div id="dcf-err" class="dcf-err"></div>
@@ -8790,18 +9101,9 @@ function dcfCheckTrack(){
             <div class="pf-iw"><span class="pf-ico">📱</span><input id="pf-mobile" class="pf-field" type="tel" placeholder="10 digit mobile" maxlength="10"/></div>
           </div>
 
-          <!-- ── PAYMENT (QR) ── -->
-          <div class="pf-payhead">💳 Payment Karein</div>
-          <div class="pf-qrbox">
-            <img id="pf-qr-img" src="" alt="Scan to Pay QR"/>
-            <div class="pf-qr-sub">Scan karke payment karein, uske baad neeche UTR / Transaction No. dalein</div>
-            <div class="pf-amt-badge">💰 Charge: ₹<span id="pf-amt-display">50</span></div>
-          </div>
-
-          <div class="pf-fg">
-            <label class="pf-lbl">🧾 UTR / Transaction No. (Payment ke baad)</label>
-            <div class="pf-iw"><span class="pf-ico">🧾</span><input id="pf-utr" class="pf-field" type="text" placeholder="Payment app se UTR number copy karein"/></div>
-          </div>
+          <!-- ── PAYMENT (WALLET) ── -->
+          <div class="pf-payhead">💳 Payment (Wallet Se)</div>
+          <div id="pf-wallet-block" style="margin-bottom:14px"></div>
 
           <button class="pf-submit" id="pf-submit-btn" onclick="submitPanFind()">📤 Request Bhejein</button>
           <button class="pf-cancel" onclick="closePanFind()">Band Karein</button>
@@ -8959,18 +9261,9 @@ function dcfCheckTrack(){
             <div class="vf-iw"><span class="vf-ico">📱</span><input id="vf-mobile" class="vf-field" type="tel" placeholder="10 digit mobile" maxlength="10"/></div>
           </div>
 
-          <!-- ── PAYMENT (QR) ── -->
-          <div class="vf-payhead">💳 Payment Karein</div>
-          <div class="vf-qrbox">
-            <img id="vf-qr-img" src="" alt="Scan to Pay QR"/>
-            <div class="vf-qr-sub">Scan karke payment karein, uske baad neeche UTR / Transaction No. dalein</div>
-            <div class="vf-amt-badge">💰 Charge: ₹<span id="vf-amt-display">60</span></div>
-          </div>
-
-          <div class="vf-fg">
-            <label class="vf-lbl">🧾 UTR / Transaction No. (Payment ke baad)</label>
-            <div class="vf-iw"><span class="vf-ico">🧾</span><input id="vf-utr" class="vf-field" type="text" placeholder="Payment app se UTR number copy karein"/></div>
-          </div>
+          <!-- ── PAYMENT (WALLET) ── -->
+          <div class="vf-payhead">💳 Payment (Wallet Se)</div>
+          <div id="vf-wallet-block" style="margin-bottom:14px"></div>
 
           <button class="vf-submit" id="vf-submit-btn" onclick="submitVoterFind()">📤 Request Bhejein</button>
           <button class="vf-cancel" onclick="closeVoterFind()">Band Karein</button>
@@ -9181,18 +9474,9 @@ function dcfCheckTrack(){
             </div>
           </div>
 
-          <!-- ── PAYMENT (QR) ── -->
-          <div class="ac-payhead">💳 Payment Karein</div>
-          <div class="ac-qrbox">
-            <img id="ac-qr-img" src="" alt="Scan to Pay QR"/>
-            <div class="ac-qr-sub">Scan karke payment karein, uske baad neeche UTR / Transaction No. dalein</div>
-            <div class="ac-amt-badge">💰 Application Fee: ₹<span id="ac-amt-display">10</span></div>
-          </div>
-
-          <div class="ac-fg">
-            <label class="ac-lbl">🧾 UTR / Transaction No. (Payment ke baad)</label>
-            <div class="ac-iw"><span class="ac-ico">🧾</span><input id="ac-utr" class="ac-field" type="text" placeholder="Payment app se UTR number copy karein"/></div>
-          </div>
+          <!-- ── PAYMENT (WALLET) ── -->
+          <div class="ac-payhead">💳 Payment (Wallet Se)</div>
+          <div id="ac-wallet-block" style="margin-bottom:14px"></div>
 
           <button class="ac-submit" id="ac-submit-btn" onclick="submitAadhaarPvc()">📤 Request Bhejein</button>
           <button class="ac-cancel" onclick="closeAadhaarPvc()">Band Karein</button>
@@ -9355,18 +9639,9 @@ function dcfCheckTrack(){
             <div class="rc-iw"><span class="rc-ico">📱</span><input id="rtc-mobile" class="rc-field" type="tel" placeholder="10 digit mobile" maxlength="10"/></div>
           </div>
 
-          <!-- ── PAYMENT (QR) ── -->
-          <div class="rc-payhead">💳 Payment Karein</div>
-          <div class="rc-qrbox">
-            <img id="rc-qr-img" src="" alt="Scan to Pay QR"/>
-            <div class="rc-qr-sub">Scan karke payment karein, uske baad neeche UTR / Transaction No. dalein</div>
-            <div class="rc-amt-badge">💰 Charge: ₹<span id="rc-amt-display">30</span></div>
-          </div>
-
-          <div class="rc-fg">
-            <label class="rc-lbl">🧾 UTR / Transaction No. (Payment ke baad)</label>
-            <div class="rc-iw"><span class="rc-ico">🧾</span><input id="rtc-utr" class="rc-field" type="text" placeholder="Payment app se UTR number copy karein"/></div>
-          </div>
+          <!-- ── PAYMENT (WALLET) ── -->
+          <div class="rc-payhead">💳 Payment (Wallet Se)</div>
+          <div id="rc-wallet-block" style="margin-bottom:14px"></div>
 
           <button class="rc-submit" id="rc-submit-btn" onclick="submitRationCard()">📤 Request Bhejein</button>
           <button class="rc-cancel" onclick="closeRationCard()">Band Karein</button>
@@ -9560,18 +9835,9 @@ function dcfCheckTrack(){
             <div class="aau-iw"><span class="aau-ico">📍</span><input id="aau-pincode" class="aau-field" type="text" inputmode="numeric" maxlength="6" placeholder="6 digit PIN"/></div>
           </div>
 
-          <!-- ── PAYMENT (QR) ── -->
-          <div class="aau-payhead">💳 Payment Karein</div>
-          <div class="aau-qrbox">
-            <img id="aau-qr-img" src="" alt="Scan to Pay QR"/>
-            <div class="aau-qr-sub">Scan karke payment karein, uske baad neeche UTR / Transaction No. dalein</div>
-            <div class="aau-amt-badge">💰 Charge: ₹<span id="aau-amt-display">40</span></div>
-          </div>
-
-          <div class="aau-fg">
-            <label class="aau-lbl">🧾 UTR / Transaction No. (Payment ke baad)</label>
-            <div class="aau-iw"><span class="aau-ico">🧾</span><input id="aau-utr" class="aau-field" type="text" placeholder="Payment app se UTR number copy karein"/></div>
-          </div>
+          <!-- ── PAYMENT (WALLET) ── -->
+          <div class="aau-payhead">💳 Payment (Wallet Se)</div>
+          <div id="aau-wallet-block" style="margin-bottom:14px"></div>
 
           <button class="aau-submit" id="aau-submit-btn" onclick="submitAadhaarAddr()">📤 Request Bhejein</button>
           <button class="aau-cancel" onclick="closeAadhaarAddr()">Band Karein</button>
@@ -9605,6 +9871,151 @@ function dcfCheckTrack(){
       <div id="aau-view-records" style="display:none">
         <div id="aau-records-result">
           <div class="aau-loading">⏳ Load ho raha hai...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 💰 WALLET PAGE -->
+<!-- ══════════════════════════════════════════ -->
+<style>
+#wallet-popup{display:none;background:#f0f7f0;min-height:100vh;padding:0 0 40px}
+#wallet-popup .wal-card{background:#fff;border-radius:0;padding:0;width:100%;max-width:600px;margin:0 auto;box-shadow:none;font-family:'Poppins',sans-serif}
+#wallet-popup .wal-head{background:linear-gradient(135deg,#f0a500,#ff8f00 45%,#ffa726);background-size:200% 200%;animation:cxHeadGlow 6s ease infinite;padding:24px 24px 0;position:relative;overflow:hidden}
+#wallet-popup .wal-head::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(255,255,255,.16) 0%,transparent 70%);border-radius:50%;animation:cxPulseGlow 3s ease infinite}
+#wallet-popup .wal-head::after{content:'💰';position:absolute;bottom:-14px;left:-6px;font-size:100px;opacity:.1;animation:cxMegaFloat 3.5s ease-in-out infinite}
+#wallet-popup .wal-close{position:absolute;top:14px;right:16px;background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s;z-index:2}
+#wallet-popup .wal-close:hover{background:rgba(255,255,255,.34)}
+#wallet-popup .wal-head-title{font-family:'Baloo 2',cursive;font-size:1.32rem;font-weight:800;color:#fff;position:relative;z-index:1;display:flex;align-items:center;gap:8px}
+#wallet-popup .wal-head-sub{font-size:.74rem;color:rgba(255,255,255,.85);margin-top:3px;position:relative;z-index:1}
+#wallet-popup .wal-bal-card{position:relative;z-index:1;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:16px;padding:14px 18px;margin:16px 0 0;text-align:center;backdrop-filter:blur(4px)}
+#wallet-popup .wal-bal-lbl{font-size:.68rem;color:rgba(255,255,255,.9);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+#wallet-popup .wal-bal-val{font-family:'Baloo 2',cursive;font-size:2rem;font-weight:800;color:#fff;margin-top:2px}
+#wallet-popup .wal-tabs{display:flex;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);border-radius:13px;padding:4px;gap:4px;margin:14px 0 0;position:relative;z-index:1}
+#wallet-popup .wal-tab{flex:1;text-align:center;padding:10px 6px;border-radius:10px;font-size:.76rem;font-weight:700;cursor:pointer;transition:all .3s cubic-bezier(.22,1,.36,1);color:rgba(255,255,255,.85);font-family:'Poppins',sans-serif;background:none;border:none}
+#wallet-popup .wal-tab.active{background:#fff;color:#c76e00;box-shadow:0 6px 16px rgba(0,0,0,.2);transform:translateY(-1px)}
+#wallet-popup .wal-body{padding:20px 24px 24px}
+#wallet-popup .wal-fg{margin-bottom:14px}
+#wallet-popup .wal-lbl{display:block;font-size:.74rem;font-weight:700;color:#8a5200;margin-bottom:6px;letter-spacing:.03em}
+#wallet-popup .wal-iw{position:relative}
+#wallet-popup .wal-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;color:#ff8f00}
+#wallet-popup .wal-field{width:100%;background:#fff8ec;border:1.5px solid rgba(240,165,0,.3);border-radius:12px;padding:11px 14px 11px 38px;color:#5a3600;font-family:'Poppins',sans-serif;font-size:.87rem;outline:none;transition:all .2s;box-sizing:border-box}
+#wallet-popup .wal-field:focus{border-color:#ff8f00;background:#fff3dd;box-shadow:0 0 0 3px rgba(240,165,0,.14)}
+#wallet-popup .wal-amt-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+#wallet-popup .wal-amt-chip{background:#fff8ec;border:1.5px solid rgba(240,165,0,.35);color:#8a5200;font-weight:700;font-size:.78rem;padding:8px 16px;border-radius:20px;cursor:pointer;transition:all .2s;font-family:'Poppins',sans-serif}
+#wallet-popup .wal-amt-chip:hover,#wallet-popup .wal-amt-chip.active{background:linear-gradient(135deg,#f0a500,#ff8f00);color:#fff;border-color:transparent}
+#wallet-popup .wal-genbtn{width:100%;padding:13px;background:linear-gradient(135deg,#f0a500,#ff8f00);border:none;border-radius:13px;color:#fff;font-family:'Poppins',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;box-shadow:0 8px 20px rgba(240,165,0,.35);margin-bottom:6px;transition:all .2s}
+#wallet-popup .wal-genbtn:hover{transform:translateY(-2px)}
+#wallet-popup .wal-qrbox{display:none;text-align:center;background:#fff8ec;border:1.5px solid rgba(240,165,0,.3);border-radius:14px;padding:16px;margin:16px 0}
+#wallet-popup .wal-qrbox img{width:220px;height:220px;max-width:100%;object-fit:contain;border-radius:10px;background:#fff;padding:8px;box-shadow:0 4px 14px rgba(240,165,0,.2)}
+#wallet-popup .wal-qrbox .amt-badge{display:inline-block;margin-top:10px;background:linear-gradient(135deg,#f0a500,#ff8f00);color:#fff;font-weight:800;font-size:.9rem;padding:5px 16px;border-radius:20px}
+#wallet-popup .wal-upiid{font-size:.68rem;color:#8a5200;margin-top:8px;word-break:break-all}
+#wallet-popup .wal-submit{position:relative;overflow:hidden;width:100%;padding:14px;background:linear-gradient(135deg,#1b5e20,#2e7d32);border:none;border-radius:13px;color:#fff;font-family:'Poppins',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;box-shadow:0 8px 22px rgba(27,94,32,.35);margin-bottom:10px;transition:all .2s}
+#wallet-popup .wal-submit::before{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-25deg);animation:cxShine 2.6s ease-in-out infinite}
+#wallet-popup .wal-submit:hover{transform:translateY(-2px)}
+#wallet-popup .wal-cancel{width:100%;padding:11px;background:rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.1);border-radius:12px;color:#555;font-family:'Poppins',sans-serif;font-size:.82rem;cursor:pointer;transition:all .2s}
+#wallet-popup .wal-cancel:hover{background:rgba(0,0,0,.09)}
+#wallet-popup .wal-searchrow{display:flex;gap:8px;margin-bottom:16px}
+#wallet-popup .wal-searchrow input{flex:1}
+#wallet-popup .wal-searchbtn{background:linear-gradient(135deg,#f0a500,#ff8f00);color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:.82rem;padding:0 18px;border:none;border-radius:12px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 16px rgba(240,165,0,.3);transition:all .2s}
+#wallet-popup .wal-track-card{background:#fff;border:1.5px solid rgba(240,165,0,.28);border-radius:16px;padding:16px 18px;margin-bottom:12px;box-shadow:0 4px 18px rgba(240,165,0,.12)}
+#wallet-popup .wal-track-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+#wallet-popup .wal-track-num{font-size:.72rem;font-weight:800;color:#c76e00;background:#fff3dd;padding:3px 10px;border-radius:20px}
+#wallet-popup .wal-sbadge{display:inline-block;padding:4px 13px;border-radius:20px;font-size:.71rem;font-weight:800;letter-spacing:.02em}
+#wallet-popup .wal-sbadge-pending{background:#fff3cd;color:#856404}
+#wallet-popup .wal-sbadge-done{background:#d1e7dd;color:#0a3622}
+#wallet-popup .wal-sbadge-rejected{background:#fde2e2;color:#c62828}
+#wallet-popup .wal-track-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed rgba(240,165,0,.2);font-size:.79rem}
+#wallet-popup .wal-track-row:last-child{border-bottom:none}
+#wallet-popup .wal-track-row .k{color:#a17a3a;font-weight:600;flex-shrink:0}
+#wallet-popup .wal-track-row .v{color:#5a3600;font-weight:700;text-align:right}
+#wallet-popup .wal-empty{text-align:center;padding:34px 10px;color:#e0b366}
+#wallet-popup .wal-empty .em-ico{font-size:2.4rem;margin-bottom:8px;display:inline-block}
+#wallet-popup .wal-empty .em-txt{font-size:.85rem;font-weight:600}
+#wallet-popup .wal-loading{text-align:center;padding:30px 10px;color:#888;font-size:.85rem}
+#wallet-popup .wal-err{display:none;background:#fdecea;border:1px solid rgba(211,47,47,.35);color:#b71c1c;font-size:.78rem;font-weight:600;padding:9px 12px;border-radius:10px;margin-bottom:12px}
+</style>
+<div id="wallet-popup" class="page">
+  <div class="wal-card">
+    <div class="wal-head">
+      <button class="wal-close" onclick="closeWallet()" title="Dashboard par wapas jaayein">&#8592;</button>
+      <div class="wal-head-title"><span>💰</span> My Wallet</div>
+      <div class="wal-head-sub">Wallet me paise add karein — sabhi services ka payment ab isi se hoga</div>
+      <div class="wal-bal-card">
+        <div class="wal-bal-lbl">Current Balance</div>
+        <div class="wal-bal-val">₹<span id="wal-balance-display">0</span></div>
+      </div>
+      <div class="wal-tabs">
+        <button class="wal-tab active" id="wal-tab-add" onclick="walSwitchTab('add')">💰 Add Money</button>
+        <button class="wal-tab" id="wal-tab-track" onclick="walSwitchTab('track')">🔍 Status Check</button>
+        <button class="wal-tab" id="wal-tab-records" onclick="walSwitchTab('records')">📂 Meri Records</button>
+      </div>
+    </div>
+
+    <div class="wal-body">
+
+      <!-- ══ ADD MONEY VIEW ══ -->
+      <div id="wal-view-add">
+        <div id="wal-add-form-view">
+          <div class="wal-err" id="wal-err"></div>
+          <div class="wal-fg">
+            <label class="wal-lbl">💵 Kitna Add Karna Hai?</label>
+            <div class="wal-iw"><span class="wal-ico">₹</span><input id="wal-amount" class="wal-field" type="number" min="1" placeholder="Amount dalein"/></div>
+          </div>
+          <div class="wal-amt-chips">
+            <button type="button" class="wal-amt-chip" onclick="walSetAmount(50)">₹50</button>
+            <button type="button" class="wal-amt-chip" onclick="walSetAmount(100)">₹100</button>
+            <button type="button" class="wal-amt-chip" onclick="walSetAmount(200)">₹200</button>
+            <button type="button" class="wal-amt-chip" onclick="walSetAmount(500)">₹500</button>
+            <button type="button" class="wal-amt-chip" onclick="walSetAmount(1000)">₹1000</button>
+          </div>
+          <button type="button" class="wal-genbtn" onclick="walGenerateQr()">📱 QR Generate Karein</button>
+
+          <div class="wal-qrbox" id="wal-qrbox">
+            <img id="wal-qr-img" src="" alt="Scan to Pay QR"/>
+            <div class="amt-badge" id="wal-qr-amt-badge">₹0</div>
+            <div style="font-size:.72rem;color:#8a5200;margin-top:10px">Scan karke payment karein, uske baad neeche UTR number dein</div>
+            <div class="wal-upiid">UPI ID: BHARATPE.8R0K1Z0V1R62609@fbpe</div>
+          </div>
+
+          <div id="wal-utr-wrap" style="display:none">
+            <div class="wal-fg">
+              <label class="wal-lbl">🧾 UTR / Transaction No. <span style="color:#e53935">*</span></label>
+              <div class="wal-iw"><span class="wal-ico">🧾</span><input id="wal-utr" class="wal-field" type="text" placeholder="Payment app se UTR number copy karein"/></div>
+            </div>
+            <button class="wal-submit" id="wal-submit-btn" onclick="submitWalletTopup()">✅ Submit Karein</button>
+          </div>
+          <button class="wal-cancel" onclick="closeWallet()">Cancel</button>
+        </div>
+
+        <!-- SUCCESS VIEW -->
+        <div id="wal-success-view" style="display:none;text-align:center;padding:20px 4px">
+          <div style="font-size:3rem;margin-bottom:10px">✅</div>
+          <div style="font-family:'Baloo 2',cursive;font-size:1.05rem;font-weight:800;color:#c76e00;margin-bottom:6px">Request Bhej Di Gayi!</div>
+          <div style="font-size:.82rem;color:#4a4a4a;line-height:1.6;margin-bottom:18px">Admin verify karte hi paise aapke wallet me turant add ho jayenge.</div>
+          <button class="wal-submit" style="margin-bottom:8px" onclick="walGoTrackAfterSubmit()">🔍 Status Check Karein</button>
+          <button class="wal-cancel" onclick="closeWallet()">Band Karein</button>
+        </div>
+      </div>
+
+      <!-- ══ STATUS CHECK VIEW ══ -->
+      <div id="wal-view-track" style="display:none">
+        <div class="wal-searchrow">
+          <input id="wal-track-inp" class="wal-field" type="text" placeholder="Submit ke baad mila hua Request No" onkeydown="if(event.key==='Enter') trackWalletStatus()"/>
+          <button class="wal-searchbtn" onclick="trackWalletStatus()">🔍 Check</button>
+        </div>
+        <div id="wal-track-result">
+          <div class="wal-empty"><div class="em-ico">📭</div><div class="em-txt">Apna top-up status dekhne ke liye Request No se search karein</div></div>
+        </div>
+      </div>
+
+      <!-- ══ MERI RECORDS VIEW ══ -->
+      <div id="wal-view-records" style="display:none">
+        <div id="wal-records-result">
+          <div class="wal-loading">⏳ Load ho raha hai...</div>
         </div>
       </div>
 

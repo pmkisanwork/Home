@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Wallet Top-up Action — All Work Online</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Segoe UI',Roboto,Poppins,Arial,sans-serif;
+    background:linear-gradient(135deg,#0d3b1e,#1a7a35 45%,#25a84a);
+    min-height:100vh;
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .card{
+    background:#fff;
+    border-radius:24px;
+    max-width:420px;
+    width:100%;
+    padding:32px 26px;
+    box-shadow:0 24px 70px rgba(0,0,0,.35);
+    text-align:center;
+    animation:cardIn .4s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+  .logo{font-size:2.4rem;margin-bottom:8px}
+  .brand{font-weight:800;font-size:.95rem;color:#1a7a35;letter-spacing:.02em;margin-bottom:22px}
+
+  .spinner{
+    width:44px;height:44px;border-radius:50%;
+    border:4px solid rgba(26,122,53,.15);
+    border-top-color:#25a84a;
+    margin:10px auto 18px;
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .status-title{font-size:1.05rem;font-weight:800;margin-bottom:8px}
+  .status-sub{font-size:.85rem;color:#666;line-height:1.6;margin-bottom:6px}
+
+  .icon-big{font-size:3.2rem;margin-bottom:12px;animation:pop .5s cubic-bezier(.34,1.56,.64,1) both}
+  @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+
+  .detail-box{
+    background:#f5faf6;border:1.5px solid rgba(37,168,74,.2);
+    border-radius:14px;padding:14px 16px;margin:16px 0;text-align:left;
+  }
+  .detail-row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:.84rem}
+  .detail-row .k{color:#5a7a5a;font-weight:600}
+  .detail-row .v{color:#0d3b1e;font-weight:700;text-align:right}
+
+  .approved .icon-big{color:#25a84a}
+  .approved .status-title{color:#1a7a35}
+  .rejected .icon-big{color:#e53935}
+  .rejected .status-title{color:#c62828}
+  .error .icon-big{color:#f0a500}
+  .error .status-title{color:#8a5200}
+  .info .icon-big{color:#1976d2}
+  .info .status-title{color:#0d47a1}
+
+  .footer-note{font-size:.72rem;color:#999;margin-top:20px;line-height:1.5}
+  .balance-badge{
+    display:inline-block;margin-top:10px;
+    background:linear-gradient(135deg,#1a7a35,#25a84a);
+    color:#fff;font-weight:800;font-size:.9rem;
+    padding:6px 18px;border-radius:20px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="card" id="card">
+    <div class="logo">🌾</div>
+    <div class="brand">ALL WORK ONLINE — Wallet</div>
+    <div class="spinner" id="spinner"></div>
+    <div class="status-title" id="statusTitle">Process ho raha hai...</div>
+    <div class="status-sub" id="statusSub">Kripya thoda intezaar karein</div>
+  </div>
+
+<script>
+// ── FIREBASE REST CONFIG (isi database se connect hota hai jaise poora app) ──
+const DB_URL = "https://allworkonline-6cbca-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+function walletKeySafe(mobile){
+  return String(mobile||'').replace(/[.#$\[\]\/]/g, '_');
+}
+
+function restGet(path){
+  return fetch(DB_URL + '/' + path + '.json').then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+}
+function restPatch(path, data){
+  return fetch(DB_URL + '/' + path + '.json', {
+    method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)
+  }).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+}
+function restPut(path, data){
+  return fetch(DB_URL + '/' + path + '.json', {
+    method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)
+  }).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+}
+function restPush(path, data){
+  return fetch(DB_URL + '/' + path + '.json', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)
+  }).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+}
+
+function logActivityRest(action, details){
+  restPush('activity_log', {
+    action: action, details: details, admin: 'Telegram Bot',
+    time: new Date().toLocaleString('en-IN')
+  }).catch(()=>{});
+}
+
+function showResult(type, icon, title, sub, detailsHtml){
+  const card = document.getElementById('card');
+  card.className = 'card ' + type;
+  card.innerHTML =
+    '<div class="logo">🌾</div>'
+    + '<div class="brand">ALL WORK ONLINE — Wallet</div>'
+    + '<div class="icon-big">' + icon + '</div>'
+    + '<div class="status-title">' + title + '</div>'
+    + '<div class="status-sub">' + sub + '</div>'
+    + (detailsHtml || '')
+    + '<div class="footer-note">Yeh page band kar sakte hain, action process ho chuka hai.</div>';
+}
+
+async function processAction(){
+  const params = new URLSearchParams(window.location.search);
+  const action = params.get('action');
+  const reqId  = params.get('reqId');
+
+  if(!action || !reqId){
+    showResult('error','⚠️','Link Galat Hai','Request No ya Action nahi mila is link me.');
+    return;
+  }
+
+  let r;
+  try{
+    r = await restGet('wallet_topup_requests/' + reqId);
+  }catch(e){
+    showResult('error','❌','Internet Error','Data load nahi hua. Internet check karke is link ko dobara open karein.');
+    return;
+  }
+
+  if(!r){
+    showResult('error','⚠️','Request Nahi Mili','Yeh wallet top-up request nahi mili (delete ho chuki hai ya galat ID hai).');
+    return;
+  }
+
+  if(r.status && r.status !== 'Pending'){
+    showResult('info','ℹ️','Pehle Hi Process Ho Chuka Hai',
+      'Yeh request pehle hi "' + r.status + '" ki jaa chuki hai.',
+      '<div class="detail-box">'
+        + '<div class="detail-row"><span class="k">👤 Naam</span><span class="v">' + (r.name||'—') + '</span></div>'
+        + '<div class="detail-row"><span class="k">📱 Mobile</span><span class="v">' + (r.mobile||'—') + '</span></div>'
+        + '<div class="detail-row"><span class="k">💰 Amount</span><span class="v">₹' + (r.amount||0) + '</span></div>'
+        + '<div class="detail-row"><span class="k">📊 Status</span><span class="v">' + r.status + '</span></div>'
+      + '</div>');
+    return;
+  }
+
+  const key = walletKeySafe(r.mobile);
+  const amount = Number(r.amount) || 0;
+
+  try{
+    if(action === 'approve'){
+      const balSnap = await restGet('wallets/' + key + '/balance');
+      const currentBalance = Number(balSnap) || 0;
+      const newBalance = currentBalance + amount;
+      await restPut('wallets/' + key + '/balance', newBalance);
+      await restPatch('wallet_topup_requests/' + reqId, {status:'Approved', verifiedAt: new Date().toLocaleString('en-IN')});
+      logActivityRest('Wallet Top-up (Approved via Telegram)', (r.name||'')+' ('+r.mobile+') — ₹'+amount+' wallet me add kiya gaya. Naya balance: ₹'+newBalance);
+      showResult('approved','✅','Approve Ho Gaya!',
+        'Paise wallet me turant add ho gaye hain.',
+        '<div class="detail-box">'
+          + '<div class="detail-row"><span class="k">👤 Naam</span><span class="v">' + (r.name||'—') + '</span></div>'
+          + '<div class="detail-row"><span class="k">📱 Mobile</span><span class="v">' + (r.mobile||'—') + '</span></div>'
+          + '<div class="detail-row"><span class="k">💰 Amount Added</span><span class="v">₹' + amount + '</span></div>'
+        + '</div>'
+        + '<div class="balance-badge">Naya Balance: ₹' + newBalance + '</div>');
+    } else if(action === 'reject'){
+      await restPatch('wallet_topup_requests/' + reqId, {status:'Rejected', verifiedAt: new Date().toLocaleString('en-IN')});
+      logActivityRest('Wallet Top-up (Rejected via Telegram)', (r.name||'')+' ('+r.mobile+') — ₹'+amount+' ki request reject ki gayi');
+      showResult('rejected','❌','Request Reject Ho Gayi',
+        'Is request ke liye koi paisa wallet me add nahi hua.',
+        '<div class="detail-box">'
+          + '<div class="detail-row"><span class="k">👤 Naam</span><span class="v">' + (r.name||'—') + '</span></div>'
+          + '<div class="detail-row"><span class="k">📱 Mobile</span><span class="v">' + (r.mobile||'—') + '</span></div>'
+          + '<div class="detail-row"><span class="k">💰 Amount</span><span class="v">₹' + amount + '</span></div>'
+        + '</div>');
+    } else {
+      showResult('error','⚠️','Galat Action','Sirf Accept ya Reject ka link kaam karega.');
+    }
+  }catch(e){
+    showResult('error','❌','Kuch Galat Ho Gaya','Error: ' + e.message + ' — Internet check karke is link ko dobara open karein.');
+  }
+}
+
+processAction();
+</script>
+
+</body>
+</html>

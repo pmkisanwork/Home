@@ -65,6 +65,22 @@
     color:#fff;font-weight:800;font-size:.9rem;
     padding:6px 18px;border-radius:20px;
   }
+  .reason-input{
+    width:100%;border:1.5px solid rgba(229,57,53,.3);border-radius:12px;
+    padding:12px 14px;font-size:.88rem;font-family:inherit;color:#333;
+    outline:none;resize:vertical;min-height:70px;margin:14px 0;box-sizing:border-box;
+    background:#fdf5f5;
+  }
+  .reason-input:focus{border-color:#e53935;box-shadow:0 0 0 3px rgba(229,57,53,.12)}
+  .btn-row{display:flex;gap:10px;margin-top:6px}
+  .btn{
+    flex:1;padding:13px;border:none;border-radius:12px;font-weight:800;font-size:.85rem;
+    cursor:pointer;transition:all .2s;font-family:inherit;
+  }
+  .btn-confirm-reject{background:linear-gradient(135deg,#c62828,#e53935);color:#fff;box-shadow:0 8px 20px rgba(229,57,53,.3)}
+  .btn-confirm-reject:hover{transform:translateY(-2px)}
+  .btn-cancel{background:#f0f0f0;color:#666}
+  .btn-cancel:hover{background:#e5e5e5}
 </style>
 </head>
 <body>
@@ -111,6 +127,13 @@ function logActivityRest(action, details){
   }).catch(()=>{});
 }
 
+function logWalletTxn(key, type, amount, description, balanceAfter){
+  restPush('wallet_transactions/' + key, {
+    type: type, amount: amount, description: description,
+    balanceAfter: balanceAfter, timestamp: Date.now(), time: new Date().toLocaleString('en-IN')
+  }).catch(()=>{});
+}
+
 function showResult(type, icon, title, sub, detailsHtml){
   const card = document.getElementById('card');
   card.className = 'card ' + type;
@@ -122,6 +145,55 @@ function showResult(type, icon, title, sub, detailsHtml){
     + '<div class="status-sub">' + sub + '</div>'
     + (detailsHtml || '')
     + '<div class="footer-note">Yeh page band kar sakte hain, action process ho chuka hai.</div>';
+}
+
+function escHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, function(m){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
+  });
+}
+
+// Reject se pehle admin se karan (reason) poochta hai
+function showRejectForm(reqId, r){
+  const card = document.getElementById('card');
+  card.className = 'card';
+  card.innerHTML =
+    '<div class="logo">🌾</div>'
+    + '<div class="brand">ALL WORK ONLINE — Wallet</div>'
+    + '<div class="icon-big" style="color:#e53935">❌</div>'
+    + '<div class="status-title" style="color:#c62828">Request Reject Karein</div>'
+    + '<div class="status-sub">' + escHtml(r.name) + ' (' + escHtml(r.mobile) + ') — ₹' + (r.amount||0) + '</div>'
+    + '<textarea class="reason-input" id="reasonInput" placeholder="Reject karne ka karan likhein (jaise: UTR match nahi hua, galat amount, etc.) — yeh user ko dikhega"></textarea>'
+    + '<div class="btn-row">'
+      + '<button class="btn btn-cancel" onclick="window.close();history.back();">Cancel</button>'
+      + '<button class="btn btn-confirm-reject" id="confirmRejectBtn" onclick="confirmReject(\'' + reqId + '\')">❌ Reject Confirm Karein</button>'
+    + '</div>';
+}
+
+async function confirmReject(reqId){
+  const btn = document.getElementById('confirmRejectBtn');
+  const reasonInput = document.getElementById('reasonInput');
+  const reason = (reasonInput ? reasonInput.value.trim() : '') || 'Koi karan nahi diya gaya';
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Process ho raha hai...'; }
+  try{
+    const r = await restGet('wallet_topup_requests/' + reqId);
+    if(!r || (r.status && r.status !== 'Pending')){
+      showResult('info','ℹ️','Pehle Hi Process Ho Chuka Hai','Yeh request ab available nahi hai.');
+      return;
+    }
+    await restPatch('wallet_topup_requests/' + reqId, {status:'Rejected', rejectReason: reason, verifiedAt: new Date().toLocaleString('en-IN')});
+    logActivityRest('Wallet Top-up (Rejected via Telegram)', (r.name||'')+' ('+r.mobile+') — ₹'+(r.amount||0)+' ki request reject ki gayi. Karan: '+reason);
+    showResult('rejected','❌','Request Reject Ho Gayi',
+      'Is request ke liye koi paisa wallet me add nahi hua.',
+      '<div class="detail-box">'
+        + '<div class="detail-row"><span class="k">👤 Naam</span><span class="v">' + escHtml(r.name||'—') + '</span></div>'
+        + '<div class="detail-row"><span class="k">📱 Mobile</span><span class="v">' + escHtml(r.mobile||'—') + '</span></div>'
+        + '<div class="detail-row"><span class="k">💰 Amount</span><span class="v">₹' + (r.amount||0) + '</span></div>'
+        + '<div class="detail-row"><span class="k">📝 Karan</span><span class="v">' + escHtml(reason) + '</span></div>'
+      + '</div>');
+  }catch(e){
+    showResult('error','❌','Kuch Galat Ho Gaya','Error: ' + e.message + ' — Internet check karke is link ko dobara open karein.');
+  }
 }
 
 async function processAction(){
@@ -148,14 +220,30 @@ async function processAction(){
   }
 
   if(r.status && r.status !== 'Pending'){
+    let extra = '';
+    if(r.status === 'Rejected' && r.rejectReason){
+      extra = '<div class="detail-row"><span class="k">📝 Karan</span><span class="v">' + escHtml(r.rejectReason) + '</span></div>';
+    }
     showResult('info','ℹ️','Pehle Hi Process Ho Chuka Hai',
       'Yeh request pehle hi "' + r.status + '" ki jaa chuki hai.',
       '<div class="detail-box">'
-        + '<div class="detail-row"><span class="k">👤 Naam</span><span class="v">' + (r.name||'—') + '</span></div>'
-        + '<div class="detail-row"><span class="k">📱 Mobile</span><span class="v">' + (r.mobile||'—') + '</span></div>'
+        + '<div class="detail-row"><span class="k">👤 Naam</span><span class="v">' + escHtml(r.name||'—') + '</span></div>'
+        + '<div class="detail-row"><span class="k">📱 Mobile</span><span class="v">' + escHtml(r.mobile||'—') + '</span></div>'
         + '<div class="detail-row"><span class="k">💰 Amount</span><span class="v">₹' + (r.amount||0) + '</span></div>'
         + '<div class="detail-row"><span class="k">📊 Status</span><span class="v">' + r.status + '</span></div>'
+        + extra
       + '</div>');
+    return;
+  }
+
+  // Reject ke liye pehle karan poocha jaata hai (form dikhega), turant process nahi hota
+  if(action === 'reject'){
+    showRejectForm(reqId, r);
+    return;
+  }
+
+  if(action !== 'approve'){
+    showResult('error','⚠️','Galat Action','Sirf Accept ya Reject ka link kaam karega.');
     return;
   }
 
@@ -163,34 +251,21 @@ async function processAction(){
   const amount = Number(r.amount) || 0;
 
   try{
-    if(action === 'approve'){
-      const balSnap = await restGet('wallets/' + key + '/balance');
-      const currentBalance = Number(balSnap) || 0;
-      const newBalance = currentBalance + amount;
-      await restPut('wallets/' + key + '/balance', newBalance);
-      await restPatch('wallet_topup_requests/' + reqId, {status:'Approved', verifiedAt: new Date().toLocaleString('en-IN')});
-      logActivityRest('Wallet Top-up (Approved via Telegram)', (r.name||'')+' ('+r.mobile+') — ₹'+amount+' wallet me add kiya gaya. Naya balance: ₹'+newBalance);
-      showResult('approved','✅','Approve Ho Gaya!',
-        'Paise wallet me turant add ho gaye hain.',
-        '<div class="detail-box">'
-          + '<div class="detail-row"><span class="k">👤 Naam</span><span class="v">' + (r.name||'—') + '</span></div>'
-          + '<div class="detail-row"><span class="k">📱 Mobile</span><span class="v">' + (r.mobile||'—') + '</span></div>'
-          + '<div class="detail-row"><span class="k">💰 Amount Added</span><span class="v">₹' + amount + '</span></div>'
-        + '</div>'
-        + '<div class="balance-badge">Naya Balance: ₹' + newBalance + '</div>');
-    } else if(action === 'reject'){
-      await restPatch('wallet_topup_requests/' + reqId, {status:'Rejected', verifiedAt: new Date().toLocaleString('en-IN')});
-      logActivityRest('Wallet Top-up (Rejected via Telegram)', (r.name||'')+' ('+r.mobile+') — ₹'+amount+' ki request reject ki gayi');
-      showResult('rejected','❌','Request Reject Ho Gayi',
-        'Is request ke liye koi paisa wallet me add nahi hua.',
-        '<div class="detail-box">'
-          + '<div class="detail-row"><span class="k">👤 Naam</span><span class="v">' + (r.name||'—') + '</span></div>'
-          + '<div class="detail-row"><span class="k">📱 Mobile</span><span class="v">' + (r.mobile||'—') + '</span></div>'
-          + '<div class="detail-row"><span class="k">💰 Amount</span><span class="v">₹' + amount + '</span></div>'
-        + '</div>');
-    } else {
-      showResult('error','⚠️','Galat Action','Sirf Accept ya Reject ka link kaam karega.');
-    }
+    const balSnap = await restGet('wallets/' + key + '/balance');
+    const currentBalance = Number(balSnap) || 0;
+    const newBalance = currentBalance + amount;
+    await restPut('wallets/' + key + '/balance', newBalance);
+    await restPatch('wallet_topup_requests/' + reqId, {status:'Approved', verifiedAt: new Date().toLocaleString('en-IN')});
+    logActivityRest('Wallet Top-up (Approved via Telegram)', (r.name||'')+' ('+r.mobile+') — ₹'+amount+' wallet me add kiya gaya. Naya balance: ₹'+newBalance);
+    logWalletTxn(key, 'credit', amount, 'Wallet Top-up Approved', newBalance);
+    showResult('approved','✅','Approve Ho Gaya!',
+      'Paise wallet me turant add ho gaye hain.',
+      '<div class="detail-box">'
+        + '<div class="detail-row"><span class="k">👤 Naam</span><span class="v">' + escHtml(r.name||'—') + '</span></div>'
+        + '<div class="detail-row"><span class="k">📱 Mobile</span><span class="v">' + escHtml(r.mobile||'—') + '</span></div>'
+        + '<div class="detail-row"><span class="k">💰 Amount Added</span><span class="v">₹' + amount + '</span></div>'
+      + '</div>'
+      + '<div class="balance-badge">Naya Balance: ₹' + newBalance + '</div>');
   }catch(e){
     showResult('error','❌','Kuch Galat Ho Gaya','Error: ' + e.message + ' — Internet check karke is link ko dobara open karein.');
   }

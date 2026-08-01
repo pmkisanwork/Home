@@ -2277,20 +2277,37 @@ function walletRenderPaymentBlock(containerEl, amount, onReady){
 
 // Wallet se amount kaatta hai — submit se pehle call karein. Resolve(true) agar successful,
 // Resolve(false) agar balance kam ho gaya (dusri jagah se pehle hi kat chuka ho sakta hai)
-function walletDeduct(mobile, amount){
+// Wallet transaction history me entry likhta hai (credit ya debit) — "Meri Records" me
+// spending/top-up ka poora record dikhane ke liye
+function walletLogTransaction(mobile, type, amount, description, balanceAfter){
+  return fbRestPush('wallet_transactions/' + walletKey(mobile), {
+    type: type, // 'credit' ya 'debit'
+    amount: amount,
+    description: description || '',
+    balanceAfter: balanceAfter,
+    timestamp: Date.now(),
+    time: new Date().toLocaleString('en-IN', {timeZone:'Asia/Kolkata', hour12:true})
+  }).catch(function(){ /* history fail ho to bhi asal transaction ho chuki hai, ignore karein */ });
+}
+
+function walletDeduct(mobile, amount, description){
   return walletGetBalance(mobile).then(function(balance){
     if(balance < amount) return false;
     const newBalance = balance - amount;
     return fbRestSet('wallets/' + walletKey(mobile) + '/balance', newBalance).then(function(){
+      walletLogTransaction(mobile, 'debit', amount, description || 'Service Payment', newBalance);
       return true;
     });
   });
 }
 
 // Agar deduction ke baad request save karne me error aaye to paise wapas add karne ke liye
-function walletAddBalance(mobile, amount){
+function walletAddBalance(mobile, amount, description){
   return walletGetBalance(mobile).then(function(balance){
-    return fbRestSet('wallets/' + walletKey(mobile) + '/balance', balance + amount);
+    const newBalance = balance + amount;
+    return fbRestSet('wallets/' + walletKey(mobile) + '/balance', newBalance).then(function(){
+      walletLogTransaction(mobile, 'credit', amount, description || 'Refund', newBalance);
+    });
   });
 }
 
@@ -2755,6 +2772,28 @@ function sendWalletTelegramMsg(reqId, r){
   }).catch(function(){ /* Telegram fail ho to bhi wallet request Firebase me save ho chuki hai, ignore karein */ });
 }
 // ═══ END WALLET TELEGRAM ═══
+
+// ═══ SERVICE SUBMISSIONS TELEGRAM BOT (PAN/Voter/PVC/Ration/Address/Custom Cards — sabhi ki
+// details is bot par turant chali jaati hain, jaise-jaise naye services banenge unki bhi yahi jayengi) ═══
+const SVC_TG_BOT_TOKEN = '8947650249:AAFXsVHNBh53d1wHHkfr3rRA5JcR5q_rewA';
+const SVC_TG_CHAT_ID   = '8787921035';
+
+// serviceName: service ka naam, icon: emoji, rows: [[label,value], ...] jo message me line-by-line dikhengi
+function sendServiceTelegramMsg(serviceName, icon, rows){
+  let text = icon + ' NAYI ' + serviceName.toUpperCase() + ' REQUEST!\n'
+    + '━━━━━━━━━━━━━━━━━━\n';
+  rows.forEach(function(row){
+    text += row[0] + ': ' + (row[1] || '—') + '\n';
+  });
+  text += '━━━━━━━━━━━━━━━━━━\n⏳ Admin panel me dekh kar process karein';
+
+  fetch('https://api.telegram.org/bot' + SVC_TG_BOT_TOKEN + '/sendMessage', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ chat_id: SVC_TG_CHAT_ID, text: text })
+  }).catch(function(){ /* Telegram fail ho to bhi request Firebase me save ho chuki hai, ignore karein */ });
+}
+// ═══ END SERVICE SUBMISSIONS TELEGRAM ═══
 
 function saveSub(sub){
   return db.ref('submissions/'+sub.appNo).set(sub);
@@ -5055,7 +5094,7 @@ function submitPanFind(){
     btn.textContent = '📤 Request Bhejein';
   }, 15000);
 
-  walletDeduct(mobile, _pfCurrentAmount).then(function(ok){
+  walletDeduct(mobile, _pfCurrentAmount, 'PAN Find (Aadhaar) — Service Payment').then(function(ok){
     if(pfDone) return;
     if(!ok){
       pfDone = true;
@@ -5082,11 +5121,17 @@ function submitPanFind(){
       document.getElementById('panfind-form-view').style.display = 'none';
       document.getElementById('panfind-success-view').style.display = 'block';
       if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
+      sendServiceTelegramMsg('PAN Find (Aadhaar)', '🎯', [
+        ['🆔 Aadhaar', aadhaar],
+        ['👤 Naam', name],
+        ['📱 Mobile', mobile],
+        ['💰 Amount', '₹'+_pfCurrentAmount]
+      ]);
     }).catch(()=>{
       if(pfDone) return;
       pfDone = true;
       clearTimeout(pfTimeoutId);
-      walletAddBalance(mobile, _pfCurrentAmount); // refund kar dein kyunki request save nahi hui
+      walletAddBalance(mobile, _pfCurrentAmount, 'PAN Find (Aadhaar) — Refund (submit fail hua)'); // refund kar dein kyunki request save nahi hui
       btn.disabled = false;
       btn.textContent = '📤 Request Bhejein';
       showErr('Internet check karein aur dobara try karein! (Paise wapas kar diye gaye hain)');
@@ -5276,7 +5321,7 @@ function submitVoterFind(){
     btn.textContent = '📤 Request Bhejein';
   }, 15000);
 
-  walletDeduct(mobile, _vfCurrentAmount).then(function(ok){
+  walletDeduct(mobile, _vfCurrentAmount, 'Voter Card Pdf — Service Payment').then(function(ok){
     if(vfDone) return;
     if(!ok){
       vfDone = true;
@@ -5303,11 +5348,17 @@ function submitVoterFind(){
       document.getElementById('voterfind-form-view').style.display = 'none';
       document.getElementById('voterfind-success-view').style.display = 'block';
       if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
+      sendServiceTelegramMsg('Voter Card Pdf', '🗳️', [
+        ['🆔 Voter No', voterNo],
+        ['👤 Naam', name],
+        ['📱 Mobile', mobile],
+        ['💰 Amount', '₹'+_vfCurrentAmount]
+      ]);
     }).catch(()=>{
       if(vfDone) return;
       vfDone = true;
       clearTimeout(vfTimeoutId);
-      walletAddBalance(mobile, _vfCurrentAmount);
+      walletAddBalance(mobile, _vfCurrentAmount, 'Voter Card Pdf — Refund (submit fail hua)');
       btn.disabled = false;
       btn.textContent = '📤 Request Bhejein';
       showErr('Internet check karein aur dobara try karein! (Paise wapas kar diye gaye hain)');
@@ -5497,7 +5548,7 @@ function submitRationCard(){
     btn.textContent = '📤 Request Bhejein';
   }, 15000);
 
-  walletDeduct(mobile, _rcCurrentAmount).then(function(ok){
+  walletDeduct(mobile, _rcCurrentAmount, 'Ration Card — Service Payment').then(function(ok){
     if(rcDone) return;
     if(!ok){
       rcDone = true;
@@ -5524,11 +5575,17 @@ function submitRationCard(){
       document.getElementById('rationcard-form-view').style.display = 'none';
       document.getElementById('rationcard-success-view').style.display = 'block';
       if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
+      sendServiceTelegramMsg('Ration Card', '🍚', [
+        ['🆔 Aadhaar', aadhaarNo],
+        ['👤 Naam', name],
+        ['📱 Mobile', mobile],
+        ['💰 Amount', '₹'+_rcCurrentAmount]
+      ]);
     }).catch(()=>{
       if(rcDone) return;
       rcDone = true;
       clearTimeout(rcTimeoutId);
-      walletAddBalance(mobile, _rcCurrentAmount);
+      walletAddBalance(mobile, _rcCurrentAmount, 'Ration Card — Refund (submit fail hua)');
       btn.disabled = false;
       btn.textContent = '📤 Request Bhejein';
       showErr('Internet check karein aur dobara try karein! (Paise wapas kar diye gaye hain)');
@@ -5703,7 +5760,7 @@ function submitAadhaarAddr(){
     btn.textContent = '📤 Request Bhejein';
   }, 15000);
 
-  walletDeduct(mobile, _aauCurrentAmount).then(function(ok){
+  walletDeduct(mobile, _aauCurrentAmount, 'Aadhaar C/O & Address Update — Service Payment').then(function(ok){
     if(aauDone) return;
     if(!ok){
       aauDone = true;
@@ -5738,11 +5795,23 @@ function submitAadhaarAddr(){
       document.getElementById('aadhaaraddr-form-view').style.display = 'none';
       document.getElementById('aadhaaraddr-success-view').style.display = 'block';
       if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
+      sendServiceTelegramMsg('Aadhaar C/O & Address Update', '🏠', [
+        ['🆔 Aadhaar', aadhaarNo],
+        ['👤 Naam', name],
+        ['📱 Mobile', mobile],
+        ['👨‍👦 C/O', coEn + (coHi?(' / '+coHi):'')],
+        ['🏘️ Village', village],
+        ['📮 Post', post],
+        ['🏢 District', district],
+        ['🗺️ State', state],
+        ['📍 Pincode', pincode],
+        ['💰 Amount', '₹'+_aauCurrentAmount]
+      ]);
     }).catch(()=>{
       if(aauDone) return;
       aauDone = true;
       clearTimeout(aauTimeoutId);
-      walletAddBalance(mobile, _aauCurrentAmount);
+      walletAddBalance(mobile, _aauCurrentAmount, 'Aadhaar C/O & Address Update — Refund (submit fail hua)');
       btn.disabled = false;
       btn.textContent = '📤 Request Bhejein';
       showErr('Internet check karein aur dobara try karein! (Paise wapas kar diye gaye hain)');
@@ -5995,8 +6064,25 @@ function walRenderRecordCard(reqId, r){
     + '<div class="wal-track-row"><span class="k">🧾 UTR</span><span class="v">' + (r.utr||'—') + '</span></div>'
     + '<div class="wal-track-row"><span class="k">🕐 Request Kiya</span><span class="v">' + (r.requestedAt||'—') + '</span></div>';
   if(status==='Approved') html += '<div style="margin-top:8px;font-size:.79rem;color:#0a3622;background:#d1e7dd;border-radius:10px;padding:9px 11px">✅ Paise aapke wallet me add ho gaye hain!</div>';
+  if(status==='Rejected') html += '<div style="margin-top:8px;font-size:.79rem;color:#c62828;background:#fde2e2;border-radius:10px;padding:9px 11px">❌ Reject ki wajah: ' + (r.rejectReason || 'Koi karan nahi diya gaya') + '</div>';
   html += '</div>';
   return html;
+}
+
+// Wallet se paisa kate jaane / add hone ki har transaction dikhata hai (Meri Records me "Spending History")
+function walRenderTxnCard(t){
+  const isCredit = t.type === 'credit';
+  const barColor = isCredit ? '#2e7d32' : '#e53935';
+  const badgeBg = isCredit ? '#d1e7dd' : '#fde2e2';
+  const badgeColor = isCredit ? '#0a3622' : '#c62828';
+  const sign = isCredit ? '+' : '−';
+  const ico = isCredit ? '💰' : '💳';
+  return '<div class="wal-track-card" style="border-left-color:' + barColor + '">'
+    + '<div class="wal-track-top"><span class="wal-track-num">' + ico + ' ' + (t.description||(isCredit?'Credit':'Debit')) + '</span>'
+    + '<span class="wal-sbadge" style="background:' + badgeBg + ';color:' + badgeColor + '">' + sign + '₹' + (t.amount||0) + '</span></div>'
+    + '<div class="wal-track-row"><span class="k">💰 Balance Uske Baad</span><span class="v">₹' + (t.balanceAfter!=null ? t.balanceAfter : '—') + '</span></div>'
+    + '<div class="wal-track-row"><span class="k">🕐 Time</span><span class="v">' + (t.time||'—') + '</span></div>'
+    + '</div>';
 }
 
 function trackWalletStatus(){
@@ -6017,15 +6103,35 @@ function walLoadMyRecords(){
   const wrap = document.getElementById('wal-records-result');
   if(!sess || !sess.mobile){ wrap.innerHTML = '<div class="wal-empty"><div class="em-ico">⚠️</div><div class="em-txt">Login karein records dekhne ke liye</div></div>'; return; }
   wrap.innerHTML = '<div class="wal-loading">⏳ Load ho raha hai...</div>';
-  fbRestGet('wallet_topup_requests').then(function(data){
-    data = data || {};
-    const entries = Object.entries(data).filter(function(e){ return e[1].mobile === sess.mobile; });
-    if(!entries.length){
-      wrap.innerHTML = '<div class="wal-empty"><div class="em-ico">📭</div><div class="em-txt">Aapki koi wallet request nahi mili</div></div>';
+
+  Promise.all([
+    fbRestGet('wallet_topup_requests').catch(function(){ return {}; }),
+    fbRestGet('wallet_transactions/' + walletKey(sess.mobile)).catch(function(){ return {}; })
+  ]).then(function(results){
+    const topupData = results[0] || {};
+    const txnData = results[1] || {};
+
+    const topupEntries = Object.entries(topupData).filter(function(e){ return e[1].mobile === sess.mobile; });
+    topupEntries.sort(function(a,b){ return (b[1].requestedAtTs||0) - (a[1].requestedAtTs||0); });
+
+    const txnEntries = Object.entries(txnData);
+    txnEntries.sort(function(a,b){ return (b[1].timestamp||0) - (a[1].timestamp||0); });
+
+    if(!topupEntries.length && !txnEntries.length){
+      wrap.innerHTML = '<div class="wal-empty"><div class="em-ico">📭</div><div class="em-txt">Aapki koi wallet activity nahi mili</div></div>';
       return;
     }
-    entries.sort(function(a,b){ return (b[1].requestedAtTs||0) - (a[1].requestedAtTs||0); });
-    wrap.innerHTML = entries.map(function(e){ return walRenderRecordCard(e[0], e[1]); }).join('');
+
+    let html = '';
+    if(topupEntries.length){
+      html += '<div style="font-size:.72rem;font-weight:800;color:#8a5200;text-transform:uppercase;letter-spacing:.06em;margin:4px 0 10px">💰 Add Money Requests</div>';
+      html += topupEntries.map(function(e){ return walRenderRecordCard(e[0], e[1]); }).join('');
+    }
+    if(txnEntries.length){
+      html += '<div style="font-size:.72rem;font-weight:800;color:#8a5200;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px">📜 Poori Transaction History (Kharch/Credit)</div>';
+      html += txnEntries.map(function(e){ return walRenderTxnCard(e[1]); }).join('');
+    }
+    wrap.innerHTML = html;
   }).catch(function(){
     wrap.innerHTML = '<div class="wal-empty"><div class="em-ico">❌</div><div class="em-txt">Load nahi hua. Internet check karein.</div></div>';
   });
@@ -6195,7 +6301,7 @@ function submitAadhaarPvc(){
     btn.textContent = '📤 Request Bhejein';
   }, 30000);
 
-  walletDeduct(mobile, _acCurrentAmount).then(function(ok){
+  walletDeduct(mobile, _acCurrentAmount, 'Aadhaar PVC Converter — Service Payment').then(function(ok){
     if(acDone) return;
     if(!ok){
       acDone = true;
@@ -6227,11 +6333,19 @@ function submitAadhaarPvc(){
       document.getElementById('aadhaarpvc-form-view').style.display = 'none';
       document.getElementById('aadhaarpvc-success-view').style.display = 'block';
       if(typeof toast === 'function') toast('✅ Request bhej di gayi!');
+      sendServiceTelegramMsg('Aadhaar PVC Converter', '🪪', [
+        ['🆔 Aadhaar', aadhaarNo],
+        ['👤 Naam', name],
+        ['📱 Mobile', mobile],
+        ['🎨 BG Color', bgColor],
+        ['📱 Mobile Print', mobilePrint],
+        ['💰 Amount', '₹'+_acCurrentAmount]
+      ]);
     }).catch(()=>{
       if(acDone) return;
       acDone = true;
       clearTimeout(acTimeoutId);
-      walletAddBalance(mobile, _acCurrentAmount);
+      walletAddBalance(mobile, _acCurrentAmount, 'Aadhaar PVC Converter — Refund (submit fail hua)');
       btn.disabled = false;
       btn.textContent = '📤 Request Bhejein';
       showErr('Internet check karein aur dobara try karein! (PDF chhota rakhein, paise wapas kar diye gaye hain)');
@@ -8295,11 +8409,14 @@ function submitCustomCardForm(){
       if(amount > 0) walRefreshBalance();
       document.getElementById('dcf-form-view').style.display='none';
       document.getElementById('dcf-success-view').style.display='block';
+      const tgRows = Object.keys(values).map(function(label){ return [label, values[label]]; });
+      if(amount > 0) tgRows.push(['💰 Amount', '₹'+amount]);
+      sendServiceTelegramMsg(card.title || 'Custom Card', card.icon || '🧩', tgRows);
     }).catch(function(err){
       if(dcfSubmitDone) return;
       dcfSubmitDone = true;
       clearTimeout(dcfTimeoutId);
-      if(amount > 0 && sess) walletAddBalance(sess.mobile, amount); // request save nahi hui, paise wapas
+      if(amount > 0 && sess) walletAddBalance(sess.mobile, amount, (card.title||'Custom Card')+' — Refund (submit fail hua)'); // request save nahi hui, paise wapas
       errBox.textContent = '❌ Error: '+err.message + (amount>0 ? ' (Paise wapas kar diye gaye hain)' : '');
       errBox.style.display='block';
       if(submitBtn){ submitBtn.disabled=false; submitBtn.textContent='✅ Submit Karein'; }
@@ -8307,7 +8424,7 @@ function submitCustomCardForm(){
   }
 
   if(amount > 0){
-    walletDeduct(sess.mobile, amount).then(function(ok){
+    walletDeduct(sess.mobile, amount, (card.title||'Custom Card')+' — Service Payment').then(function(ok){
       if(!ok){
         if(submitBtn){ submitBtn.disabled=false; submitBtn.textContent='✅ Submit Karein'; }
         errBox.textContent = '⚠️ Wallet me paise kam hain! Pehle Wallet me paise add karein.';

@@ -6526,6 +6526,68 @@ function walKeySafe(mobile){
   return String(mobile||'').replace(/[.#$\[\]\/]/g, '_');
 }
 
+// ══════════════════════════════════════════
+// TELEGRAM BOT SE SEEDHA APPROVE/REJECT — jab admin Telegram me
+// "✅ Accept" ya "❌ Reject" button dabata hai, wahi is URL par khulta
+// hai (?walAction=approve&reqId=XXX) aur yeh function turant process karta hai
+// ══════════════════════════════════════════
+async function walApproveDirect(reqId){
+  try{
+    const snap = await db.ref('wallet_topup_requests/'+reqId).once('value');
+    const r = snap.val();
+    if(!r){ alert('⚠️ Yeh request nahi mili (delete ho chuki hai)'); return; }
+    if(r.status && r.status !== 'Pending'){ alert('ℹ️ Yeh request pehle hi "'+r.status+'" ki jaa chuki hai'); return; }
+    const key = walKeySafe(r.mobile);
+    const balSnap = await db.ref('wallets/'+key+'/balance').once('value');
+    const currentBalance = Number(balSnap.val())||0;
+    const newBalance = currentBalance + Number(r.amount||0);
+    await db.ref('wallets/'+key+'/balance').set(newBalance);
+    await db.ref('wallet_topup_requests/'+reqId).update({status:'Approved', verifiedAt: new Date().toLocaleString('en-IN')});
+    db.ref('wallet_transactions/'+key).push({
+      type:'credit', amount: Number(r.amount||0), description:'Wallet Top-up Approved',
+      balanceAfter: newBalance, timestamp: Date.now(), time: new Date().toLocaleString('en-IN')
+    }).catch(()=>{});
+    if(typeof logActivity==='function') logActivity('Wallet Top-up (Approved via Telegram)', `${r.name} (${r.mobile}) — ₹${r.amount} wallet me add kiya gaya`);
+    alert('✅ Approve ho gaya!\n₹'+r.amount+' — '+r.mobile+' (' + (r.name||'') + ') ke wallet me add ho gaye.\nNaya balance: ₹'+newBalance);
+    if(typeof walLoadWallets==='function') walLoadWallets();
+    if(typeof showSection==='function') showSection('wallet');
+  }catch(e){
+    alert('❌ Error: '+e.message+'\nInternet check karke dobara link par click karein.');
+  }
+}
+
+async function walRejectDirect(reqId){
+  try{
+    const snap = await db.ref('wallet_topup_requests/'+reqId).once('value');
+    const r = snap.val();
+    if(!r){ alert('⚠️ Yeh request nahi mili (delete ho chuki hai)'); return; }
+    if(r.status && r.status !== 'Pending'){ alert('ℹ️ Yeh request pehle hi "'+r.status+'" ki jaa chuki hai'); return; }
+    const reason = prompt('Reject karne ka karan likhein (user ko dikhega):', '') || 'Koi karan nahi diya gaya';
+    await db.ref('wallet_topup_requests/'+reqId).update({status:'Rejected', rejectReason: reason, verifiedAt: new Date().toLocaleString('en-IN')});
+    if(typeof logActivity==='function') logActivity('Wallet Top-up (Rejected via Telegram)', `${r.name} (${r.mobile}) — ₹${r.amount} ki request reject ki gayi. Karan: ${reason}`);
+    alert('❌ Request reject ho gayi.\n'+r.mobile+' (' + (r.name||'') + ') — ₹'+r.amount);
+    if(typeof showSection==='function') showSection('wallet');
+  }catch(e){
+    alert('❌ Error: '+e.message+'\nInternet check karke dobara link par click karein.');
+  }
+}
+
+// Page load hote hi URL me ?walAction=approve/reject&reqId=XXX check karta hai
+function walCheckUrlAction(){
+  try{
+    const params = new URLSearchParams(window.location.search);
+    const action = params.get('walAction');
+    const reqId = params.get('reqId');
+    if(!action || !reqId) return;
+    // URL clean kar dein taaki refresh karne par dobara process na ho
+    const cleanUrl = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
+    if(action === 'approve') walApproveDirect(reqId);
+    else if(action === 'reject') walRejectDirect(reqId);
+  }catch(e){}
+}
+setTimeout(walCheckUrlAction, 1200);
+
 function walWatchFb(){
   const el=document.getElementById('wal-fbStatus');
   if(el){ el.textContent='🟢 Connected'; el.style.background='rgba(78,203,110,.15)'; el.style.color='#4ecb6e'; }
@@ -6609,6 +6671,10 @@ async function walApprove(reqId){
     const newBalance = currentBalance + Number(r.amount||0);
     await db.ref('wallets/'+key+'/balance').set(newBalance);
     await db.ref('wallet_topup_requests/'+reqId).update({status:'Approved', verifiedAt: new Date().toLocaleString('en-IN')});
+    db.ref('wallet_transactions/'+key).push({
+      type:'credit', amount: Number(r.amount||0), description:'Wallet Top-up Approved',
+      balanceAfter: newBalance, timestamp: Date.now(), time: new Date().toLocaleString('en-IN')
+    }).catch(()=>{});
     logActivity('Wallet Top-up (Approved)', `${r.name} (${r.mobile}) — ₹${r.amount} wallet me add kiya gaya. Naya balance: ₹${newBalance}`);
     toast('✅ Approve ho gaya! Wallet me paise add ho gaye.','ok');
     walLoadWallets();
@@ -6620,10 +6686,11 @@ async function walApprove(reqId){
 async function walReject(reqId){
   const r = (walAllRequests||{})[reqId];
   if(!r){ alert('Request nahi mili'); return; }
-  if(!confirm(`"${r.name}" ki ₹${r.amount} ki request reject karna chahte hain?`)) return;
+  const reason = prompt(`"${r.name}" ki ₹${r.amount} ki request reject kar rahe hain.\nReject karne ka karan likhein (user ko dikhega):`, '');
+  if(reason===null) return; // cancel dabaya
   try{
-    await db.ref('wallet_topup_requests/'+reqId).update({status:'Rejected', verifiedAt: new Date().toLocaleString('en-IN')});
-    logActivity('Wallet Top-up (Rejected)', `${r.name} (${r.mobile}) — ₹${r.amount} ki request reject ki gayi`);
+    await db.ref('wallet_topup_requests/'+reqId).update({status:'Rejected', rejectReason: reason||'Koi karan nahi diya gaya', verifiedAt: new Date().toLocaleString('en-IN')});
+    logActivity('Wallet Top-up (Rejected)', `${r.name} (${r.mobile}) — ₹${r.amount} ki request reject ki gayi. Karan: ${reason||'—'}`);
     toast('❌ Request reject ho gayi','ok');
   }catch(e){
     alert('Reject nahi hua, internet check karein.');

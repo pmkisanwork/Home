@@ -87,6 +87,38 @@ input[type=file]{display:none;}
 .t-item .meta{margin-top:6px;font-size:11.5px;color:var(--muted);}
 .t-item.done .name::before{content:"✓ ";color:#59D18A;}
 .summary{margin-top:auto;padding-top:20px;text-align:center;color:var(--muted);font-size:12px;}
+
+/* ---------- connectivity reminder modal ---------- */
+.modal-backdrop{
+  position:fixed;inset:0;z-index:50;
+  background:rgba(6,15,13,0.88);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+}
+.modal-backdrop.hidden{display:none;}
+.modal-card{
+  width:100%;max-width:400px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:26px 22px;
+}
+.modal-title{font-family:var(--font-display);font-weight:700;font-size:19px;margin-bottom:16px;}
+.modal-checklist{list-style:none;margin:0 0 18px;padding:0;display:flex;flex-direction:column;gap:12px;}
+.modal-checklist li{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:var(--text);line-height:1.4;}
+.modal-checklist .num{
+  flex-shrink:0;width:22px;height:22px;border-radius:50%;
+  background:var(--send-dim);color:var(--send);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:12px;font-weight:700;
+  margin-top:1px;
+}
+.conn-status{
+  font-size:12.5px;padding:10px 12px;border-radius:10px;
+  background:var(--surface-2);color:var(--muted);margin-bottom:16px;
+}
+.conn-status.ok{color:#59D18A;}
+.conn-status.warn{color:var(--danger);}
 </style>
 </head>
 <body>
@@ -185,6 +217,20 @@ input[type=file]{display:none;}
 
 </div>
 
+<!-- CONNECTIVITY REMINDER (shown once per page load) -->
+<div id="connectivity-modal" class="modal-backdrop">
+  <div class="modal-card">
+    <div class="modal-title">Shuru karne se pehle</div>
+    <ul class="modal-checklist">
+      <li><span class="num">1</span>WiFi ya Hotspot <b>on</b> karo</li>
+      <li><span class="num">2</span>Bhejne wala aur lene wala — dono phone <b>same WiFi/Hotspot</b> par jodo</li>
+      <li><span class="num">3</span>Phir "Bhejo" ya "Lo" par jaake aage badho</li>
+    </ul>
+    <div id="conn-status-row" class="conn-status">Connection type check ho raha hai...</div>
+    <button class="primary-btn send" id="conn-continue-btn">Continue</button>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -200,17 +246,63 @@ input[type=file]{display:none;}
   // file ka data Firebase se kabhi nahi guzarta.
   // ===================================================================
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT",
+    apiKey: "AIzaSyArKexg85svxuPoQ4e00YFufH-7CcjHAU4",
+    authDomain: "file-transfer-8c7f2.firebaseapp.com",
+    databaseURL: "https://file-transfer-8c7f2-default-rtdb.firebaseio.com/",
+    projectId: "file-transfer-8c7f2",
   };
+  const FIREBASE_CONFIGURED = firebaseConfig.apiKey !== 'YOUR_API_KEY' && firebaseConfig.databaseURL !== 'PASTE_YOUR_REALTIME_DATABASE_URL_HERE';
+  if (!FIREBASE_CONFIGURED) {
+    window.addEventListener('DOMContentLoaded', () => {
+      alert('Firebase Realtime Database ka URL abhi set nahi hai. Firebase console me Realtime Database enable karke uska URL index.html me databaseURL field me daalo.');
+    });
+  }
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
   const CHUNK_SIZE = 64 * 1024; // 64KB per chunk
   const BUFFERED_LOW_THRESHOLD = 1 * 1024 * 1024; // 1MB
   const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }];
+
+  // ---------- connectivity reminder ----------
+  const connModal = document.getElementById('connectivity-modal');
+  const connContinueBtn = document.getElementById('conn-continue-btn');
+  const connStatusRow = document.getElementById('conn-status-row');
+
+  connContinueBtn.addEventListener('click', () => connModal.classList.add('hidden'));
+
+  function updateConnStatus() {
+    // Network Information API — only works on some Android/Chrome browsers.
+    // Browsers give no way to detect or force an actual WiFi connection reliably,
+    // so this is a best-effort hint, not a guarantee.
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (!conn || (!conn.type && !conn.effectiveType)) {
+      connStatusRow.textContent = 'Is browser me connection type check nahi ho pata — khud confirm kar lena ki WiFi/Hotspot on hai.';
+      connStatusRow.className = 'conn-status';
+      return;
+    }
+    if (conn.type) {
+      if (conn.type === 'wifi') {
+        connStatusRow.textContent = '✓ Is phone par WiFi connected hai.';
+        connStatusRow.className = 'conn-status ok';
+      } else if (conn.type === 'cellular') {
+        connStatusRow.textContent = '⚠ Is phone par abhi mobile data chal raha hai, WiFi nahi. WiFi/Hotspot on karke connect karo.';
+        connStatusRow.className = 'conn-status warn';
+      } else if (conn.type === 'none') {
+        connStatusRow.textContent = '⚠ Is phone par abhi koi network nahi hai.';
+        connStatusRow.className = 'conn-status warn';
+      } else {
+        connStatusRow.textContent = 'Connection type: ' + conn.type;
+        connStatusRow.className = 'conn-status';
+      }
+    } else {
+      connStatusRow.textContent = 'Connection type is browser me exactly pata nahi chal sakta — khud confirm kar lena ki WiFi/Hotspot on hai.';
+      connStatusRow.className = 'conn-status';
+    }
+  }
+  updateConnStatus();
+  const _conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (_conn && _conn.addEventListener) _conn.addEventListener('change', updateConnStatus);
 
   // ---------- screen navigation ----------
   const screens = document.querySelectorAll('.screen');
@@ -255,18 +347,31 @@ input[type=file]{display:none;}
   function generateCode() { return Math.floor(1000 + Math.random() * 9000).toString(); }
 
   createRoomBtn.addEventListener('click', async () => {
-    roomCode = generateCode();
-    isSender = true;
-    roomRef = db.ref('rooms/' + roomCode);
-    // Make sure the code isn't already taken; retry a couple times if so.
-    const snap = await roomRef.get();
-    if (snap.exists()) { createRoomBtn.click(); return; }
+    if (!FIREBASE_CONFIGURED) {
+      alert('Pehle index.html me firebaseConfig apni Firebase project ki values se set karo.');
+      return;
+    }
+    createRoomBtn.disabled = true;
+    createRoomBtn.textContent = 'Connecting...';
+    try {
+      roomCode = generateCode();
+      isSender = true;
+      roomRef = db.ref('rooms/' + roomCode);
+      // Make sure the code isn't already taken; retry a couple times if so.
+      const snap = await roomRef.get();
+      if (snap.exists()) { createRoomBtn.disabled = false; createRoomBtn.textContent = 'Code banao'; createRoomBtn.click(); return; }
 
-    document.getElementById('room-code-display').textContent = roomCode;
-    renderQr(roomCode);
-    show('screen-send-wait');
-    roomRef.onDisconnect().remove();
-    setupSenderConnection();
+      document.getElementById('room-code-display').textContent = roomCode;
+      renderQr(roomCode);
+      show('screen-send-wait');
+      roomRef.onDisconnect().remove();
+      setupSenderConnection();
+    } catch (err) {
+      alert('Room banane me error aaya: ' + (err && err.message ? err.message : err) + '\n\nCheck karo: Firebase config sahi hai, Realtime Database enabled hai, aur rules me /rooms path likhne diya hai.');
+    } finally {
+      createRoomBtn.disabled = false;
+      createRoomBtn.textContent = 'Code banao';
+    }
   });
 
   function renderQr(code) {
@@ -286,15 +391,23 @@ input[type=file]{display:none;}
   joinBtn.addEventListener('click', () => joinRoom(codeInput.value));
 
   async function joinRoom(code) {
-    const ref = db.ref('rooms/' + code);
-    const snap = await ref.get();
-    if (!snap.exists()) { alert('Code galat hai ya expire ho gaya.'); return; }
-    roomCode = code;
-    roomRef = ref;
-    isSender = false;
-    show('screen-transfer');
-    document.getElementById('transfer-role-label').textContent = 'LO';
-    setupReceiverConnection();
+    if (!FIREBASE_CONFIGURED) {
+      alert('Pehle index.html me firebaseConfig apni Firebase project ki values se set karo.');
+      return;
+    }
+    try {
+      const ref = db.ref('rooms/' + code);
+      const snap = await ref.get();
+      if (!snap.exists()) { alert('Code galat hai ya expire ho gaya.'); return; }
+      roomCode = code;
+      roomRef = ref;
+      isSender = false;
+      show('screen-transfer');
+      document.getElementById('transfer-role-label').textContent = 'LO';
+      setupReceiverConnection();
+    } catch (err) {
+      alert('Connect karne me error aaya: ' + (err && err.message ? err.message : err) + '\n\nCheck karo: Firebase config sahi hai, Realtime Database enabled hai, aur rules me /rooms path padhne diya hai.');
+    }
   }
 
   // ---- QR scan (optional) ----

@@ -2289,6 +2289,33 @@ body.light-mode .alog-card .alog-act{color:#0d1f12}
             </div>
           </div>
 
+          <!-- ── MANUAL WALLET CREDIT / BONUS ── -->
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
+            <h3 style="font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:700;color:var(--g4);margin-bottom:6px;display:flex;align-items:center;gap:8px">🎁 Manual Wallet Credit (Bonus/Adjustment)</h3>
+            <p style="font-size:.7rem;color:var(--text2);margin-bottom:16px">Kisi bhi user ke wallet me seedha paisa add karein — bonus, referral reward, ya kisi bhi wajah se. Remark likhna zaroori hai taaki record me pata rahe kyun add kiya.</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px">
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">📱 User Mobile Number</label>
+                <input id="wal-credit-mobile" maxlength="10" inputmode="numeric" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.85rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="10 digit mobile"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">💰 Amount (₹)</label>
+                <input id="wal-credit-amount" type="number" min="1" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.85rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text);font-weight:800" placeholder="jaise: 100"/>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:4px;grid-column:span 2">
+                <label style="font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">📝 Remark (kyun add kar rahe hain)</label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+                  <button type="button" onclick="document.getElementById('wal-credit-remark').value='🎁 Bonus'" style="font-size:.68rem;padding:5px 11px;border-radius:14px;border:1px solid var(--border);background:rgba(240,165,0,.1);color:var(--gold2);cursor:pointer">🎁 Bonus</button>
+                  <button type="button" onclick="document.getElementById('wal-credit-remark').value='🤝 Referral Reward'" style="font-size:.68rem;padding:5px 11px;border-radius:14px;border:1px solid var(--border);background:rgba(78,203,110,.1);color:var(--g4);cursor:pointer">🤝 Referral Reward</button>
+                  <button type="button" onclick="document.getElementById('wal-credit-remark').value='🔧 Correction/Adjustment'" style="font-size:.68rem;padding:5px 11px;border-radius:14px;border:1px solid var(--border);background:rgba(59,130,246,.1);color:#93c5fd;cursor:pointer">🔧 Correction</button>
+                </div>
+                <input id="wal-credit-remark" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.85rem;outline:none;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.05);color:var(--text)" placeholder="jaise: Diwali Bonus, Referral se X ne join kiya, etc."/>
+              </div>
+            </div>
+            <button class="tb-btn" style="background:linear-gradient(135deg,var(--g3),var(--g1));color:#fff;border:none;padding:12px 22px" onclick="walManualCredit()">🎁 Wallet Me Add Karein</button>
+            <div id="wal-credit-toast" style="display:none;background:rgba(78,203,110,.12);border:1px solid rgba(78,203,110,.3);border-radius:9px;padding:11px 14px;margin-top:12px;font-size:.8rem;color:var(--g4);font-weight:600"></div>
+          </div>
+
           <!-- ── USER WALLET BALANCES ── -->
           <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 22px;margin-bottom:18px">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
@@ -6730,6 +6757,41 @@ async function walManualAdjust(mobile){
     walLoadWallets();
   }catch(e){
     alert('Update nahi hua, internet check karein.');
+  }
+}
+
+// Kisi bhi user ke wallet me seedha amount add karta hai — bonus, referral, ya kisi bhi wajah se, remark ke saath
+async function walManualCredit(){
+  const mobileInp = document.getElementById('wal-credit-mobile');
+  const amountInp = document.getElementById('wal-credit-amount');
+  const remarkInp = document.getElementById('wal-credit-remark');
+  const toastEl = document.getElementById('wal-credit-toast');
+
+  const mobile = (mobileInp.value||'').trim();
+  const amount = parseInt(amountInp.value, 10);
+  const remark = (remarkInp.value||'').trim();
+
+  if(!/^[0-9]{10}$/.test(mobile)){ alert('Sahi 10 digit mobile number dalein!'); return; }
+  if(!amount || amount <= 0){ alert('Sahi amount dalein!'); return; }
+  if(!remark){ alert('Remark likhna zaroori hai — kyun add kar rahe hain (jaise: Bonus, Referral, etc.)'); return; }
+
+  try{
+    const key = walKeySafe(mobile);
+    const snap = await db.ref('wallets/'+key+'/balance').once('value');
+    const currentBalance = Number(snap.val())||0;
+    const newBalance = currentBalance + amount;
+    await db.ref('wallets/'+key+'/balance').set(newBalance);
+    db.ref('wallet_transactions/'+key).push({
+      type:'credit', amount: amount, description: '🎁 ' + remark,
+      balanceAfter: newBalance, timestamp: Date.now(), time: new Date().toLocaleString('en-IN')
+    }).catch(()=>{});
+    logActivity('Wallet (Manual Credit)', `${mobile} ke wallet me ₹${amount} add kiya gaya — Remark: "${remark}". Naya balance: ₹${newBalance}`);
+    if(toastEl){ toastEl.style.display='block'; toastEl.textContent='✅ ₹'+amount+' add ho gaya! "'+mobile+'" ka naya balance: ₹'+newBalance; setTimeout(()=>toastEl.style.display='none',4000); }
+    toast('✅ Wallet me paise add ho gaye!','ok');
+    mobileInp.value=''; amountInp.value=''; remarkInp.value='';
+    walLoadWallets();
+  }catch(e){
+    alert('Add nahi hua, internet check karein.');
   }
 }
 

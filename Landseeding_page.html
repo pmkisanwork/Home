@@ -1092,20 +1092,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
               <div style="font-size:.72rem;color:#3d6e3d;margin-top:1px">Land Seeding + Verification + Documentation</div>
             </div>
           </div>
-          <a href="https://payments.cashfree.com/links?code=d9u46lskihh0_AAAAAAAOe0Q" target="_blank" style="display:none"></a>
         </div>
 
-
-        <!-- QR CODE PAYMENT -->
-        <div style="margin-bottom:20px;padding:20px;background:rgba(255,255,255,.95);border:1px solid rgba(37,168,74,.18);border-radius:16px;text-align:center;">
-          <div style="font-weight:700;font-size:.9rem;color:#c07800;margin-bottom:4px">📲 Scan QR Code to Pay</div>
-          <div style="font-size:.72rem;color:rgba(15,50,15,.55);margin-bottom:14px">GPay / PhonePe / Paytm / UPI se scan karein</div>
+        <!-- WALLET PAYMENT (QR ki jagah) -->
+        <div id="main-wallet-block" style="margin-bottom:20px"></div>
+        <div style="display:none">
           <img src="data:image/png;base64,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ELoAABghdAEAMELoAgBghNAFAMAIoQsAgBFCFwAAIw9ahrRNDNatL22bhu8XdGsbUbro0vyhoX2PQ9n7PlivjfZ8a/XR3DSkNdW0E4VhaP6s0XoLz1PtudE2RT015rvQ7dI0ohnTxeFwkI8fP0oURV7jptOppGmqamLRaNfU8oGmbX1pmz98r7Wua/NaR2vahpKyLFV7X1WV5Hn+qpubhrKmXRqfptOp15i+vIXnqTaj2rYgzbhHg/fP7QddmkaG8rJuGunjpW190ba3DOmlXRvrhpIhvV77mlo3Pr2FtXkLz9On8JkuAABGCF0AAIwQugAAGCF0AQAwQugCAGCE0AUAwAihCwCAEUIXAAAjhC4AAEYIXQAAjBC6AAAYIXQBADDyXctQEAQynU5lNpt5/6CqquTLly/e4yaTiXd7h8i3VpSqquTr169e45xz6hYlTZPOaDSSOI692zu62u/33mOcc5IkiWo/NJxzUlWV3N/fe43ruqaatRER1X2hPafj8VjiODZtb6mqSu7u7kzmExGJ43gQaxrHsVRVpT43GlbtUq2zszOJ49i7wk67NtrnaRfarDn58/BUzQnaVozX3ogzmUyOl5eXp1rmf0S7F+fn58fb21uz69Q2jXRZ06GcU+tmmy4NY6duYfkR6zUdUiOO9qW994e0Ntbn9Cn8eRkAACOELgAARghdAACMELoAABghdAEAMELoAgBghNAFAMAIoQsAgBFCFwAAI4QuAABGCF0AAIwQugAAGPnpx//kn4miSN69e6caq2n9cc6ZtrA456Sua+9mk7a9RfMeu9DsRRiGUlWVWftHVVXSNI33uK5rqlkb65Yorfac+q6rc07CMDRdm7qupa5r73Hae789377nRntO+3B2dqbaD+29b702o9FIoihSPfetz2kYhhJF0YPmppOFbpZlkqap97g8z2W5XHqPS5JE3r9/b1ZDt9/vZbPZyO+//+417u7uTjabjeR5/kxX9lCWZbLdbr3HlWUp//3vf01rxTSHucuaatdmKKFblqVsNhs5HA5e4+I4lizLVPeidm3yPJfNZuM9Tnvv7/d72W63ql8qNee0D1mWyWq18h7X5d63XJsoimS1WslisVCN1dCe08ViIavV6sE5Pen/6WreVJ7ncnNz4z0uSRLz7tcoirxDV+RbSFj2lGZZJkmSeI8ry1LKslT1IlvT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" alt="Payment QR Code" id="payment-qr-img" style="width:200px;height:200px;border-radius:12px;border:3px solid rgba(240,165,0,.4);padding:6px;background:#fff;"/>
-          <div style="font-size:.72rem;color:#3d6e3d;margin-top:10px">Payment karne ke baad neeche UTR number daalen</div>
-        </div>        <div>
-          <label class="form-label">🧾 Payment UTR Number <span style="color:#ff5252">*</span></label>
-          <div class="inp-wrap"><span class="inp-ico">🔖</span><input id="f-utr" class="form-input" type="text" placeholder="Payment ke baad UTR/Transaction ID daalen"/></div>
-          <div class="ferrmsg" id="fe-utr">UTR number daalna zaroori hai</div>
         </div>
 
         <button class="submit-btn" onclick="submitForm()">🌾 Application Submit Karein →</button>
@@ -2311,6 +2303,19 @@ function walletAddBalance(mobile, amount, description){
   });
 }
 
+// Charge amount load karke Farmer Registration (main) form ke liye wallet-balance payment block dikhata hai
+let _mainFormAmount = 400;
+function mainFormLoadAmount(){
+  db.ref('settings/mainFormAmount').once('value').then(function(snap){
+    _mainFormAmount = snap.val() || 400;
+    const block = document.getElementById('main-wallet-block');
+    if(block) walletRenderPaymentBlock(block, _mainFormAmount);
+  }).catch(function(){
+    const block = document.getElementById('main-wallet-block');
+    if(block) walletRenderPaymentBlock(block, _mainFormAmount);
+  });
+}
+
 // ✅ ADMIN CREDENTIALS — HARDCODED
 const _ADMIN_MOBILE_FIXED    = '8960947991';
 const _ADMIN_PASS_HASH_FIXED = '0041d0259ebfeba58ed5d57182bca90ef52fae9f2b80dac46b4cfb474f7c1ad8'; // SHA256 of 'shivangee'
@@ -3393,6 +3398,7 @@ function showPage(id){
   if(id==='form-page'){
     const banner = document.getElementById('farmer-registry-banner');
     if(banner) banner.style.display='flex';
+    if(typeof mainFormLoadAmount === 'function') mainFormLoadAmount();
   }
 }
 
@@ -6606,10 +6612,10 @@ function handleFile(inp){
   document.getElementById('fe-file').classList.remove('show');
 }
 
-// ── FORM SUBMIT ──
+// ── FORM SUBMIT ── (payment ab wallet balance se hota hai, QR/UTR ki jagah)
 function submitForm(){
   let ok=true;
-  const fields=[['f-regno','fe-regno'],['f-name','fe-name'],['f-father','fe-father'],['f-village','fe-village'],['f-sub','fe-sub'],['f-dist','fe-dist'],['f-utr','fe-utr']];
+  const fields=[['f-regno','fe-regno'],['f-name','fe-name'],['f-father','fe-father'],['f-village','fe-village'],['f-sub','fe-sub'],['f-dist','fe-dist']];
   fields.forEach(([id,eid])=>{
     const el=document.getElementById(id);
     const err=document.getElementById(eid);
@@ -6644,40 +6650,55 @@ function submitForm(){
     sub:document.getElementById('f-sub').value.trim(),
     district:document.getElementById('f-dist').value.trim(),
     state:document.getElementById('f-state').value,
-    utr:document.getElementById('f-utr').value.trim(),
+    amount: _mainFormAmount,
     files: fileNames,
     fileData: _uploadedFiles,
     time:now,status:'Pending'
   };
 
-  showLoading('Application save ho rahi hai...');
-  saveSub(sub).then(()=>{
-    hideLoading();
-    _uploadedFiles=[];
-    sendTelegramMsg(sub); // 📲 Admin ko Telegram notification
-    window._lastSub = sub;
-    document.getElementById('app-no-display').textContent=appNo;
-    document.getElementById('form-view').style.display='none';
-    document.getElementById('success-view').style.display='block';
-    toast('🎉 Application submit ho gayi! App No: '+appNo);
-    window.scrollTo(0,0);
-    // FIX 7: Auto refresh dashboard after 3 seconds with countdown
-    let countdown = 3;
-    const cdEl = document.getElementById('dash-redirect-msg');
-    const cdInt = setInterval(()=>{
-      countdown--;
-      if(cdEl) cdEl.textContent = countdown;
-      if(countdown <= 0){
-        clearInterval(cdInt);
-        showPage('user-dash-page');
-        renderUserDash();
-      }
-    }, 1000);
-  }).catch(()=>{ hideLoading(); toast('❌ Submit nahi hua. Internet check karein','fail'); });
+  showLoading('Wallet se payment ho raha hai...');
+  walletDeduct(sess.mobile, _mainFormAmount, 'Land Seeding Application — Service Payment').then(function(walOk){
+    if(!walOk){
+      hideLoading();
+      toast('⚠️ Wallet me paise kam hain! Pehle Wallet me paise add karein.','fail');
+      const block = document.getElementById('main-wallet-block');
+      if(block) walletRenderPaymentBlock(block, _mainFormAmount);
+      return;
+    }
+    showLoading('Application save ho rahi hai...');
+    saveSub(sub).then(()=>{
+      hideLoading();
+      _uploadedFiles=[];
+      walRefreshBalance();
+      sendTelegramMsg(sub); // 📲 Admin ko Telegram notification
+      window._lastSub = sub;
+      document.getElementById('app-no-display').textContent=appNo;
+      document.getElementById('form-view').style.display='none';
+      document.getElementById('success-view').style.display='block';
+      toast('🎉 Application submit ho gayi! App No: '+appNo);
+      window.scrollTo(0,0);
+      // FIX 7: Auto refresh dashboard after 3 seconds with countdown
+      let countdown = 3;
+      const cdEl = document.getElementById('dash-redirect-msg');
+      const cdInt = setInterval(()=>{
+        countdown--;
+        if(cdEl) cdEl.textContent = countdown;
+        if(countdown <= 0){
+          clearInterval(cdInt);
+          showPage('user-dash-page');
+          renderUserDash();
+        }
+      }, 1000);
+    }).catch(()=>{
+      hideLoading();
+      walletAddBalance(sess.mobile, _mainFormAmount, 'Land Seeding Application — Refund (submit fail hua)');
+      toast('❌ Submit nahi hua. Paise wapas kar diye gaye hain. Internet check karein','fail');
+    });
+  });
 }
 
 function resetForm(){
-  ['f-regno','f-name','f-father','f-mobile','f-village','f-sub','f-dist','f-utr'].forEach(id=>document.getElementById(id).value='');
+  ['f-regno','f-name','f-father','f-mobile','f-village','f-sub','f-dist'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-state').value='';
   document.getElementById('f-file').value='';
   document.getElementById('file-tags').innerHTML='';
